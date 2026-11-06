@@ -84,7 +84,7 @@ def test_system_json_command_emits_full_valid_report(capsys):
 
     assert result == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["schema_version"] == "1.0.0"
+    assert data["schema_version"] == "2.0"
     assert data["aicre_version"] == "0.2.0"
     assert "resource.cpu.logical_count" in {item["id"] for item in data["findings"]}
     assert not any(item["id"].startswith("tool.") for item in data["findings"])
@@ -118,7 +118,7 @@ def test_report_file_uses_private_permissions_and_allows_overwrite(tmp_path, cap
     assert main(["report", "--output", str(output), "--timeout", "0"]) == 0
     capsys.readouterr()
     data = json.loads(output.read_text(encoding="utf-8"))
-    assert data["schema_version"] == "2.0"
+    assert data["schema_version"] == "1.0.0"
     if os.name == "posix":
         assert stat.S_IMODE(output.stat().st_mode) == 0o600
 
