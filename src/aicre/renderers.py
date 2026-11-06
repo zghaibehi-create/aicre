@@ -64,7 +64,7 @@ def render_html(report: dict[str, Any]) -> str:
         "</head><body><h1>AICRE scan report</h1><p>Generated: " +
         html.escape(str(report.get("generated_at", "unknown"))) +
         "</p>" + diff_summary + "<h2>Readiness</h2><table><thead><tr><th>Dimension</th><th>Status</th><th>Explanation</th></tr></thead><tbody>" +
-        "".join(readiness_rows) + "</tbody></table>" + diff_summary + "<h2>Findings</h2>" +
+        "".join(readiness_rows) + "</tbody></table><h2>Findings</h2>" +
         "".join(finding_cards) +
         "<details><summary>Raw report JSON</summary><pre>" + raw + "</pre></details></body></html>"
     )
