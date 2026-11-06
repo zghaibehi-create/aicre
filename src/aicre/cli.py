@@ -55,7 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan = subparsers.add_parser("scan", help="inventory a directory or run a system profile")
     scan.add_argument("source", nargs="?", help="directory to scan (omit for a system profile)")
     scan.add_argument("--profile", choices=supported_profiles(), help="system/workload profile")
-    scan.add_argument("--format", choices=FORMATS, default=None, help="explicit report format; omitted preserves legacy output")
+    scan.add_argument("--format", default=None, help="one of text, json, markdown, html, pdf; omitted preserves legacy output")
     scan.add_argument("--output", help="report destination")
     scan.add_argument("--open", action="store_true", help="open the completed report with xdg-open (Linux only)")
     scan.add_argument("--exclude", action="append", default=[], help="private relative path/glob to exclude; repeatable")
@@ -72,7 +72,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     report = subparsers.add_parser("report", help="render, inspect, or compare saved reports")
     report.add_argument("--profile", choices=supported_profiles(), default="standard", help="workload baseline")
-    report.add_argument("--format", choices=FORMATS, default="json")
+    report.add_argument("--format", default="json", help="one of text, json, markdown, html, pdf")
     report.add_argument("--output", help="destination; parent directories are created and existing files replaced")
     report.add_argument("--open", action="store_true", help="open the completed report with xdg-open (Linux only)")
     report.add_argument("--input", help="render an existing JSON report instead of scanning")
@@ -253,15 +253,19 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
+        if args.command in {"scan", "report"} and args.format is not None and args.format not in FORMATS:
+            raise ScanError(f"unsupported report format: {args.format}")
         if args.command == "scan":
             if args.source is not None:
+                if args.format not in (None, "json"):
+                    raise ScanError("directory metadata scans currently support JSON output only")
                 if args.output is None:
                     parser.error("scan SOURCE requires --output")
                 report = scan_directory(args.source, args.output, excludes=args.exclude,
                                         force=args.force, timeout=args.timeout)
                 summary = report["summary"]
                 print(f"Inventory written. Included: {summary['included_items']}; excluded: {summary['excluded_items']}; errors: {summary['scan_errors']}.")
-                return 0
+                return _open_report(Path(args.output).expanduser().absolute()) if args.open else 0
             if args.profile not in supported_profiles():
                 parser.error("unsupported workload profile")
             timeout = DEFAULT_TIMEOUT_SECONDS if args.timeout is None else args.timeout
