@@ -52,7 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     scan = subparsers.add_parser("scan", help="inventory a directory or run a system profile")
     scan.add_argument("source", nargs="?", help="directory to scan (omit for a system profile)")
-    scan.add_argument("--profile", choices=supported_profiles(), default="standard", help="system/workload profile")
+    scan.add_argument("--profile", choices=supported_profiles(), help="system/workload profile")
     scan.add_argument("--format", choices=FORMATS, default=None, help="explicit report format; omitted preserves legacy output")
     scan.add_argument("--output", help="report destination")
     scan.add_argument("--open", action="store_true", help="open the completed report with xdg-open (Linux only)")
@@ -200,14 +200,19 @@ def _open_report(path: Path) -> int:
 def _handle_report_command(args: argparse.Namespace) -> int:
     if args.input and args.diff:
         raise ScanError("--input and --diff cannot be used together")
+    diff_result = None
     if args.diff:
         before, after = (_load_json(path) for path in args.diff)
-        data = _diff_as_report(compare_reports(before, after))
+        diff_result = compare_reports(before, after)
+        data = _diff_as_report(diff_result)
     elif args.input:
         data = canonical_report(_load_json(args.input))
     else:
         data = canonical_report(build_report(profile=args.profile, excludes=args.exclude, timeout=args.timeout))
-    rendered, extension = _render(data, args.format)
+    if diff_result is not None and args.format == "json":
+        rendered, extension = json.dumps(diff_result, ensure_ascii=False, indent=2) + "\n", ".json"
+    else:
+        rendered, extension = _render(data, args.format)
     if args.output:
         path = _write_output(args.output, rendered)
         print(f"AICRE report written to {path}")
@@ -280,7 +285,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
     except (ScanError, ValueError, OSError, RuntimeError) as exc:
         print(f"AICRE: {exc}", file=sys.stderr)
-        if "unsupported report format" in str(exc):
+        if "unsupported report format" in str(exc) or "requires the optional ReportLab dependency" in str(exc):
             return EXIT_UNSUPPORTED_FORMAT
         return 2
     return 2
