@@ -6,7 +6,7 @@ from typing import Any
 def render_markdown(report: dict[str, Any]) -> str:
     lines = ['# AICRE scan report', '', f"- Scan ID: {report.get('scan_id', 'legacy')}", f"- Generated: {report.get('generated_at', 'unknown')}", '', '## Findings', '']
     for item in report.get('findings', []):
-        lines.extend([f"### {item.get('id', 'unknown')} — {item.get('status', 'unknown')}", '', f"Source: {item.get('source', 'unknown')}", '', '```json', json.dumps(item.get('value'), ensure_ascii=False, sort_keys=True, indent=2), '```', ''])
+        lines.extend([f"### {item.get('check_id', item.get('id', 'unknown'))} — {item.get('status', 'unknown')}", '', f"Source: {item.get('source', 'unknown')}", '', '```json', json.dumps(item.get('value'), ensure_ascii=False, sort_keys=True, indent=2), '```', ''])
     return '\n'.join(lines).rstrip() + '\n'
 
 def render_html(report: dict[str, Any]) -> str:
