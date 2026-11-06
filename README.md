@@ -1,85 +1,89 @@
-# AICRE 0.1.0 — Linux Preview
+# AICRE 0.2.0 — Linux-first inventory and readiness preview
 
-**AI Computer Readiness Engine** is an experimental local, metadata-only inventory prototype intended to help users understand a directory before preparing a computer for AI-agent workflows.
+**Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
-> **Preview status:** This is an experimental Linux-first preview, not a security product, agent sandbox, malware scanner, or guarantee that a computer is safe for autonomous agents. Use it only on directories you own or are authorized to inspect. Review the report before sharing it.
+> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. The 0.2 implementation is not a release approval; independent review remains required.
 
-## What this version does
+## Privacy and collection boundaries
 
-- Scans a directory selected by the user.
-- Records relative paths, item type, extension, file size, and last-modified UTC timestamp.
-- Counts path names, not unique underlying files; hard-linked source paths appear as separate entries.
-- Does **not** open or read source-file contents.
-- Does **not** modify, move, rename, or delete source items.
-- Skips symbolic links and, on supported POSIX systems, opens directories relative to the selected root without following path-component symlinks.
-- Does not descend into entries whose filesystem device differs from the scan root; same-device bind mounts are not reliably detected.
-- Excludes selected credential directories and names, plus user-specified path patterns. The path-based policy is conservative but cannot identify every secret.
-- Writes a JSON report outside the scan root using a temporary file and atomic publication. Existing symlink, hard-link, directory, device, FIFO, and other non-regular report destinations are rejected.
-- Creates report files with owner-only `0600` permissions on POSIX systems. `--force` replaces an existing regular report atomically; it does not truncate an existing file in place.
+AICRE uses only narrowly scoped local sources: Python's `platform`, `os`, `sys`, and `sysconfig` interfaces; Linux `/etc/os-release`/`/usr/lib/os-release`, `/proc/meminfo`, `/sys/class/drm` vendor/device identifiers; `shutil.disk_usage("/")`; and `shutil.which` for a fixed allowlist of executable names. The allowlist is `git`, `python3`, `pip`, `uv`, `pipx`, `node`, `npm`, `docker`, `podman`, `codex`, `claude`, `aider`, and `ollama`. Tool detection searches permitted `PATH` entries only: `detected` does not verify version or functionality, and `not_detected` does not prove the tool is absent elsewhere.
 
-The scanner is not a filesystem snapshot. Concurrent changes can make results incomplete or inconsistent. It reports an aggregate scan-error count, not a diagnostic path for each error. See [SECURITY.md](SECURITY.md) and [docs/SECURITY_MODEL.md](docs/SECURITY_MODEL.md) before use.
+AICRE does not execute discovered programs, read credentials, API keys, `.env` contents, private keys, chat histories, or user documents. It makes no network requests or telemetry calls and does not perform remediation. Filesystem sources and executable paths are filtered through built-in sensitive-path policy and any `--exclude` patterns before reading or disclosing them. An excluded result is reported as `not_checked`, not as absent. Exclusion patterns are not persisted.
 
-## Platform and requirements
+Reports can contain hardware details, software availability, and executable paths. Review a report before sharing it. Built-in path rules are conservative and cannot discover every secret.
 
-- **Initial target:** Linux (Ubuntu 24.04 LTS is the CI target).
-- Python 3.11 or newer is declared; the automated test matrix covers Python 3.11, 3.12, and 3.13.
-- No runtime third-party dependencies.
-- CI installs hash-locked build, test, and lint tools from `.github/requirements-ci.txt`.
+## Findings and readiness
 
-Windows support is planned, but this preview is not being advertised as Windows-validated. The descriptor-relative no-follow scan implementation requires platform support for those filesystem operations and refuses to scan where they are unavailable.
+Each finding has a stable ID, category, collection status, value and optional unit, named source, confidence, UTC collection timestamp, and limitations. Finding statuses are `detected`, `not_detected`, `unsupported`, `permission_denied`, `error`, and `not_checked`.
 
-## Install from a local clone
+Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. AICRE does not calculate a composite score. Resource and Software readiness remain `unknown` until workload resource thresholds and a required software manifest are defined. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
+
+The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
+
+## Requirements and installation
+
+- Linux-first. Windows and macOS support are not claimed.
+- Python 3.11 or newer.
+- No runtime third-party dependencies. `pytest`, Ruff, and `fastjsonschema` are development/test-only dependencies.
+- GitHub Actions checks Ubuntu 24.04 with Python 3.11, 3.12, and 3.13; CI tools are version- and hash-locked in `.github/requirements-ci.txt`.
 
 ```bash
-python3 --version
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
 ```
 
-## Usage
+## CLI
 
-Choose a source directory and a report destination **outside** it:
+Run a system profile, human-readable by default:
 
 ```bash
 aicre --version
-aicre scan "$HOME/Documents" --output "$HOME/aicre-inventory.json"
+aicre system
+aicre inventory
+aicre readiness
+aicre scan --profile standard
 ```
 
-Exclude private paths. Patterns are matched against relative POSIX-style paths:
+Emit the complete versioned JSON report to stdout or save it securely to a new file:
 
 ```bash
-aicre scan "$HOME/Documents" \
-  --output "$HOME/aicre-inventory.json" \
-  --exclude 'Projects/Client-A/**' \
-  --exclude '**/Personal/**'
+aicre report --format json
+aicre report --format json --output "$HOME/aicre-report.json"
 ```
 
-To intentionally replace an existing regular report:
+Set exclusions and a cooperative time budget for system inventory:
 
 ```bash
-aicre scan "$HOME/Documents" --output "$HOME/aicre-inventory.json" --force
+aicre inventory --exclude '**/.local/bin/private-tool' --timeout 10
 ```
 
-A hard-linked report destination is refused even with `--force`; choose a new, ordinary file path instead. Reports include a summary of included items, excluded items, and scan errors. Inaccessible entries are skipped and counted as errors rather than guessed.
+Show built-in exclusions:
 
-## Safety recommendations
+```bash
+aicre exclusions show
+```
 
-1. Run as your ordinary user; do not use `sudo`.
-2. Start with a small, non-sensitive test directory.
-3. Set explicit `--exclude` patterns for private projects and folders.
-4. Keep the JSON report private. Filenames and metadata can themselves reveal sensitive information.
-5. Do not interpret a successful scan as proof that every secret was excluded.
-6. A non-zero `scan_errors` count means the inventory is incomplete.
+The original directory metadata scanner is retained:
 
-## Development and tests
+```bash
+aicre scan "$HOME/Documents" --output "$HOME/aicre-directory-report.json" \
+  --exclude 'Projects/Client-A/**' --exclude '**/Personal/**'
+```
+
+For directory scans, exclusions are matched against paths relative to the selected scan root. For system inventory and tool discovery, they are matched against root-relative paths and, when applicable, home-relative paths. `--timeout` is cooperative between observations; it cannot interrupt a filesystem call already in progress. A timed-out directory scan writes a partial report with a non-zero `scan_errors` count. The system/inventory/report commands represent observations not reached before the deadline as `not_checked`.
+
+To intentionally replace an existing regular report file, supply `--force`. Symlinks, hard-linked destinations, directories, FIFOs, sockets, devices, and other non-regular destinations are rejected. A directory scan must still write its report outside the scan root. A non-zero `scan_errors` count means the directory inventory is incomplete.
+
+## Development and verification
 
 ```bash
 python -m pip install -e '.[dev]'
+ruff check src tests
 pytest -v
 ```
 
-GitHub Actions runs Ruff and the test suite on Ubuntu 24.04 with Python 3.11, 3.12, and 3.13. Check the repository's Actions tab for the result on the commit or pull request you are reviewing. A green workflow verifies only the checks it runs; it does not establish production readiness or remove the limitations in the security model.
+The automated tests cover system source filtering, executable discovery without execution, explicit compatibility requirements, readiness evidence, report-schema validation, path exclusions, CLI behavior, scanner races, and previous security regressions. A green CI run verifies only those checks; it does not establish production readiness.
 
 ## Project documents
 
@@ -87,6 +91,7 @@ GitHub Actions runs Ruff and the test suite on Ubuntu 24.04 with Python 3.11, 3.
 - [Roadmap](docs/ROADMAP.md)
 - [Security reporting](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
+- [JSON report schema](schemas/report-v2.schema.json)
 
 ## License
 

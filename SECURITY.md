@@ -6,4 +6,4 @@ If GitHub private vulnerability reporting is enabled for this repository, use it
 
 Include the affected AICRE version, operating system and filesystem where known, a concise impact description, and safe reproduction steps that use disposable test data only.
 
-AICRE is an experimental metadata-inventory prototype. Do not use it as a security boundary or with elevated privileges.
+AICRE 0.2 is an experimental local metadata-inventory and readiness prototype, not a security boundary. Do not run it with elevated privileges or attach generated inventories to public issues; reports can disclose system and path metadata.
