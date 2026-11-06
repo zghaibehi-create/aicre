@@ -170,7 +170,8 @@ def _diff_as_report(diff: dict[str, Any]) -> dict[str, Any]:
         })
     return {"schema_version": diff["schema_version"], "aicre_version": __version__,
             "scan_id": diff.get("after_scan_id"), "generated_at": "comparison",
-            "profile": "diff", "findings": findings, "readiness": {}}
+            "profile": "diff", "findings": findings, "readiness": {},
+            "diff_counts": diff["counts"]}
 
 
 def _render(report_data: dict[str, Any], fmt: str) -> tuple[str | bytes, str]:
