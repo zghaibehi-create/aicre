@@ -18,7 +18,7 @@ Each finding has a stable ID, category, collection status, value and optional un
 
 Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. AICRE does not calculate a composite score. Resource and Software readiness remain `unknown` until workload resource thresholds and a required software manifest are defined. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
 
-The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
+The legacy `system`, `inventory`, and `readiness` JSON output conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). The new `report` command and explicit `scan --format` output use the canonical [`schemas/report-v1.schema.json`](schemas/report-v1.schema.json) contract. All report output is local; new renderer outputs are atomically replaced after privacy checks and use owner-only `0600` permissions on POSIX. The legacy `scan --profile standard` path retains its original `--force` overwrite requirement.
 
 ## Requirements and installation
 
@@ -91,7 +91,32 @@ The automated tests cover system source filtering, executable discovery without 
 - [Roadmap](docs/ROADMAP.md)
 - [Security reporting](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
-- [JSON report schema](schemas/report-v2.schema.json)
+- [Legacy JSON report schema](schemas/report-v2.schema.json)
+- [Canonical report schema](schemas/report-v1.schema.json)
+- [Report schema and identity design](docs/schema.md)
+
+## Report formats and comparisons
+
+Render a canonical report as JSON, Markdown, HTML, or PDF:
+
+```bash
+aicre report --format json
+aicre report --format markdown --output "$HOME/reports/aicre.md"
+aicre report --format html --output "$HOME/reports/aicre.html"
+aicre scan --profile standard --format html --output "$HOME/reports/system.html"
+```
+
+PDF is optional: install it with `python -m pip install -e '.[pdf]'`, then use `--format pdf`. HTML has no scripts, remote assets, CDN dependencies, or external fonts. POSIX output files are created with mode `0600`; parent directories are created and existing regular files are atomically replaced.
+
+Render a previously saved JSON report, or compare two snapshots:
+
+```bash
+aicre report --input "$HOME/aicre-report.json" --format html --output "$HOME/aicre.html"
+aicre report --diff before.json after.json --format json
+aicre report --diff before.json after.json --format markdown --output changes.md
+```
+
+The diff classifies checks as `new`, `resolved`, `unchanged`, or `changed`. `--open` opens a completed output with `xdg-open` on Linux only. Exit code `3` indicates an unsupported output format or missing optional PDF support; `6` indicates that opening is unsupported on the current platform; `7` indicates that `xdg-open` could not be launched.
 
 ## License
 
