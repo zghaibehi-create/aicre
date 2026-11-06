@@ -26,6 +26,10 @@ jobs:
           python -m pip install --require-hashes -r .github/requirements-ci.txt
           python -m pip install --no-build-isolation --no-deps -e '.[dev]'
           python -m pip check
+      - name: Temporary import-sort diagnostics
+        run: |
+          python -m ruff check --select I --fix src tests
+          git diff -- src tests
       - name: Lint
         run: python -m ruff check src tests
       - name: Run tests
