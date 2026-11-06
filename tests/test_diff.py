@@ -1,5 +1,6 @@
 from aicre.diff import compare_reports
 
+
 def finding(value, status="detected"):
     return {"id": "sha", "check_id": "cpu.logical", "category": "resource", "status": status,
             "value": value, "unit": "count", "source": "collector", "confidence": "high", "limitations": []}
