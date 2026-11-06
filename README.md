@@ -18,7 +18,7 @@ Each finding has a stable ID, category, collection status, value and optional un
 
 Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. AICRE does not calculate a composite score. Resource and Software readiness remain `unknown` until workload resource thresholds and a required software manifest are defined. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
 
-The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
+The legacy `system`, `inventory`, and `readiness` JSON output conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). The new `report` command and explicit `scan --format` output use the canonical [`schemas/report-v1.schema.json`](schemas/report-v1.schema.json) contract. All report output is local; new renderer outputs are atomically replaced after privacy checks and use owner-only `0600` permissions on POSIX. The legacy `scan --profile standard` path retains its original `--force` overwrite requirement.
 
 ## Requirements and installation
 
