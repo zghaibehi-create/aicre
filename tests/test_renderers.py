@@ -5,6 +5,7 @@ import pytest
 
 from aicre.renderers import render_html, render_markdown, render_pdf
 
+
 def sample():
     return {"scan_id":"abc", "generated_at":"2026-01-01T00:00:00Z", "findings":[
         {"id":"f1", "status":"detected", "source":"fixture <script>", "value":"<script>alert(1)</script>"}],
