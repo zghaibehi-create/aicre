@@ -80,3 +80,8 @@ def test_new_report_writer_rejects_symlink_and_hardlink(tmp_path, monkeypatch):
     os.link(victim, hardlink)
     assert main(['report', '--format', 'json', '--output', str(hardlink), '--timeout', '0']) == 2
     assert victim.read_text(encoding='utf-8') == 'keep'
+
+
+def test_unknown_format_returns_exit_code_3(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, 'build_report', lambda **kwargs: FIXTURE)
+    assert main(['scan', '--profile', 'standard', '--format', 'xml']) == 3
