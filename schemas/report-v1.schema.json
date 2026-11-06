@@ -8,7 +8,7 @@
   "properties": {
     "schema_version": {"const": "1.0.0"},
     "aicre_version": {"type": "string"},
-    "scan_id": {"type": "string", "format": "uuid"},
+    "scan_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
     "generated_at": {"type": "string", "format": "date-time"},
     "profile": {"type": "string", "minLength": 1},
     "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
