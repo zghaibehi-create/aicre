@@ -77,6 +77,9 @@ def test_new_report_writer_rejects_symlink_and_hardlink(tmp_path, monkeypatch):
     link.symlink_to(victim)
     assert main(['report', '--format', 'json', '--output', str(link), '--timeout', '0']) == 2
     assert victim.read_text(encoding='utf-8') == 'keep'
+    broken_link = tmp_path / 'broken-link.json'
+    broken_link.symlink_to(tmp_path / 'missing-target')
+    assert main(['report', '--format', 'json', '--output', str(broken_link), '--timeout', '0']) == 2
     hardlink = tmp_path / 'hardlink.json'
     os.link(victim, hardlink)
     assert main(['report', '--format', 'json', '--output', str(hardlink), '--timeout', '0']) == 2
