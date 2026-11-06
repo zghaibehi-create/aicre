@@ -1,3 +1,5 @@
+import hashlib
+import json
 from aicre.renderers import render_html, render_markdown
 
 def sample():
@@ -14,6 +16,8 @@ def test_html_is_self_contained_and_escapes_report_content():
     text = render_html(sample())
     assert "Content-Security-Policy" in text
     assert "aicre-report-sha256" in text
+    payload = json.dumps(sample(), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    assert hashlib.sha256(payload.encode("utf-8")).hexdigest() in text
     assert "default-src 'none'" in text
     assert "https://" not in text
     assert "<script>alert(1)</script>" not in text
