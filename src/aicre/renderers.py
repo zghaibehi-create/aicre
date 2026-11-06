@@ -1,8 +1,10 @@
 from __future__ import annotations
+
+import hashlib
 import html
 import json
-import hashlib
 from typing import Any
+
 
 def render_markdown(report: dict[str, Any]) -> str:
     lines = ['# AICRE scan report', '', f"- Scan ID: {report.get('scan_id', 'legacy')}", f"- Generated: {report.get('generated_at', 'unknown')}", f"- Profile: {report.get('profile', 'unknown')}", '', '## Readiness', '', '| Dimension | Status | Explanation |', '|---|---|---|']
@@ -73,12 +75,20 @@ def render_html(report: dict[str, Any]) -> str:
 def render_pdf(report: dict[str, Any]) -> bytes:
     try:
         from io import BytesIO
+        from xml.sax.saxutils import escape
+
+        from reportlab.lib import colors
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.lib.units import mm
-        from reportlab.lib import colors
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted, Table, TableStyle
-        from xml.sax.saxutils import escape
+        from reportlab.platypus import (
+            Paragraph,
+            Preformatted,
+            SimpleDocTemplate,
+            Spacer,
+            Table,
+            TableStyle,
+        )
     except ImportError as exc:
         raise RuntimeError('PDF support requires the optional ReportLab dependency; install aicre[pdf]') from exc
     stream = BytesIO()
