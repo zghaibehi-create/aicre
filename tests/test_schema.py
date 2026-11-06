@@ -6,6 +6,7 @@ import fastjsonschema
 
 from aicre.schema import canonical_report, stable_finding_id
 
+
 def source_report(timestamp):
     return {"schema_version":"2.0", "aicre_version":"0.2.0", "profile":"standard",
             "generated_at":timestamp, "findings":[{"id":"resource.cpu", "category":"resource",
