@@ -129,7 +129,17 @@ def test_python_paths_filtered_by_policy(monkeypatch):
 
 def test_non_linux_marks_linux_observations_unsupported(monkeypatch):
     patch_normal(monkeypatch)
-    monkeypatch.setattr(inventory.sys, "platform", "darwin")
+    monkeypatch.setattr(
+        inventory,
+        "sys",
+        SimpleNamespace(
+            platform="darwin",
+            executable=inventory.sys.executable,
+            prefix=inventory.sys.prefix,
+            implementation=inventory.sys.implementation,
+            base_prefix=inventory.sys.base_prefix,
+        ),
+    )
     findings = by_id(inventory.collect_system_findings())
     for identifier in EXPECTED_IDS - {"python.environment", "security.effective_uid", "resource.gpu"}:
         assert findings[identifier].status == "unsupported"
