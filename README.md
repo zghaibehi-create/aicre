@@ -91,7 +91,31 @@ The automated tests cover system source filtering, executable discovery without 
 - [Roadmap](docs/ROADMAP.md)
 - [Security reporting](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
-- [JSON report schema](schemas/report-v2.schema.json)
+- [Legacy JSON report schema](schemas/report-v2.schema.json)
+- [Canonical report schema](schemas/report-v1.schema.json)
+- [Report schema and identity design](docs/schema.md)
+
+## Report formats and comparisons
+
+Render a canonical report as JSON, Markdown, HTML, or PDF:
+
+```bash
+aicre report --format json
+aicre report --format markdown --output "$HOME/reports/aicre.md"
+aicre report --format html --output "$HOME/reports/aicre.html"
+```
+
+PDF is optional: install it with `python -m pip install -e '.[pdf]'`, then use `--format pdf`. HTML has no scripts, remote assets, CDN dependencies, or external fonts. POSIX output files are created with mode `0600`; parent directories are created and existing regular files are atomically replaced.
+
+Render a previously saved JSON report, or compare two snapshots:
+
+```bash
+aicre report --input "$HOME/aicre-report.json" --format html --output "$HOME/aicre.html"
+aicre report --diff before.json after.json --format json
+aicre report --diff before.json after.json --format markdown --output changes.md
+```
+
+The diff classifies checks as `new`, `resolved`, `unchanged`, or `changed`. `--open` opens a completed output with `xdg-open` on Linux only.
 
 ## License
 
