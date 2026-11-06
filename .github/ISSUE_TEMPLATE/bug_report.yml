@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a reproducible AICRE issue without sharing private data.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not upload inventory reports, personal filenames, credentials, or private directory contents."
+  - type: input
+    id: version
+    attributes:
+      label: AICRE version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Linux distribution and version
+      placeholder: "Ubuntu 24.04"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Safe reproduction steps
+      description: Use disposable test folders and synthetic files only.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true

@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a focused improvement to AICRE.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Privacy or security implications
+      description: Explain whether this would read content, access the network, elevate privileges, or modify source files.
+    validations:
+      required: true
