@@ -141,7 +141,10 @@ def _load_json(path: str) -> dict[str, Any]:
         value = json.loads(Path(path).expanduser().read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise ScanError(f"cannot read JSON report {path!r}: {exc}") from exc
-    if not isinstance(value, dict) or not isinstance(value.get("findings", []), list):
+    if (not isinstance(value, dict)
+            or not isinstance(value.get("findings", []), list)
+            or any(not isinstance(item, dict) for item in value.get("findings", []))
+            or not isinstance(value.get("readiness", {}), dict)):
         raise ScanError(f"invalid AICRE report structure in {path!r}")
     return value
 
@@ -227,7 +230,7 @@ def _handle_report_command(args: argparse.Namespace) -> int:
     else:
         data = canonical_report(build_report(profile=args.profile, excludes=args.exclude, timeout=args.timeout))
     if diff_result is not None and args.format == "json":
-        rendered, extension = json.dumps(diff_result, ensure_ascii=False, indent=2) + "\n", ".json"
+        rendered, _extension = json.dumps(diff_result, ensure_ascii=False, indent=2) + "\n", ".json"
     else:
         rendered, _extension = _render(data, args.format)
     if args.output:
@@ -277,7 +280,7 @@ def main(argv: list[str] | None = None) -> int:
                 return 0
             old_report = build_report(profile=args.profile, excludes=args.exclude, timeout=timeout)
             data = canonical_report(old_report)
-            rendered, extension = _render(data, args.format)
+            rendered, _extension = _render(data, args.format)
             if args.output:
                 reason = path_exclusion_reason(args.output, args.exclude)
                 if reason:
