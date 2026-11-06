@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import Any
+
 
 def compare_reports(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
     def key(item: dict[str, Any]) -> str:
