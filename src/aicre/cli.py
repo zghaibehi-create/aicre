@@ -141,11 +141,21 @@ def _load_json(path: str) -> dict[str, Any]:
         value = json.loads(Path(path).expanduser().read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise ScanError(f"cannot read JSON report {path!r}: {exc}") from exc
+    required = {"schema_version", "aicre_version", "profile", "generated_at", "findings", "readiness"}
     if (not isinstance(value, dict)
-            or not isinstance(value.get("findings", []), list)
+            or not required.issubset(value)
+            or value.get("schema_version") not in {"2.0", "1.0.0"}
+            or not isinstance(value.get("findings"), list)
             or any(not isinstance(item, dict) for item in value.get("findings", []))
-            or not isinstance(value.get("readiness", {}), dict)):
+            or not isinstance(value.get("readiness"), dict)):
         raise ScanError(f"invalid AICRE report structure in {path!r}")
+    for item in value["findings"]:
+        if not {"category", "status", "value", "source", "confidence", "unit", "limitations"}.issubset(item):
+            raise ScanError(f"invalid finding structure in {path!r}")
+        if "id" not in item and "check_id" not in item:
+            raise ScanError(f"finding is missing an identifier in {path!r}")
+    if value["schema_version"] == "1.0.0" and not isinstance(value.get("scan_id"), str):
+        raise ScanError(f"canonical report is missing scan_id in {path!r}")
     return value
 
 
