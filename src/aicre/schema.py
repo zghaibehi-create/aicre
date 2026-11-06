@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import hashlib
 import json
 import uuid
 from typing import Any
+
 
 def _canonical(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':'), default=str)
