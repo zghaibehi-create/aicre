@@ -1,7 +1,6 @@
 import json
 import os
 import stat
-from pathlib import Path
 import pytest
 from aicre import cli
 from aicre.cli import main
