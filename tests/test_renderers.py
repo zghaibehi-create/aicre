@@ -13,6 +13,7 @@ def test_markdown_contains_findings_and_escapable_json():
 def test_html_is_self_contained_and_escapes_report_content():
     text = render_html(sample())
     assert "Content-Security-Policy" in text
+    assert "aicre-report-sha256" in text
     assert "default-src 'none'" in text
     assert "https://" not in text
     assert "<script>alert(1)</script>" not in text
