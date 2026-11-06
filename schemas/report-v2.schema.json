@@ -13,13 +13,27 @@
     "readiness"
   ],
   "properties": {
-    "schema_version": {"const": "2.0"},
-    "aicre_version": {"const": "0.2.0"},
-    "profile": {"const": "standard"},
-    "generated_at": {"type": "string", "format": "date-time"},
+    "schema_version": {
+      "const": "2.0"
+    },
+    "aicre_version": {
+      "const": "0.2.0"
+    },
+    "profile": {
+      "enum": [
+        "standard",
+        "agent-development"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "findings": {
       "type": "array",
-      "items": {"$ref": "#/$defs/finding"}
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
     },
     "readiness": {
       "type": "object",
@@ -32,11 +46,21 @@
         "security_readiness"
       ],
       "properties": {
-        "resource_readiness": {"$ref": "#/$defs/readiness_dimension"},
-        "software_readiness": {"$ref": "#/$defs/readiness_dimension"},
-        "compatibility_readiness": {"$ref": "#/$defs/readiness_dimension"},
-        "privacy_readiness": {"$ref": "#/$defs/readiness_dimension"},
-        "security_readiness": {"$ref": "#/$defs/readiness_dimension"}
+        "resource_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "software_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "compatibility_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "privacy_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "security_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        }
       }
     }
   },
@@ -56,8 +80,14 @@
         "limitations"
       ],
       "properties": {
-        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
-        "category": {"type": "string", "minLength": 1},
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
         "status": {
           "enum": [
             "detected",
@@ -68,22 +98,73 @@
             "not_checked"
           ]
         },
-        "value": {"type": ["object", "array", "string", "number", "integer", "boolean", "null"]},
-        "unit": {"type": ["string", "null"]},
-        "source": {"type": "string", "minLength": 1},
-        "confidence": {"enum": ["high", "medium", "low"]},
-        "collected_at": {"type": "string", "format": "date-time"},
-        "limitations": {"type": "array", "items": {"type": "string"}}
+        "value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "readiness_dimension": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "explanation", "evidence"],
+      "required": [
+        "status",
+        "explanation",
+        "evidence"
+      ],
       "properties": {
-        "status": {"enum": ["pass", "warning", "fail", "unknown"]},
-        "explanation": {"type": "string", "minLength": 1},
-        "evidence": {"type": "array", "items": {"type": "string"}}
+        "status": {
+          "enum": [
+            "pass",
+            "warning",
+            "fail",
+            "unknown"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     }
   }

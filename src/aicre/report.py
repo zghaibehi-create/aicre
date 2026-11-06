@@ -13,6 +13,7 @@ from .models import Finding, utc_now
 from .readiness import evaluate_readiness
 from .system_inventory import collect_system_findings
 from .tool_discovery import discover_tools
+from .workload_profiles import evaluate_workload_profile, supported_profiles
 
 REPORT_SCHEMA_VERSION = "2.0"
 DEFAULT_TIMEOUT_SECONDS = 15.0
@@ -32,7 +33,7 @@ def build_report(
     subprocesses, remote connections, remediation, or user-file content reads
     are performed by this orchestrator.
     """
-    if profile != "standard":
+    if profile not in supported_profiles():
         raise ValueError(f"unsupported profile: {profile}")
     if not math.isfinite(timeout) or timeout < 0:
         raise ValueError("timeout must be a finite, non-negative number")
@@ -42,7 +43,8 @@ def build_report(
     findings = collect_system_findings(patterns, deadline=deadline)
     if include_tools:
         findings.extend(discover_tools(patterns, deadline=deadline))
-    findings.extend(evaluate_compatibility(profile, deadline=deadline))
+    findings.extend(evaluate_compatibility("standard", deadline=deadline))
+    findings.extend(evaluate_workload_profile(findings, profile))
     findings.extend([
         Finding(
             id="privacy.local_collection",
@@ -74,7 +76,7 @@ def build_report(
             ),
         ),
     ])
-    readiness = evaluate_readiness(findings)
+    readiness = evaluate_readiness(findings, profile=profile)
     return {
         "schema_version": REPORT_SCHEMA_VERSION,
         "aicre_version": __version__,

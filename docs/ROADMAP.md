@@ -1,11 +1,22 @@
 # AICRE Roadmap
 
-This roadmap distinguishes implemented work from release approval; a passing build is not a production-readiness claim.
+This roadmap separates implemented behavior from planned work and release approval.
 
-- **AICRE 0.1 Linux preview and security hardening — merged:** descriptor-relative scanner hardening, conservative path policy, private atomic reports, locked CI, and regression coverage. This remains an experimental tool.
-- **AICRE 0.2 Linux inventory/readiness — implementation in progress:** local system metadata, allowlisted non-executing tool discovery, explicit Linux/Python compatibility checks, five independent readiness dimensions, and a versioned JSON Schema. Resource and software baselines remain unknown until workload requirements are defined; no composite score is planned.
-- **0.2 release gate — pending:** Linux CI on the supported Python matrix, verified read-only behavior, privacy/exclusion and schema tests, updated limitations, and independent review. Do not describe 0.2 as release-ready until each criterion is verified.
-- **Future scope:** a configurable workload requirements profile, additional reviewed local metadata sources, packaging/signing, and broader platform feasibility work.
-- **Non-goals:** no Windows/macOS support claim, GUI, autonomous agent execution, automatic repairs, cloud analytics, telemetry, or vendor lock-in.
+## Implemented on main
+- **0.1 security hardening:** descriptor-relative directory scanning, conservative sensitive-path policy, private atomic reports, locked CI, and regression coverage.
+- **0.2 Linux inventory preview:** local system metadata, allowlisted PATH-only tool discovery without execution, explicit Linux/Python compatibility checks, five separate readiness dimensions, versioned JSON Schema, cooperative timeouts, and CLI reporting.
 
-A phase is complete only after its acceptance criteria pass on its target environment and required independent review is complete. Future roadmap items are not implemented merely because they appear here.
+## Current work
+- **0.3 workload-profile foundation (under review):** deterministic resource and required-tool comparisons for the documented `agent-development` baseline. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.
+
+## Next engineering phases
+- **0.3 security intelligence:** threat model and narrowly scoped metadata-only checks for agent/tool configuration, MCP trust and permission exposure, execution boundaries, and dependency provenance. No configuration is executed or changed.
+- **0.4 compatibility catalog:** evidence-backed, version-aware requirements for selected agent runtimes; unknown states are explicit.
+- **0.5 guided remediation plans:** recommendations and preview-only diffs; any system-changing action requires explicit per-action approval and rollback design.
+- **1.x broader platforms:** Windows/macOS only after separate implementations and target-environment CI; GUI after core contracts stabilize.
+
+## Release gates
+A green CI run is necessary but insufficient. Each phase requires code review, privacy and threat-model review, regression tests, target-environment integration tests, documented residual risks, and a release decision. Planned features are not implemented merely because they appear here.
+
+## Permanent non-goals unless explicitly redesigned
+No telemetry, cloud upload of machine inventories, undisclosed network activity, automatic installation/remediation, autonomous agent execution, vendor lock-in, or silent weakening of exclusions.

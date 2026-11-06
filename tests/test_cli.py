@@ -161,3 +161,17 @@ def test_invalid_timeout_has_usage_error():
     with pytest.raises(SystemExit) as exit_info:
         main(["inventory", "--timeout", "nan"])
     assert exit_info.value.code == 2
+
+
+def test_agent_development_profile_cli_is_selectable(capsys):
+    result = main(["readiness", "--profile", "agent-development", "--timeout", "0"])
+    assert result == 0
+    assert "agent-development" in capsys.readouterr().out
+
+
+def test_report_accepts_agent_development_profile(capsys):
+    result = main(["report", "--profile", "agent-development", "--timeout", "0"])
+    assert result == 0
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile"] == "agent-development"
+    assert "profile.resource.cpu" in {item["id"] for item in data["findings"]}

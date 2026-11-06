@@ -18,6 +18,7 @@ from .policy import (
 from .privacy import path_exclusion_reason
 from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
 from .scanner import ScanError, scan_directory, write_json_report
+from .workload_profiles import supported_profiles
 
 
 def _timeout_value(raw: str) -> float:
@@ -31,6 +32,7 @@ def _timeout_value(raw: str) -> float:
 
 
 def _add_inventory_options(parser: argparse.ArgumentParser, *, default_timeout: float) -> None:
+    parser.add_argument("--profile", choices=supported_profiles(), default="standard", help="workload baseline")
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument("--exclude", action="append", default=[],
                         help="relative path pattern to omit; repeatable")
@@ -48,7 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     scan = subparsers.add_parser("scan", help="inventory a directory or run the standard system profile")
     scan.add_argument("source", nargs="?", help="directory to scan (omit for a system profile)")
-    scan.add_argument("--profile", choices=("standard",), help="system inventory profile")
+    scan.add_argument("--profile", choices=supported_profiles(), default="standard", help="system inventory/workload profile")
     scan.add_argument("--output", help="JSON report path")
     scan.add_argument("--exclude", action="append", default=[],
                       help="private relative path/glob to exclude; repeatable")
@@ -66,6 +68,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_inventory_options(readiness, default_timeout=DEFAULT_TIMEOUT_SECONDS)
 
     report = subparsers.add_parser("report", help="emit the full versioned JSON report")
+    report.add_argument("--profile", choices=supported_profiles(), default="standard", help="workload baseline")
     report.add_argument("--format", choices=("json",), default="json")
     report.add_argument("--output", help="optional report destination; stdout if omitted")
     report.add_argument("--force", action="store_true", help="explicitly replace an existing report")
@@ -136,7 +139,7 @@ def _show_exclusions() -> None:
 
 def _build_and_emit_report(args: argparse.Namespace, *, command: str, include_tools: bool = True) -> int:
     report = build_report(
-        profile="standard",
+        profile=args.profile,
         excludes=args.exclude,
         timeout=args.timeout,
         include_tools=include_tools,
@@ -172,8 +175,8 @@ def main(argv: list[str] | None = None) -> int:
                     f"errors: {summary['scan_errors']}."
                 )
                 return 0
-            if args.profile != "standard":
-                parser.error("use scan --profile standard for a system inventory")
+            if args.profile not in supported_profiles():
+                parser.error("unsupported workload profile")
             if args.output is not None:
                 reason = path_exclusion_reason(args.output, args.exclude)
                 if reason:
@@ -205,7 +208,7 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.command == "report":
             report = build_report(
-                profile="standard",
+                profile=args.profile,
                 excludes=args.exclude,
                 timeout=args.timeout,
             )
