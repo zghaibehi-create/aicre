@@ -1,3 +1,7 @@
+import json
+import uuid
+from pathlib import Path
+import fastjsonschema
 from aicre.schema import canonical_report, stable_finding_id
 
 def source_report(timestamp):
@@ -15,5 +19,12 @@ def test_scan_id_is_deterministic_and_ignores_timestamps():
     first = canonical_report(source_report("2026-01-01T00:00:00Z"))
     second = canonical_report(source_report("2026-01-02T00:00:00Z"))
     assert first["scan_id"] == second["scan_id"]
-    assert first["scan_id"].endswith("-5" + first["scan_id"][first["scan_id"].find("-5")+2:first["scan_id"].find("-5")+3]) is False or first["scan_id"]
+    assert uuid.UUID(first["scan_id"]).version == 5
     assert first["findings"][0]["id"] == second["findings"][0]["id"]
+
+
+def test_canonical_report_validates_against_v1_schema():
+    schema = json.loads(Path('schemas/report-v1.schema.json').read_text(encoding='utf-8'))
+    validate = fastjsonschema.compile(schema)
+    report = canonical_report(source_report('2026-01-01T00:00:00Z'))
+    assert validate(report) == report
