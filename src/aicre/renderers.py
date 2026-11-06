@@ -9,6 +9,9 @@ def render_markdown(report: dict[str, Any]) -> str:
     for name, item in report.get("readiness", {}).items():
         explanation = str(item.get("explanation", "")).replace("|", "\\|")
         lines.append(f"| {name} | {item.get('status', 'unknown')} | {explanation} |")
+    if report.get("diff_counts"):
+        lines.extend(["", "## Diff summary", "", "| Change | Count |", "|---|---:|"])
+        lines.extend(f"| {name} | {count} |" for name, count in report["diff_counts"].items())
     lines.extend(['', '## Findings', ''])
     for item in report.get('findings', []):
         lines.extend([f"### {item.get('check_id', item.get('id', 'unknown'))} — {item.get('status', 'unknown')}", '', f"Source: {item.get('source', 'unknown')}", '', '```json', json.dumps(item.get('value'), ensure_ascii=False, sort_keys=True, indent=2), '```', ''])
@@ -26,6 +29,14 @@ def render_html(report: dict[str, Any]) -> str:
             html.escape(str(item.get("status", "unknown"))) + "</td><td>" +
             html.escape(str(item.get("explanation", ""))) + "</td></tr>"
         )
+    diff_summary = ""
+    if report.get("diff_counts"):
+        summary_rows = "".join(
+            "<tr><th scope=\"row\">" + html.escape(str(name)) + "</th><td>" +
+            html.escape(str(count)) + "</td></tr>"
+            for name, count in report["diff_counts"].items()
+        )
+        diff_summary = "<h2>Diff summary</h2><table><tbody>" + summary_rows + "</tbody></table>"
     finding_cards = []
     for item in report.get("findings", []):
         finding_cards.append(
@@ -52,7 +63,7 @@ def render_html(report: dict[str, Any]) -> str:
         "@media print{body{color:#000;background:#fff}.finding{break-inside:avoid}}</style>"
         "</head><body><h1>AICRE scan report</h1><p>Generated: " +
         html.escape(str(report.get("generated_at", "unknown"))) +
-        "</p><h2>Readiness</h2><table><thead><tr><th>Dimension</th><th>Status</th><th>Explanation</th></tr></thead><tbody>" +
+        "</p>" + diff_summary + "<h2>Readiness</h2><table><thead><tr><th>Dimension</th><th>Status</th><th>Explanation</th></tr></thead><tbody>" +
         "".join(readiness_rows) + "</tbody></table><h2>Findings</h2>" +
         "".join(finding_cards) +
         "<details><summary>Raw report JSON</summary><pre>" + raw + "</pre></details></body></html>"
@@ -79,7 +90,13 @@ def render_pdf(report: dict[str, Any]) -> bytes:
         readiness_rows.append([Paragraph(escape(name), styles["BodyText"]), Paragraph(escape(str(item.get("status", "unknown"))), styles["BodyText"]), Paragraph(escape(str(item.get("explanation", ""))), styles["BodyText"])])
     table = Table(readiness_rows, colWidths=[40*mm, 25*mm, 105*mm], repeatRows=1)
     table.setStyle(TableStyle([("BACKGROUND", (0,0), (-1,0), colors.lightgrey), ("GRID", (0,0), (-1,-1), .4, colors.grey), ("VALIGN", (0,0), (-1,-1), "TOP"), ("PADDING", (0,0), (-1,-1), 5)]))
-    story.extend([table, Spacer(1, 12), Paragraph('Findings', styles['Heading2'])])
+    story.extend([table, Spacer(1, 12)])
+    if report.get("diff_counts"):
+        story.append(Paragraph("Diff summary", styles["Heading2"]))
+        diff_rows = [["Change", "Count"]] + [[str(name), str(count)] for name, count in report["diff_counts"].items()]
+        story.append(Table(diff_rows, colWidths=[50*mm, 25*mm]))
+        story.append(Spacer(1, 12))
+    story.append(Paragraph('Findings', styles['Heading2']))
     for item in report.get('findings', []):
         story.extend([Spacer(1, 8), Paragraph(escape(str(item.get('id')) + ' — ' + str(item.get('status'))), styles['Heading3']), Preformatted(json.dumps(item.get('value'), ensure_ascii=False, indent=2, default=str), styles['Code'])])
     doc.build(story)
