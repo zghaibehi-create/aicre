@@ -1,6 +1,7 @@
 import hashlib
 import json
-from aicre.renderers import render_html, render_markdown
+import pytest
+from aicre.renderers import render_html, render_markdown, render_pdf
 
 def sample():
     return {"scan_id":"abc", "generated_at":"2026-01-01T00:00:00Z", "findings":[
@@ -22,3 +23,8 @@ def test_html_is_self_contained_and_escapes_report_content():
     assert "https://" not in text
     assert "<script>alert(1)</script>" not in text
     assert "&lt;script&gt;" in text
+
+
+def test_pdf_renderer_when_optional_dependency_is_installed():
+    pytest.importorskip('reportlab')
+    assert render_pdf(sample()).startswith(b'%PDF-')
