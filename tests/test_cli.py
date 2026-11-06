@@ -84,7 +84,7 @@ def test_system_json_command_emits_full_valid_report(capsys):
 
     assert result == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["schema_version"] == "2.0"
+    assert data["schema_version"] == "1.0.0"
     assert data["aicre_version"] == "0.2.0"
     assert "resource.cpu.logical_count" in {item["id"] for item in data["findings"]}
     assert not any(item["id"].startswith("tool.") for item in data["findings"])
@@ -113,7 +113,7 @@ def test_report_json_stdout_and_schema_shape(capsys):
     }
 
 
-def test_report_file_uses_private_permissions_and_refuses_overwrite(tmp_path, capsys):
+def test_report_file_uses_private_permissions_and_allows_overwrite(tmp_path, capsys):
     output = tmp_path / "aicre-report.json"
     assert main(["report", "--output", str(output), "--timeout", "0"]) == 0
     capsys.readouterr()
@@ -122,8 +122,9 @@ def test_report_file_uses_private_permissions_and_refuses_overwrite(tmp_path, ca
     if os.name == "posix":
         assert stat.S_IMODE(output.stat().st_mode) == 0o600
 
-    assert main(["report", "--output", str(output), "--timeout", "0"]) == 2
-    assert "already exists" in capsys.readouterr().err
+    assert main(["report", "--output", str(output), "--timeout", "0"]) == 0
+    capsys.readouterr()
+    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "1.0.0"
 
 
 def test_report_respects_user_exclusion_for_destination(tmp_path, capsys):
@@ -146,7 +147,7 @@ def test_report_force_replaces_only_explicitly(tmp_path, capsys):
 
     assert main(["report", "--output", str(output), "--force", "--timeout", "0"]) == 0
     capsys.readouterr()
-    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "2.0"
+    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "1.0.0"
 
 
 def test_exclusions_show_policy_and_non_persistence(capsys):
