@@ -229,6 +229,9 @@ def _handle_report_command(args: argparse.Namespace) -> int:
     else:
         rendered, extension = _render(data, args.format)
     if args.output:
+        reason = path_exclusion_reason(args.output, args.exclude)
+        if reason:
+            raise ScanError("Report destination is excluded by the privacy policy; choose another path.")
         path = _write_output(args.output, rendered)
         print(f"AICRE report written to {path}")
         return _open_report(path) if args.open else 0
@@ -274,6 +277,9 @@ def main(argv: list[str] | None = None) -> int:
             data = canonical_report(old_report)
             rendered, extension = _render(data, args.format)
             if args.output:
+                reason = path_exclusion_reason(args.output, args.exclude)
+                if reason:
+                    raise ScanError("Report destination is excluded by the privacy policy; choose another path.")
                 path = _write_output(args.output, rendered)
                 print(f"AICRE report written to {path}")
                 return _open_report(path) if args.open else 0
