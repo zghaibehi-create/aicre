@@ -24,7 +24,8 @@ def canonical_report(report: dict[str, Any]) -> dict[str, Any]:
             'value': item.get('value'), 'source': collector_id, 'confidence': item.get('confidence', 'low'),
             'unit': item.get('unit'), 'collected_at': item.get('collected_at', report.get('generated_at')),
             'limitations': list(item.get('limitations', []))})
-    seed = _canonical({'profile': report.get('profile'), 'findings': findings})
+    stable_rows = [{key: item.get(key) for key in ('id', 'check_id', 'category', 'status', 'value', 'source', 'confidence', 'unit', 'limitations')} for item in findings]
+    seed = _canonical({'profile': report.get('profile'), 'findings': stable_rows})
     scan_id = str(uuid.uuid5(uuid.NAMESPACE_URL, 'urn:aicre:scan:' + seed))
     return {'schema_version': '1.0.0', 'aicre_version': report.get('aicre_version'), 'scan_id': scan_id,
         'generated_at': report.get('generated_at'), 'profile': report.get('profile'),
