@@ -66,3 +66,17 @@ def test_legacy_scan_profile_stdout_is_unchanged(monkeypatch, capsys):
     monkeypatch.setattr(cli, 'build_report', lambda **kwargs: {'aicre_version':'0.2.0','profile':'standard','findings':[],'readiness':{}})
     assert main(['scan', '--profile', 'standard', '--timeout', '0']) == 0
     assert capsys.readouterr().out == 'AICRE 0.2.0 — profile: standard\nReadiness (separate dimensions; no composite score):\n'
+
+
+def test_new_report_writer_rejects_symlink_and_hardlink(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, 'build_report', lambda **kwargs: FIXTURE)
+    victim = tmp_path / 'victim.txt'
+    victim.write_text('keep', encoding='utf-8')
+    link = tmp_path / 'symlink.json'
+    link.symlink_to(victim)
+    assert main(['report', '--format', 'json', '--output', str(link), '--timeout', '0']) == 2
+    assert victim.read_text(encoding='utf-8') == 'keep'
+    hardlink = tmp_path / 'hardlink.json'
+    os.link(victim, hardlink)
+    assert main(['report', '--format', 'json', '--output', str(hardlink), '--timeout', '0']) == 2
+    assert victim.read_text(encoding='utf-8') == 'keep'
