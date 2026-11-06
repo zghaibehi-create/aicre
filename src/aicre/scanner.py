@@ -2,18 +2,36 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import secrets
 import stat
+import time
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from . import __version__
 from .policy import is_sensitive_relative_path, is_sensitive_scan_root, is_user_excluded
 
 
 class ScanError(RuntimeError):
     """Raised when a scan cannot safely be started or its report cannot be written."""
+
+
+class _ScanDeadlineExceeded(Exception):
+    """Internal signal for a cooperative timeout during directory enumeration."""
+
+
+def _sorted_entries(iterator: Any, deadline: float | None) -> list[Any]:
+    entries = []
+    for entry in iterator:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise _ScanDeadlineExceeded
+        entries.append(entry)
+    if deadline is not None and time.monotonic() >= deadline:
+        raise _ScanDeadlineExceeded
+    return sorted(entries, key=lambda item: item.name.casefold(), reverse=True)
 
 
 def _is_reparse_point(st: os.stat_result) -> bool:
@@ -146,16 +164,37 @@ def _write_report(path: Path, report: dict[str, Any], *, force: bool) -> None:
         os.close(parent_fd)
 
 
+def write_json_report(output: str | Path, report: dict[str, Any], *, force: bool = False) -> Path:
+    """Publish a JSON report with the same private atomic rules as directory scans."""
+    output_path = Path(output).expanduser().absolute()
+    if not output_path.parent.is_dir():
+        raise ScanError("Report parent directory does not exist.")
+    try:
+        parent = output_path.parent.resolve(strict=True)
+    except OSError as exc:
+        raise ScanError(f"Cannot inspect report directory: {exc}") from exc
+    normalized = parent / output_path.name
+    _validate_output_destination(normalized, force=force)
+    _write_report(normalized, report, force=force)
+    return normalized
+
+
 def scan_directory(source: str | Path, output: str | Path, *,
                    excludes: tuple[str, ...] | list[str] = (),
-                   force: bool = False) -> dict[str, Any]:
+                   force: bool = False,
+                   timeout: float | None = None) -> dict[str, Any]:
     """Inventory metadata below source and write JSON outside source.
 
     On POSIX systems with descriptor-relative no-follow operations, directory
     traversal is anchored to the opened scan root and refuses symlink swaps.
     It is not an atomic filesystem snapshot and does not prevent concurrent
     changes to file metadata or mount topology.
+    ``timeout`` is cooperative between filesystem operations; an in-progress
+    kernel/filesystem call cannot be interrupted safely.
     """
+    if timeout is not None and (not math.isfinite(timeout) or timeout < 0):
+        raise ScanError("Timeout must be a finite, non-negative number.")
+    deadline = time.monotonic() + timeout if timeout is not None else None
     source_path = Path(source).expanduser().absolute()
     output_path = Path(output).expanduser().absolute()
 
@@ -196,11 +235,15 @@ def scan_directory(source: str | Path, output: str | Path, *,
         records: list[dict[str, Any]] = []
         errors = 0
         excluded = 0
+        timed_out = False
         stack: list[tuple[PurePosixPath, int, int]] = [
             (PurePosixPath(), opened_root_stat.st_dev, opened_root_stat.st_ino)
         ]
 
         while stack:
+            if deadline is not None and time.monotonic() >= deadline:
+                errors += 1
+                break
             current_relative, expected_dev, expected_ino = stack.pop()
             current_fd: int | None = None
             try:
@@ -211,8 +254,12 @@ def scan_directory(source: str | Path, output: str | Path, *,
                     continue
 
                 with os.scandir(current_fd) as iterator:
-                    entries = sorted(iterator, key=lambda item: item.name.casefold(), reverse=True)
+                    entries = _sorted_entries(iterator, deadline)
                     for entry in entries:
+                        if deadline is not None and time.monotonic() >= deadline:
+                            errors += 1
+                            timed_out = True
+                            break
                         try:
                             item_stat = entry.stat(follow_symlinks=False)
                         except OSError:
@@ -272,16 +319,21 @@ def scan_directory(source: str | Path, output: str | Path, *,
                             "size_bytes": size,
                             "modified_utc": _utc_timestamp(item_stat.st_mtime),
                         })
+            except _ScanDeadlineExceeded:
+                errors += 1
+                timed_out = True
             except OSError:
                 errors += 1
             finally:
                 if current_fd is not None:
                     os.close(current_fd)
+            if timed_out:
+                break
 
         records.sort(key=lambda record: record["relative_path"].casefold())
         report = {
             "schema_version": "1",
-            "aicre_version": "0.1.0",
+            "aicre_version": __version__,
             "source_name": source_path.name,
             "generated_utc": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
             "summary": {

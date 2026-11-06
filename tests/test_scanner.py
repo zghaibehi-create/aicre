@@ -443,6 +443,27 @@ def test_empty_tree_and_many_files_produce_valid_complete_json(tmp_path):
     assert names == sorted(names, key=str.casefold)
 
 
+def test_cooperative_scan_timeout_marks_partial_inventory(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "not-yet-scanned.txt").write_text("fixture", encoding="utf-8")
+    output = tmp_path / "report.json"
+
+    report = scan_directory(source, output, timeout=0)
+
+    assert report["aicre_version"] == "0.2.0"
+    assert report["summary"]["included_items"] == 0
+    assert report["summary"]["scan_errors"] >= 1
+    assert json.loads(output.read_text(encoding="utf-8"))["summary"]["scan_errors"] >= 1
+
+
+def test_scan_rejects_invalid_timeout(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    with pytest.raises(ScanError, match="finite, non-negative"):
+        scan_directory(source, tmp_path / "report.json", timeout=float("nan"))
+
+
 def test_invalid_source_and_missing_output_parent_are_rejected(tmp_path):
     regular_file = tmp_path / "not-a-directory"
     regular_file.write_text("x", encoding="utf-8")

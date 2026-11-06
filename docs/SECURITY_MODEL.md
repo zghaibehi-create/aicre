@@ -1,48 +1,70 @@
-# AICRE 0.1.0 — Security Model (Linux Preview)
+# AICRE 0.2.0 — Security and Privacy Model
 
 ## Purpose and non-goals
 
-AICRE 0.1.0 creates a local inventory of filesystem metadata. It is not an agent sandbox, access-control manager, malware scanner, secret scanner, backup tool, or security certification. It does not configure or launch an AI agent.
+AICRE 0.2 collects a bounded set of Linux environment and directory metadata and reports five independent readiness dimensions. It is not an agent sandbox, access-control manager, malware scanner, complete secret detector, backup tool, security certification, or authorization to run an autonomous agent. It does not install software, modify machine settings, or remediate findings. Windows and macOS support are not claimed.
 
 ## Trust boundary
 
-AICRE runs with the permissions of the invoking user. It does not request elevation, create accounts, alter ACLs, or configure an AI agent. The user explicitly supplies the scan root and report destination.
+AICRE runs with the invoking user's privileges. It does not request elevation or alter accounts, ACLs, or configuration. The CLI inventory profile observes the local system; the legacy `scan SOURCE` command separately inventories a user-selected directory. Reports are generated locally. A user-specified report file is the only intended output write and is created with the atomic, private publication behavior described below.
 
-## Data handling and exclusions
+## Approved discovery sources
 
-- Source file contents are not opened or read by the scanner. It enumerates directory entries and requests metadata.
-- The report contains relative paths, item type, extension, byte size, modification time, source directory name, and aggregate counts.
-- Counts are path-based rather than inode-deduplicated: hard-linked source names are reported separately, and `size_bytes` is not a unique-storage total.
-- The path-only exclusion policy covers selected credential locations and names, including `.ssh`, `.gnupg`, `.aws`, `.azure`, `.kube`, `.docker`, `.config/gcloud`, `.config/gh`, common `.env` variants, `.npmrc`, `.pypirc`, and recognized private-key/credential names and extensions.
-- These rules are not a complete secret detector. A secret in an ordinary-looking path may be inventoried. A selected scan root that is itself inside a protected sensitive location is refused before traversal. User-supplied relative exclusions are also applied.
-- Symbolic links and reparse points are skipped during enumeration; a symbolic-link scan root and report destination are rejected.
+System inventory uses:
 
-## Report handling
+- `platform.freedesktop_os_release()` for a small allowlist of distribution fields (`ID`, `NAME`, `VERSION_ID`, `PRETTY_NAME`), after checking both standard os-release paths against exclusions;
+- `platform.uname()` and `os.cpu_count()` for kernel identity and logical CPU count;
+- only `MemTotal` and `MemAvailable` from `/proc/meminfo`;
+- `shutil.disk_usage("/")` for root filesystem capacity;
+- `sys`, `sysconfig`, and `platform` for the current Python runtime, ABI, and interpreter paths;
+- `os.geteuid()` where available;
+- only vendor/device IDs for Linux DRM card entries under `/sys/class/drm` as optional GPU metadata.
 
-- The report must be outside the scan root.
-- A new report is first written to a same-directory temporary file. On POSIX, that file is restricted to owner-only mode `0600` before its contents are written.
-- A complete report is published atomically. Without `--force`, publication fails if another file appears at the destination. With `--force`, only an existing regular file with a single hard link may be replaced.
-- Symlinks, reparse points, directories, hard-linked destinations, FIFOs, sockets, device nodes, and other non-regular report destinations are refused. A failed temporary write leaves an existing report unchanged and removes the temporary file where possible.
-- On non-POSIX systems, POSIX permission-bit behavior is not asserted. This preview does not claim Windows support.
+Tool discovery checks a fixed allowlist (`git`, `python3`, `pip`, `uv`, `pipx`, `node`, `npm`, `docker`, `podman`, `codex`, `claude`, `aider`, `ollama`) with `shutil.which`. Excluded PATH directories and candidate executable paths are removed before lookup. AICRE never launches, imports, or otherwise executes a discovered tool.
 
-## Traversal and residual risks
+Only the allowlisted system-metadata sources above are read. AICRE does not inspect user-document contents, credentials, API keys, `.env` contents, private keys, or chat histories. No telemetry or network calls are made by the application. Tests patch process and network entry points to fail if called. These implementation properties do not monitor unrelated processes on the host.
 
-- On POSIX systems that support descriptor-relative directory operations and `O_NOFOLLOW`, traversal is anchored to an open scan-root directory. Child directories are opened relative to their parent descriptor with no-follow flags and checked against the metadata observed during enumeration. If these operations are unavailable, scanning is refused.
-- This reduces symlink-swap traversal races but does not create an atomic filesystem snapshot. Files and directories can change during enumeration, and mount topology or other filesystem behavior can change concurrently. AICRE is not a security boundary against a hostile process with access to the scanned tree.
-- Entries on a filesystem device different from the scan root are excluded rather than traversed. Same-device bind mounts are not reliably distinguished from ordinary directories, so AICRE does not provide complete mount isolation.
-- The scanner retains item metadata in memory and sorts entries for reproducible ordering. Very large trees can require substantial memory and time; there is no configurable item or memory limit.
-- Enumeration failures are summarized as a count. A report with non-zero `scan_errors` is incomplete, and the current schema does not identify each failing path.
-- Filenames and metadata can themselves be sensitive. Do not publish or share reports without reviewing them.
-- Filesystem, permission, mount, and symlink behavior can vary by distribution and filesystem. CI targets Ubuntu 24.04. Windows junction/reparse behavior, Windows ACLs, antivirus interactions, and Windows 11 operation have not been validated.
+## Privacy policy and exclusions
+
+The built-in policy excludes selected credential directories, filenames, extensions, and known configuration locations. It is a path/name policy, not a complete secret detector. Sensitive paths are not opened for discovery and are not emitted in report values when excluded. User patterns are applied to filesystem metadata sources and executable paths before opening or disclosing them. A withheld observation is `not_checked`; it is never described as absent. Patterns are per invocation and are not persisted. `aicre exclusions show` lists the built-in rules.
+
+For legacy directory scans, patterns are relative to the chosen scan root. For system inventory and tool lookup, patterns are tested against root-relative paths and, where relevant, paths relative to the current home directory. A report destination matching an exclusion is refused by the report/profile CLI. Exclusions do not act as system-wide access controls.
+
+Reports may reveal system versions, hardware identifiers, storage totals, tool names, interpreter paths, and filesystem metadata. Treat them as private; inspect them before sharing. Reports can still contain sensitive facts not recognized by path rules.
+
+## Finding and readiness semantics
+
+Each finding contains a stable ID, category, one of `detected`, `not_detected`, `unsupported`, `permission_denied`, `error`, or `not_checked`, a JSON value and optional unit, named source, confidence, UTC collection time, and limitations. `not_detected` means the approved observation found no matching item; it does not replace `not_checked` when a source was excluded, unavailable, timed out, or not queried.
+
+The report schema is `schemas/report-v2.schema.json`. Each readiness dimension has `pass`, `warning`, `fail`, or `unknown`, an explanation, and supporting finding IDs. There is no composite score. Resource readiness is `unknown` without a workload resource baseline; Software readiness is `unknown` without a mandatory software manifest. Compatibility explicitly checks Linux and Python `>=3.11` for the `standard` profile. Privacy readiness describes AICRE's local collection and exclusion behavior only. Security readiness warns if AICRE is run with effective UID 0; otherwise it remains unknown because the host's broader controls are not assessed.
+
+## Read-only behavior, reporting, and timeouts
+
+Inventory code reads only the allowlisted metadata sources. Tool discovery uses `shutil.which` and does not run candidates. Directory scanning remains metadata-only and does not open source files. User exclusions are checked before path-based reads and before reportable executable paths are returned.
+
+Report files are written through a same-directory temporary file and atomically published. On POSIX, they have owner-only `0600` permissions. Without `--force`, an existing destination is not replaced; with `--force`, only a single-link regular file may be replaced. Symlinks and special files are rejected.
+
+System inventory checks a cooperative deadline between observations. Directory scans check it between filesystem operations and emit a partial report with non-zero `scan_errors` if the time budget expires. A deadline cannot interrupt a filesystem or kernel call already in progress; it is not a hard real-time bound.
+
+## Residual risks and unsupported cases
+
+- Path/name rules cannot find every secret. An ordinary-looking path may still appear in a directory inventory.
+- This is not a filesystem snapshot. Concurrent changes can produce incomplete or inconsistent results.
+- The directory scanner refuses cross-device traversal but cannot reliably distinguish same-device bind mounts.
+- Very large directory scans can consume substantial time and memory; there is no configurable item or memory ceiling.
+- Scan errors are aggregated rather than identifying every failed path.
+- DRM metadata covers only the Linux DRM sysfs interface. Other GPU providers and driver readiness may not be detected.
+- Resource/software readiness cannot be meaningfully passed or failed until workload requirements are supplied. Security readiness is not a host audit.
+- Filesystem, permission, mount, and metadata behavior vary across Linux distributions. CI targets Ubuntu 24.04; no Windows/macOS compatibility claim is made.
+- AICRE is not a security boundary against a hostile process with access to the host or scanned directory.
 
 ## Safe-use guidance
 
-- Run without `sudo` or other elevated privileges.
-- Test first on a disposable directory.
-- Explicitly exclude personal, client, and otherwise private directories.
-- Store reports in a private location and inspect them before sharing.
-- Stop using the tool if its behavior differs from this document and report the issue without attaching sensitive inventories.
+- Run as a normal user; do not use `sudo`.
+- Use explicit exclusions and review reports before sharing.
+- Stop if behavior differs from this document and report issues privately without attaching sensitive inventories.
+- Do not treat `pass` in one dimension as a certification of overall agent safety.
 
-## Verification scope
+## Verification and release status
 
-The automated workflow runs Ruff and tests on Ubuntu 24.04 with Python 3.11, 3.12, and 3.13. A successful run verifies the checks in that workflow only; it is not a production-readiness claim and does not eliminate the residual risks above.
+CI runs Ruff, JSON Schema validation, and tests on Ubuntu 24.04 with Python 3.11, 3.12, and 3.13. A successful run verifies only those checks. Independent review is required before any release; this document alone does not constitute that review.
