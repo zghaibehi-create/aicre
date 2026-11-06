@@ -21,8 +21,8 @@ from .policy import (
     SENSITIVE_SUFFIXES,
 )
 from .privacy import path_exclusion_reason
-from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
 from .renderers import render_html, render_markdown, render_pdf
+from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
 from .scanner import ScanError, scan_directory, write_json_report
 from .schema import canonical_report
 from .workload_profiles import supported_profiles
