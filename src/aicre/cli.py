@@ -4,9 +4,11 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import platform
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -177,10 +179,23 @@ def _write_output(path: str, data: str | bytes) -> Path:
         raise ScanError("report destination must be a regular file, not a symlink or special file")
     if target.exists() and target.stat().st_nlink > 1:
         raise ScanError("refusing to replace a hard-linked report destination")
-    if isinstance(data, bytes):
-        target.write_bytes(data)
-    else:
-        target.write_text(data, encoding="utf-8", newline="\n")
+    fd, temporary = tempfile.mkstemp(prefix=".aicre-", suffix=".tmp", dir=target.parent)
+    try:
+        if os.name == "posix":
+            os.fchmod(fd, 0o600)
+        mode = "wb"
+        with os.fdopen(fd, mode) as stream:
+            payload = data.encode("utf-8") if isinstance(data, str) else data
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, target)
+    except Exception:
+        try:
+            os.unlink(temporary)
+        except OSError:
+            pass
+        raise
     return target.absolute()
 
 
