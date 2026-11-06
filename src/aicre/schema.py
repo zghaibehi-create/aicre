@@ -12,6 +12,8 @@ def stable_finding_id(collector_id: str, check_id: str, evidence: Any) -> str:
     return hashlib.sha256(material.encode('utf-8')).hexdigest()
 
 def canonical_report(report: dict[str, Any]) -> dict[str, Any]:
+    if report.get("schema_version") == "1.0.0" and isinstance(report.get("scan_id"), str):
+        return report
     findings = []
     for item in report.get('findings', []):
         check_id = str(item.get('id', 'unknown'))
