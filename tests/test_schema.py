@@ -1,7 +1,9 @@
 import json
 import uuid
 from pathlib import Path
+
 import fastjsonschema
+
 from aicre.schema import canonical_report, stable_finding_id
 
 def source_report(timestamp):
