@@ -27,7 +27,7 @@ def test_report_input_renders_without_running_scanner(tmp_path, monkeypatch):
     assert main(['report','--input',str(source),'--format','markdown','--output',str(output)]) == 0
     assert 'cpu.logical' in output.read_text(encoding='utf-8')
 
-def test_report_diff_json_exposes_all_classifications(tmp_path):
+def test_report_diff_json_exposes_all_classifications(tmp_path, capsys):
     before = dict(FIXTURE)
     before['findings'] = [dict(FIXTURE['findings'][0])]
     after = dict(FIXTURE)
@@ -37,7 +37,9 @@ def test_report_diff_json_exposes_all_classifications(tmp_path):
     right.write_text(json.dumps(after), encoding='utf-8')
     result = main(['report','--diff',str(left),str(right),'--format','json'])
     assert result == 0
-    # The JSON diff is emitted to stdout by the CLI; detailed classifications are covered in test_diff.py.
+    diff = json.loads(capsys.readouterr().out)
+    assert diff['counts']['new'] == 1
+    assert diff['counts']['unchanged'] == 1.
 
 def test_open_returns_platform_error_code(tmp_path, monkeypatch):
     monkeypatch.setattr(cli.platform, 'system', lambda: 'Darwin')
