@@ -103,6 +103,7 @@ Render a canonical report as JSON, Markdown, HTML, or PDF:
 aicre report --format json
 aicre report --format markdown --output "$HOME/reports/aicre.md"
 aicre report --format html --output "$HOME/reports/aicre.html"
+aicre scan --profile standard --format html --output "$HOME/reports/system.html"
 ```
 
 PDF is optional: install it with `python -m pip install -e '.[pdf]'`, then use `--format pdf`. HTML has no scripts, remote assets, CDN dependencies, or external fonts. POSIX output files are created with mode `0600`; parent directories are created and existing regular files are atomically replaced.
@@ -115,7 +116,7 @@ aicre report --diff before.json after.json --format json
 aicre report --diff before.json after.json --format markdown --output changes.md
 ```
 
-The diff classifies checks as `new`, `resolved`, `unchanged`, or `changed`. `--open` opens a completed output with `xdg-open` on Linux only.
+The diff classifies checks as `new`, `resolved`, `unchanged`, or `changed`. `--open` opens a completed output with `xdg-open` on Linux only. Exit code `3` indicates an unsupported output format or missing optional PDF support; `6` indicates that opening is unsupported on the current platform; `7` indicates that `xdg-open` could not be launched.
 
 ## License
 
