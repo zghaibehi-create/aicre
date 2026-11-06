@@ -14,12 +14,17 @@ from typing import Any
 
 from . import __version__
 from .diff import compare_reports
-from .policy import SENSITIVE_CONFIG_DIR_PAIRS, SENSITIVE_DIRS, SENSITIVE_NAMES, SENSITIVE_SUFFIXES
+from .policy import (
+    SENSITIVE_CONFIG_DIR_PAIRS,
+    SENSITIVE_DIRS,
+    SENSITIVE_NAMES,
+    SENSITIVE_SUFFIXES,
+)
 from .privacy import path_exclusion_reason
 from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
 from .renderers import render_html, render_markdown, render_pdf
-from .schema import canonical_report
 from .scanner import ScanError, scan_directory, write_json_report
+from .schema import canonical_report
 from .workload_profiles import supported_profiles
 
 EXIT_UNSUPPORTED_FORMAT = 3
