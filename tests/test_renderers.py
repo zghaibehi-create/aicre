@@ -1,6 +1,8 @@
 import hashlib
 import json
+
 import pytest
+
 from aicre.renderers import render_html, render_markdown, render_pdf
 
 def sample():
