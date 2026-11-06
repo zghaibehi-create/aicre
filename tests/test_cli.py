@@ -175,4 +175,4 @@ def test_report_accepts_agent_development_profile(capsys):
     assert result == 0
     data = json.loads(capsys.readouterr().out)
     assert data["profile"] == "agent-development"
-    assert "profile.resource.cpu" in {item["id"] for item in data["findings"]}
+    assert "profile.resource.cpu" in {item["check_id"] for item in data["findings"]}
