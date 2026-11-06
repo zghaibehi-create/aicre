@@ -1,19 +1,27 @@
 from __future__ import annotations
 import html
 import json
+import hashlib
 from typing import Any
 
 def render_markdown(report: dict[str, Any]) -> str:
-    lines = ['# AICRE scan report', '', f"- Scan ID: {report.get('scan_id', 'legacy')}", f"- Generated: {report.get('generated_at', 'unknown')}", '', '## Findings', '']
+    lines = ['# AICRE scan report', '', f"- Scan ID: {report.get('scan_id', 'legacy')}", f"- Generated: {report.get('generated_at', 'unknown')}", f"- Profile: {report.get('profile', 'unknown')}", '', '## Readiness', '', '| Dimension | Status | Explanation |', '|---|---|---|']
+    for name, item in report.get("readiness", {}).items():
+        explanation = str(item.get("explanation", "")).replace("|", "\\|")
+        lines.append(f"| {name} | {item.get('status', 'unknown')} | {explanation} |")
+    lines.extend(['', '## Findings', ''])
     for item in report.get('findings', []):
         lines.extend([f"### {item.get('check_id', item.get('id', 'unknown'))} — {item.get('status', 'unknown')}", '', f"Source: {item.get('source', 'unknown')}", '', '```json', json.dumps(item.get('value'), ensure_ascii=False, sort_keys=True, indent=2), '```', ''])
     return '\n'.join(lines).rstrip() + '\n'
 
 def render_html(report: dict[str, Any]) -> str:
+    payload = json.dumps(report, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
     raw = html.escape(json.dumps(report, ensure_ascii=False, indent=2))
     title = html.escape('AICRE report ' + str(report.get('scan_id', 'legacy')))
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<meta name="aicre-report-sha256" content="' + digest + '">'
         '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:; base-uri \'none\'; form-action \'none\'; frame-ancestors \'none\'">'
         '<title>' + title + '</title><style>:root{color-scheme:light dark;font:16px/1.5 system-ui}body{max-width:1000px;margin:2rem auto;padding:0 1rem}pre{white-space:pre-wrap;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td,th{border:1px solid GrayText;padding:.5rem}@media(max-width:600px){body{padding:0 .75rem}}@media print{body{color:#000;background:#fff}}</style>'
         '</head><body><h1>AICRE scan report</h1><p>Generated: ' + html.escape(str(report.get('generated_at', 'unknown'))) + '</p><h2>Readiness</h2><table><tbody>' + ''.join('<tr><th scope="row">' + html.escape(k) + '</th><td>' + html.escape(str(v.get('status'))) + '</td><td>' + html.escape(str(v.get('explanation'))) + '</td></tr>' for k,v in report.get('readiness',{}).items()) + '</tbody></table><h2>Findings</h2><pre>' + raw + '</pre></body></html>')
@@ -24,14 +32,21 @@ def render_pdf(report: dict[str, Any]) -> bytes:
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.lib.units import mm
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
+        from reportlab.lib import colors
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted, Table, TableStyle
         from xml.sax.saxutils import escape
     except ImportError as exc:
         raise RuntimeError('PDF support requires the optional ReportLab dependency; install aicre[pdf]') from exc
     stream = BytesIO()
     doc = SimpleDocTemplate(stream, pagesize=A4, rightMargin=16*mm, leftMargin=16*mm)
     styles = getSampleStyleSheet()
-    story = [Paragraph('AICRE scan report', styles['Title']), Spacer(1, 10), Paragraph(escape('Scan ID: ' + str(report.get('scan_id', 'legacy'))), styles['BodyText'])]
+    story = [Paragraph('AICRE scan report', styles['Title']), Spacer(1, 10), Paragraph(escape('Scan ID: ' + str(report.get('scan_id', 'legacy'))), styles['BodyText']), Spacer(1, 10), Paragraph('Readiness', styles['Heading2'])]
+    readiness_rows = [["Dimension", "Status", "Explanation"]]
+    for name, item in report.get("readiness", {}).items():
+        readiness_rows.append([Paragraph(escape(name), styles["BodyText"]), Paragraph(escape(str(item.get("status", "unknown"))), styles["BodyText"]), Paragraph(escape(str(item.get("explanation", ""))), styles["BodyText"])])
+    table = Table(readiness_rows, colWidths=[40*mm, 25*mm, 105*mm], repeatRows=1)
+    table.setStyle(TableStyle([("BACKGROUND", (0,0), (-1,0), colors.lightgrey), ("GRID", (0,0), (-1,-1), .4, colors.grey), ("VALIGN", (0,0), (-1,-1), "TOP"), ("PADDING", (0,0), (-1,-1), 5)]))
+    story.extend([table, Spacer(1, 12), Paragraph('Findings', styles['Heading2'])])
     for item in report.get('findings', []):
         story.extend([Spacer(1, 8), Paragraph(escape(str(item.get('id')) + ' — ' + str(item.get('status'))), styles['Heading3']), Preformatted(json.dumps(item.get('value'), ensure_ascii=False, indent=2, default=str), styles['Code'])])
     doc.build(story)
