@@ -66,4 +66,4 @@ def test_pdf_missing_optional_dependency_uses_exit_code_3(tmp_path, monkeypatch)
 def test_legacy_scan_profile_stdout_is_unchanged(monkeypatch, capsys):
     monkeypatch.setattr(cli, 'build_report', lambda **kwargs: {'aicre_version':'0.2.0','profile':'standard','findings':[],'readiness':{}})
     assert main(['scan', '--profile', 'standard', '--timeout', '0']) == 0
-    assert capsys.readouterr().out == 'AICRE 0.2.0 — profile: standard\\nReadiness (separate dimensions; no composite score):\\n'
+    assert capsys.readouterr().out == 'AICRE 0.2.0 — profile: standard\nReadiness (separate dimensions; no composite score):\n'
