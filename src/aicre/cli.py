@@ -163,6 +163,8 @@ def _diff_as_report(diff: dict[str, Any]) -> dict[str, Any]:
 def _render(report_data: dict[str, Any], fmt: str) -> tuple[str | bytes, str]:
     if fmt == "json":
         return json.dumps(report_data, ensure_ascii=False, indent=2, sort_keys=False) + "\n", ".json"
+    if fmt == "text":
+        return render_markdown(report_data), ".txt"
     if fmt == "markdown":
         return render_markdown(report_data), ".md"
     if fmt == "html":
@@ -227,7 +229,7 @@ def _handle_report_command(args: argparse.Namespace) -> int:
     if diff_result is not None and args.format == "json":
         rendered, extension = json.dumps(diff_result, ensure_ascii=False, indent=2) + "\n", ".json"
     else:
-        rendered, extension = _render(data, args.format)
+        rendered, _extension = _render(data, args.format)
     if args.output:
         reason = path_exclusion_reason(args.output, args.exclude)
         if reason:
