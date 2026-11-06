@@ -28,3 +28,6 @@ Collection timestamps do not alone count as a changed finding.
 The HTML renderer is self-contained: inline CSS only, no JavaScript, remote assets, external fonts, or network fetches. It sets a restrictive Content Security Policy and escapes all report-controlled text. PDF generation uses ReportLab's built-in Helvetica/Courier fonts; no third-party font files are bundled. Install PDF support with `pip install '.[pdf]'`.
 
 Report output paths create missing parent directories and replace existing regular files atomically. POSIX output files are mode `0600`. Symlinks, special files, and hard-linked destinations are rejected. The explicit `--open` option invokes `xdg-open` only on Linux.
+
+
+ReportLab's built-in Type 1 fonts avoid redistributing third-party fonts and their licenses. They do not guarantee correct rendering of every Unicode script (including Arabic); users requiring full multilingual glyph coverage need a separately licensed, explicitly configured font in a future phase.
