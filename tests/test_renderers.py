@@ -28,3 +28,10 @@ def test_html_is_self_contained_and_escapes_report_content():
 def test_pdf_renderer_when_optional_dependency_is_installed():
     pytest.importorskip('reportlab')
     assert render_pdf(sample()).startswith(b'%PDF-')
+
+
+def test_diff_summary_is_visible_in_markdown_and_html():
+    report = sample()
+    report['diff_counts'] = {'new': 1, 'resolved': 0, 'unchanged': 2, 'changed': 1}
+    assert 'Diff summary' in render_markdown(report)
+    assert 'Diff summary' in render_html(report)
