@@ -27,6 +27,7 @@ from .scanner import ScanError, scan_directory, write_json_report
 from .schema import canonical_report
 from .workload_profiles import supported_profiles
 
+
 EXIT_UNSUPPORTED_FORMAT = 3
 EXIT_OPEN_UNSUPPORTED = 6
 EXIT_OPEN_FAILED = 7
