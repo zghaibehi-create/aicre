@@ -180,7 +180,7 @@ def _render(report_data: dict[str, Any], fmt: str) -> tuple[str | bytes, str]:
 def _write_output(path: str, data: str | bytes) -> Path:
     target = Path(path).expanduser()
     target.parent.mkdir(parents=True, exist_ok=True)
-    if target.exists() and (target.is_symlink() or not target.is_file()):
+    if target.is_symlink() or (target.exists() and not target.is_file()):
         raise ScanError("report destination must be a regular file, not a symlink or special file")
     if target.exists() and target.stat().st_nlink > 1:
         raise ScanError("refusing to replace a hard-linked report destination")
