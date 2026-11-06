@@ -10,12 +10,11 @@ FIXTURE = {'schema_version':'2.0','aicre_version':'0.2.0','profile':'standard','
 def test_explicit_html_output_creates_parents_and_replaces_regular_file(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(cli, 'build_report', lambda **kwargs: FIXTURE)
     output = tmp_path / 'nested' / 'report.html'
-    output.parent.mkdir()
-    output.write_text('old', encoding='utf-8')
     assert main(['scan','--profile','standard','--format','html','--output',str(output)]) == 0
     result = output.read_text(encoding='utf-8')
     assert 'Content-Security-Policy' in result
-    assert 'old' not in result
+    assert output.parent.is_dir()
+    assert 'cpu.logical' in result
     if os.name == 'posix':
         assert stat.S_IMODE(output.stat().st_mode) == 0o600
 
@@ -87,3 +86,11 @@ def test_new_report_writer_rejects_symlink_and_hardlink(tmp_path, monkeypatch):
 def test_unknown_format_returns_exit_code_3(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, 'build_report', lambda **kwargs: FIXTURE)
     assert main(['scan', '--profile', 'standard', '--format', 'xml']) == 3
+
+
+def test_report_output_replaces_existing_regular_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, 'build_report', lambda **kwargs: FIXTURE)
+    output = tmp_path / 'existing.json'
+    output.write_text('old', encoding='utf-8')
+    assert main(['report', '--format', 'json', '--output', str(output), '--timeout', '0']) == 0
+    assert json.loads(output.read_text(encoding='utf-8'))['schema_version'] == '1.0.0'
