@@ -19,11 +19,21 @@ def render_html(report: dict[str, Any]) -> str:
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
     raw = html.escape(json.dumps(report, ensure_ascii=False, indent=2))
     title = html.escape('AICRE report ' + str(report.get('scan_id', 'legacy')))
+    finding_cards = []
+    for item in report.get("findings", []):
+        finding_cards.append(
+            '<section class="finding"><h3>' + html.escape(str(item.get("check_id", item.get("id", "unknown")))) +
+            ' — ' + html.escape(str(item.get("status", "unknown"))) + '</h3><p>' +
+            html.escape(str(item.get("category", "unknown"))) + ' · ' +
+            html.escape(str(item.get("source", "unknown"))) + '</p><pre>' +
+            html.escape(json.dumps(item.get("value"), ensure_ascii=False, indent=2, default=str)) +
+            '</pre></section>'
+        )
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<meta name="aicre-report-sha256" content="' + digest + '">'
         '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:; base-uri \'none\'; form-action \'none\'; frame-ancestors \'none\'">'
-        '<title>' + title + '</title><style>:root{color-scheme:light dark;font:16px/1.5 system-ui}body{max-width:1000px;margin:2rem auto;padding:0 1rem}pre{white-space:pre-wrap;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td,th{border:1px solid GrayText;padding:.5rem}@media(max-width:600px){body{padding:0 .75rem}}@media print{body{color:#000;background:#fff}}</style>'
+        '<title>' + title + '</title><style>:root{color-scheme:light dark;font:16px/1.5 system-ui}body{max-width:1000px;margin:2rem auto;padding:0 1rem}pre{white-space:pre-wrap;overflow-wrap:anywhere}.finding{border:1px solid GrayText;border-radius:.5rem;padding:1rem;margin:1rem 0;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td,th{border:1px solid GrayText;padding:.5rem}@media(max-width:600px){body{padding:0 .75rem}}@media print{body{color:#000;background:#fff}}</style>'
         '</head><body><h1>AICRE scan report</h1><p>Generated: ' + html.escape(str(report.get('generated_at', 'unknown'))) + '</p><h2>Readiness</h2><table><tbody>' + ''.join('<tr><th scope="row">' + html.escape(k) + '</th><td>' + html.escape(str(v.get('status'))) + '</td><td>' + html.escape(str(v.get('explanation'))) + '</td></tr>' for k,v in report.get('readiness',{}).items()) + '</tbody></table><h2>Findings</h2><pre>' + raw + '</pre></body></html>')
 
 def render_pdf(report: dict[str, Any]) -> bytes:
