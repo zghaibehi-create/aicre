@@ -4,6 +4,15 @@
 
 > **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. The 0.2 implementation is not a release approval; independent review remains required.
 
+## Quick start
+
+AICRE runs on Linux with Python 3.11 or newer and is installed from source.
+
+1. Get the source: `git clone https://github.com/zghaibehi-create/aicre.git && cd aicre`.
+2. Create and activate a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`.
+3. Install AICRE: `python -m pip install -e '.[dev]'`.
+4. Assess the agent-development profile: `aicre readiness --profile agent-development`.
+
 ## Privacy and collection boundaries
 
 AICRE uses only narrowly scoped local sources: Python's `platform`, `os`, `sys`, and `sysconfig` interfaces; Linux `/etc/os-release`/`/usr/lib/os-release`, `/proc/meminfo`, `/sys/class/drm` vendor/device identifiers; `shutil.disk_usage("/")`; and `shutil.which` for a fixed allowlist of executable names. The allowlist is `git`, `python3`, `pip`, `uv`, `pipx`, `node`, `npm`, `docker`, `podman`, `codex`, `claude`, `aider`, and `ollama`. Tool detection searches permitted `PATH` entries only: `detected` does not verify version or functionality, and `not_detected` does not prove the tool is absent elsewhere.
@@ -84,6 +93,10 @@ pytest -v
 ```
 
 The automated tests cover system source filtering, executable discovery without execution, explicit compatibility requirements, readiness evidence, report-schema validation, path exclusions, CLI behavior, scanner races, and previous security regressions. A green CI run verifies only those checks; it does not establish production readiness.
+
+## Use with AI agents
+
+See the [AICRE agent skill](skills/aicre/SKILL.md) for instructions an AI agent can follow when running AICRE and interpreting its output. AICRE is Linux-only for now.
 
 ## Project documents
 
