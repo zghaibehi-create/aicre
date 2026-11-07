@@ -244,3 +244,11 @@ def test_partial_directory_scan_writes_report_and_returns_status_1(tmp_path, cap
     assert "errors: 1" in capsys.readouterr().out
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["summary"]["scan_errors"] == 1
+
+
+
+def test_report_input_rejects_duplicate_nested_json_object_keys(tmp_path, capsys):
+    source = tmp_path / "nested-duplicate.json"
+    source.write_text('{"outer":{"duplicate":1,"duplicate":2}}', encoding="utf-8")
+    assert main(["report", "--input", str(source)]) == 2
+    assert "duplicate JSON object key" in capsys.readouterr().err
