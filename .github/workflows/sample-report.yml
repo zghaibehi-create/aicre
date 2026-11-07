@@ -35,11 +35,11 @@ jobs:
 
       - name: Collect readiness output
         run: |
-          aicre readiness --profile agent-development | tee "$RUNNER_TEMP/readiness.txt"
+          aicre readiness --profile laptop-dev | tee "$RUNNER_TEMP/readiness.txt"
 
       - name: Generate and print JSON report
         run: |
-          aicre report --profile agent-development --format json --output "$RUNNER_TEMP/report.json"
+          aicre report --profile laptop-dev --format json --output "$RUNNER_TEMP/report.json"
           cat "$RUNNER_TEMP/report.json"
           python - <<'PY'
           import json
