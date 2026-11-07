@@ -48,11 +48,11 @@ def test_host_observations_above_or_below_threshold_never_pass_or_fail_resource(
 
 def test_malformed_resource_observations_remain_unknown():
     malformed_cases = (
-        ("resource.cpu.logical_count", True),
-        ("resource.memory.total_bytes", -1),
-        ("resource.storage.root", {"free_bytes": False}),
+        ("resource.cpu.logical_count", True, True),
+        ("resource.memory.total_bytes", -1, -1),
+        ("resource.storage.root", {"free_bytes": False}, False),
     )
-    for source_id, value in malformed_cases:
+    for source_id, value, observed_actual in malformed_cases:
         base = observations()
         index = next(i for i, item in enumerate(base) if item.id == source_id)
         base[index] = finding(source_id, value)
@@ -69,7 +69,8 @@ def test_malformed_resource_observations_remain_unknown():
             if item.id == f"profile.resource.{resource_name}"
         )
         assert resource_check.status == "not_checked"
-        assert resource_check.value["actual"] is None
+        assert resource_check.value["satisfied"] is None
+        assert resource_check.value["actual"] == observed_actual
 
 
 def test_missing_required_tool_fails():
