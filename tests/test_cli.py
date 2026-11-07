@@ -176,3 +176,46 @@ def test_report_accepts_agent_development_profile(capsys):
     data = json.loads(capsys.readouterr().out)
     assert data["profile"] == "agent-development"
     assert "profile.resource.cpu" in {item["check_id"] for item in data["findings"]}
+
+
+
+def test_report_input_rejects_duplicate_json_object_keys(tmp_path, capsys):
+    source = tmp_path / "duplicate.json"
+    source.write_text('{"schema_version":"1.0.0","schema_version":"2.0"}', encoding="utf-8")
+    assert main(["report", "--input", str(source)]) == 2
+    assert "duplicate JSON object key" in capsys.readouterr().err
+
+
+def test_report_input_rejects_shallow_valid_but_invalid_canonical_report(tmp_path, capsys):
+    source = tmp_path / "invalid.json"
+    source.write_text(json.dumps({
+        "schema_version": "1.0.0",
+        "aicre_version": "0.3.0",
+        "scan_id": "not-a-uuid",
+        "generated_at": "not-a-date",
+        "profile": "standard",
+        "findings": [],
+        "readiness": {},
+    }), encoding="utf-8")
+    assert main(["report", "--input", str(source)]) == 2
+    assert "UUIDv5" in capsys.readouterr().err or "readiness" in capsys.readouterr().err
+
+
+def test_report_output_refuses_symlink_and_hardlink_destinations(tmp_path, capsys):
+    from aicre.cli import _write_output
+    from aicre.scanner import ScanError
+
+    target = tmp_path / "real.json"
+    target.write_text("KEEP", encoding="utf-8")
+    symlink = tmp_path / "symlink.json"
+    symlink.symlink_to(target)
+    with pytest.raises(ScanError, match="regular file"):
+        _write_output(str(symlink), "REPLACE")
+    assert target.read_text(encoding="utf-8") == "KEEP"
+
+    if hasattr(os, "link"):
+        hardlink = tmp_path / "hardlink.json"
+        os.link(target, hardlink)
+        with pytest.raises(ScanError, match="hard-linked"):
+            _write_output(str(hardlink), "REPLACE")
+        assert target.read_text(encoding="utf-8") == "KEEP"
