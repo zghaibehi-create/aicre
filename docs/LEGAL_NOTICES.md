@@ -26,6 +26,8 @@ The copyright notice in `LICENSE` is the project's selected public-facing notice
 
 AICRE's application has no declared third-party runtime dependencies. Development and test extras, build tooling, GitHub Actions, and services used to host the repository are separate from the runtime application and may have their own licenses and terms.
 
+The current reviewed dependency and automation inventory is recorded in [Third-Party Notices](THIRD_PARTY_NOTICES.md). It distinguishes runtime dependencies from development/test tooling and GitHub-hosted automation. The inventory is a snapshot, not a blanket license grant or a guarantee about future dependencies.
+
 The MIT License for AICRE does not relicense third-party components. Their original notices and license conditions continue to apply. Before adding or redistributing a dependency, bundled asset, code sample, or generated artifact, maintainers and contributors should identify its origin and verify that its terms permit the intended use and distribution.
 
 ## 4. Privacy and information handling
