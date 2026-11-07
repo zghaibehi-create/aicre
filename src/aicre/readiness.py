@@ -89,7 +89,7 @@ def _software_status(
 
 
 def evaluate_readiness(
-    findings: Sequence[Finding], profile: str | None = "standard"
+    findings: Sequence[Finding], profile: str | None = None
 ) -> dict[str, ReadinessDimension]:
     """Evaluate five independent dimensions for an optional named profile.
 
