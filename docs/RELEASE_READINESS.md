@@ -54,7 +54,8 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations **only wit
 - [x] Public repository description corrected and verified on 2026-11-07.
 - [x] Residual risks RR-01 through RR-08 documented with explicit 0.3.0 dispositions and usage constraints.
 - [x] **Post-PR #30 CI:** Tests run #522 passed all six Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 jobs on merge commit `16b6bee59422d97a8686d2b973c23342010225a8`.
-- [ ] All required GitHub Actions checks green on the final release-candidate commit, including the final install-smoke workflow.
+- [x] **Post-PR #31 / post-merge main Linux CI:** Tests run #533 and install-smoke run #29 both passed all six Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 jobs on main commit `1d0145752952a0a39e6ffa65510690e57cca1452`. PR #31's Tests run #532, install-smoke run #28, and sample-report run #18 also passed. See [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md) for exact run links and scope.
+- [ ] All required GitHub Actions checks green on the final 0.3.0 release-candidate commit, including the final install-smoke workflow and artifact inspection.
 - [ ] Final source distribution and wheel built from the release candidate; clean-environment install, metadata, entry point, and version checks pass; artifact contents inspected.
 - [ ] Release notes, version metadata, README, security model, schemas, and finding-ID reference are cross-checked for consistency.
 - [ ] Project owner makes the final go/no-go decision.

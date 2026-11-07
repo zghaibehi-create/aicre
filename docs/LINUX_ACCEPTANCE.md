@@ -8,18 +8,22 @@
 
 The following evidence is available from GitHub Actions:
 
-| Evidence | Environment | Result | Scope |
-|---|---|---|---|
-| Tests run #522 on the ownership-notice merge commit `16b6bee59422d97a8686d2b973c23342010225a8` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, test suite, CLI entry point |
-| Install smoke run #25 (PR #27) | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
-| Tests run #506 (PR #27) | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Test suite and CI checks |
+| Evidence | Commit | Environment | Result | Scope |
+|---|---|---|---|---|
+| Tests run #533 (post-merge on main) | `1d0145752952a0a39e6ffa65510690e57cca1452` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, full test suite, CLI entry point |
+| Install smoke run #29 (post-merge on main) | `1d0145752952a0a39e6ffa65510690e57cca1452` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
+| Tests run #532 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, full test suite, CLI entry point |
+| Install smoke run #28 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
+| Sample report run #18 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 24.04 × Python 3.12 | Passed | Sample report generation and conservative Resource readiness check |
 
 Links:
-- [Tests run #522](https://github.com/zghaibehi-create/aicre/actions/runs/42385122338)
-- [Install smoke run #25](https://github.com/zghaibehi-create/aicre/actions/runs/42382558680)
-- [Tests run #506](https://github.com/zghaibehi-create/aicre/actions/runs/42382558691)
+- [Tests run #533](https://github.com/zghaibehi-create/aicre/actions/runs/42385655762)
+- [Install smoke run #29](https://github.com/zghaibehi-create/aicre/actions/runs/42385655772)
+- [Tests run #532](https://github.com/zghaibehi-create/aicre/actions/runs/42385579698)
+- [Install smoke run #28](https://github.com/zghaibehi-create/aicre/actions/runs/42385579695)
+- [Sample report run #18](https://github.com/zghaibehi-create/aicre/actions/runs/42385579678)
 
-These are GitHub-hosted Ubuntu runner results. They do not identify or prove acceptance on the project owner's own target machine, filesystem, distribution configuration, or deployment environment.
+These are GitHub-hosted Ubuntu runner results. They do not identify or prove acceptance on the project owner's own target machine, filesystem, distribution configuration, or deployment environment. The install-smoke workflow validates build/install behavior on GitHub-hosted runners, not a release artifact uploaded to a public release.
 
 ## 2. Project-owner target Linux acceptance record
 
