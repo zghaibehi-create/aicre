@@ -319,7 +319,7 @@ def test_composite_writes_separate_summary_without_mutating_main_report(
         "privacy": "pass",
         "security": "warning",
     }
-    assert 1 <= len(summary["recommendations"]) <= 5
+    assert len(summary["recommendations"]) == 3
     assert any("node" in item and "PATH" in item for item in summary["recommendations"])
     assert "schema_version" not in summary
 
