@@ -9,17 +9,18 @@ from typing import Any
 
 def _markdown_inline(value: Any) -> str:
     """Escape untrusted text so it cannot create Markdown structure."""
-    text = str(value).replace("\\r", " ").replace("\\n", " ")
-    return re.sub(r"([\\\\\\x60*_{}\\[\\]()#+.!|>~-])", r"\\\\\\1", text)
+    text = str(value).replace("\r", " ").replace("\n", " ")
+    text = text.replace(chr(96), r"\`")
+    return re.sub(r"([\\*_{}\[\]()#+.!|>~-])", r"\\\1", text)
 
 
 def _markdown_cell(value: Any) -> str:
-    return _markdown_inline(value).replace("|", "\\\\|")
+    return _markdown_inline(value)
 
 
 def _fenced_json(value: Any) -> list[str]:
     payload = json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False)
-    longest = max((len(match.group(0)) for match in re.finditer(r"\\x60+", payload)), default=0)
+    longest = max((len(run) for run in re.findall(chr(96) + r"+", payload)), default=0)
     fence = chr(96) * max(3, longest + 1)
     return [fence + "json", payload, fence]
 
@@ -52,7 +53,7 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"Source: {_markdown_inline(item.get('source', 'unknown'))}", "",
             *_fenced_json(item.get("value")), "",
         ])
-    return "\\n".join(lines).rstrip() + "\\n"
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def render_html(report: dict[str, Any]) -> str:
