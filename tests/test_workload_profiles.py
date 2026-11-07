@@ -68,14 +68,41 @@ def test_unknown_profile_error_lists_available_profiles():
     assert "ci-runner" in str(error.value)
 
 
-def test_agent_development_profile_passes_baseline():
-    base = observations()
-    result = evaluate_readiness(
-        base + evaluate_workload_profile(base, "agent-development"),
-        "agent-development",
+def test_host_resource_observations_never_pass_or_fail_readiness():
+    for cpu_count in (1, 8):
+        base = observations()
+        base[0] = finding("resource.cpu.logical_count", cpu_count)
+        checks = evaluate_workload_profile(base, "agent-development")
+        result = evaluate_readiness(base + checks, "agent-development")
+        assert result["resource_readiness"].status == "unknown"
+        for check in checks:
+            if check.id.startswith("profile.resource."):
+                assert check.value["satisfied"] is None
+                assert check.value["ratio"] is None
+                assert check.value["comparison"] == "not_performed"
+                assert check.value["observation_scope"] == "host_facing"
+
+
+def test_malformed_resource_observations_remain_unknown():
+    malformed_cases = (
+        ("resource.cpu.logical_count", True),
+        ("resource.memory.total_bytes", -1),
+        ("resource.storage.root", {"free_bytes": False}),
     )
-    assert result["resource_readiness"].status == "pass"
-    assert result["software_readiness"].status == "pass"
+    for source_id, value in malformed_cases:
+        base = observations()
+        index = next(i for i, item in enumerate(base) if item.id == source_id)
+        base[index] = finding(source_id, value)
+        checks = evaluate_workload_profile(base, "agent-development")
+        result = evaluate_readiness(base + checks, "agent-development")
+        assert result["resource_readiness"].status == "unknown"
+        resource_check = next(
+            item for item in checks
+            if item.id.startswith("profile.resource.")
+            and item.value["source_finding"] == source_id
+        )
+        assert resource_check.status == "not_checked"
+        assert resource_check.value["satisfied"] is None
 
 
 def test_one_missing_required_tool_warns_and_two_missing_tools_fail():
