@@ -7,7 +7,7 @@ All notable changes to AICRE are documented here.
 ### Added
 - Canonical report schema 1.0.0 adapter with SHA-256 finding identifiers and deterministic UUIDv5 scan IDs.
 - Plain-text, Markdown, and self-contained offline HTML report rendering.
-- Optional PDF rendering through ReportLab's built-in fonts.
+- Optional PDF rendering through ReportLab's built-in fonts, with explicit rejection of unsupported non-WinAnsi text.
 - Saved-report input rendering and JSON/Markdown/HTML/PDF comparison output.
 - Linux-only `--open` support through `xdg-open`.
 - Atomic output publication, automatic parent-directory creation, and private POSIX file permissions.
