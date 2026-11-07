@@ -9,6 +9,7 @@ This roadmap separates implemented behavior from planned work and release approv
 
 ## Current work
 - **0.3 workload-profile foundation (implemented on main):** host-facing resource observations and required-tool PATH checks for workload profiles; Resource readiness remains `unknown` until effective limits are established. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.
+- **0.3.0 release preparation:** residual risks and their engineering dispositions are recorded in [the release-readiness register](RELEASE_READINESS.md). Release preparation is not publication approval; external review and target-Linux acceptance remain mandatory.
 - **Known limitation:** the initial resource baseline is host-observation-only. It does not yet account for cgroup CPU/memory limits or CPU affinity, so it must not be marketed as container-aware readiness.
 
 ## Next engineering phases
