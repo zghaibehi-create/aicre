@@ -100,6 +100,7 @@ The automated tests cover system source filtering, executable discovery without 
 Render a canonical report as plain text, JSON, Markdown, HTML, or PDF:
 
 ```bash
+aicre report --format text
 aicre report --format json
 aicre report --format markdown --output "$HOME/reports/aicre.md"
 aicre report --format html --output "$HOME/reports/aicre.html"
