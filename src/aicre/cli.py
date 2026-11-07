@@ -86,7 +86,13 @@ def _composite_summary(report: dict[str, Any], report_filename: str) -> dict[str
         for metric, (label, unit) in labels.items():
             item = findings.get(f"profile.resource.{metric}")
             value = item.get("value") if item else None
-            if not isinstance(value, dict) or value.get("ratio") is None:
+            ratio = value.get("ratio") if isinstance(value, dict) else None
+            if (
+                not isinstance(value, dict)
+                or not isinstance(ratio, (int, float))
+                or isinstance(ratio, bool)
+                or ratio >= 1
+            ):
                 continue
             minimum = value.get("minimum")
             actual = value.get("actual")
