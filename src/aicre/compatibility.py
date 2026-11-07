@@ -1,4 +1,4 @@
-"""Explicit runtime compatibility checks for AICRE 0.2.
+"""Explicit runtime compatibility checks for AICRE.
 
 The ``standard`` profile requires Linux and Python 3.11 or newer, matching
 AICRE's ``pyproject.toml``. It has no GPU requirement. Checks are local,
