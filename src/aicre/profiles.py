@@ -14,7 +14,7 @@ PROFILES: dict[str, dict[str, Any]] = {
         "gpu_required": False,
     },
     "agent-development": {
-        "description": "Conservative local agent-development baseline.",
+        "description": "Conservative local agent-development baseline; not a model-inference profile.",
         "cores_min": 2,
         "ram_gb_min": 8,
         "disk_gb_min": 10,
