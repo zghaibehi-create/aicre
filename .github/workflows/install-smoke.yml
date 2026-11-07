@@ -1,0 +1,55 @@
+name: Install smoke test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/install-smoke.yml'
+      - 'src/aicre/**'
+      - 'pyproject.toml'
+  pull_request:
+    paths:
+      - '.github/workflows/install-smoke.yml'
+      - 'src/aicre/**'
+      - 'pyproject.toml'
+
+permissions:
+  contents: read
+
+jobs:
+  clean-install:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build wheel
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pip wheel --no-deps --wheel-dir dist .
+
+      - name: Install wheel into a fresh virtual environment
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m venv "$RUNNER_TEMP/aicre-smoke-venv"
+          "$RUNNER_TEMP/aicre-smoke-venv/bin/python" -m pip install --no-deps dist/*.whl
+          "$RUNNER_TEMP/aicre-smoke-venv/bin/python" -m pip check
+
+      - name: Exercise installed console commands
+        shell: bash
+        run: |
+          set -o pipefail
+          AICRE="$RUNNER_TEMP/aicre-smoke-venv/bin/aicre"
+          "$AICRE" --version
+          "$AICRE" readiness --profile agent-development
+          "$AICRE" report --format json | "$RUNNER_TEMP/aicre-smoke-venv/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "2.0"; assert len(report["readiness"]) == 5'
