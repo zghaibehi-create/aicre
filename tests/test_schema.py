@@ -1,10 +1,7 @@
 import copy
 import json
-from pathlib import Path
 import uuid
-
-import fastjsonschema
-import pytest
+from pathlib import Path
 
 from aicre.schema import (
     ReportValidationError,
@@ -12,6 +9,9 @@ from aicre.schema import (
     stable_finding_id,
     validate_v1_report,
 )
+
+import fastjsonschema
+import pytest
 
 
 READINESS_KEYS = (
