@@ -1,5 +1,35 @@
 # AICRE 0.2.0 — Linux-first inventory and readiness preview
 
+AICRE inventories selected Linux environment metadata and reports five separate readiness dimensions without combining them into a score.
+
+## Quick start
+
+1. Create and activate a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`.
+2. Install AICRE: `python -m pip install -e '.[dev]'`.
+3. Assess the agent-development profile: `aicre readiness --profile agent-development`.
+
+## Sample output
+
+The following readiness output was collected from a real GitHub Actions virtual runner:
+
+```text
+AICRE 0.2.0 — profile: agent-development
+[pass] resource_readiness: Compared CPU count, total RAM, and free root-filesystem storage with documented agent-development minimums. This is not a performance guarantee.
+  evidence: profile.resource.cpu, profile.resource.memory, profile.resource.storage
+[pass] software_readiness: Compared allowlisted PATH presence for required tools. Presence does not verify versions, configuration, security, or functionality.
+  evidence: profile.software.git, profile.software.python3
+[pass] compatibility_readiness: Linux platform and minimum Python compatibility are assessed from explicit runtime checks only.
+  evidence: compatibility.platform.linux, compatibility.python.minimum
+[pass] privacy_readiness: Describes AICRE's local collection and exclusion behavior only; it is not a host-wide privacy guarantee.
+  evidence: privacy.local_collection, privacy.user_exclusions
+[unknown] security_readiness: The process effective UID is nonzero; other host security controls were not assessed.
+  evidence: security.effective_uid
+```
+
+This sample describes a GitHub Actions virtual runner, not a personal computer. Resource observations are host-facing; container CPU and memory limits are not reflected.
+
+
+
 **Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
 > **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. The 0.2 implementation is not a release approval; independent review remains required.
@@ -84,6 +114,10 @@ pytest -v
 ```
 
 The automated tests cover system source filtering, executable discovery without execution, explicit compatibility requirements, readiness evidence, report-schema validation, path exclusions, CLI behavior, scanner races, and previous security regressions. A green CI run verifies only those checks; it does not establish production readiness.
+
+## Use with AI agents
+
+See the [AICRE agent skill](skills/aicre/SKILL.md) for instructions an AI agent can follow when running AICRE and interpreting its output. AICRE is Linux-only for now.
 
 ## Project documents
 
