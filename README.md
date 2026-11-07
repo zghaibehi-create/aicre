@@ -49,7 +49,8 @@ Emit the complete versioned JSON report to stdout or save it securely to a new f
 
 ```bash
 aicre report --format json
-aicre report --format json --output "$HOME/aicre-report.json"\naicre report --profile laptop-dev --output "$HOME/aicre-report.json" --composite
+aicre report --format json --output "$HOME/aicre-report.json"
+aicre report --profile laptop-dev --output "$HOME/aicre-report-composite.json" --composite
 ```
 
 Set exclusions and a cooperative time budget for system inventory:
