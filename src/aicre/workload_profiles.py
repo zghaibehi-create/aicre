@@ -55,8 +55,10 @@ def evaluate_workload_profile(findings: Sequence[Finding], profile: str) -> list
             source="AICRE agent-development baseline",
             confidence="medium" if valid else "low", unit=unit,
             limitations=(
-                "Host-facing observation only; effective process, container, cgroup, affinity, "
-                "or filesystem quota limits are not established. Resource readiness remains unknown.",
+                (
+                    "Host-facing observation only; effective process, container, cgroup, affinity, "
+                    "or filesystem quota limits are not established. Resource readiness remains unknown."
+                ),
             ) if valid else (
                 "Required host observation unavailable, excluded, malformed, or timed out.",
             ),
