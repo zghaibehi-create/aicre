@@ -85,7 +85,7 @@ jobs:
               ]
               assert not runtime_requirements, runtime_requirements
               print("Wheel inventory:")
-              print("\\n".join(names))
+              print("\n".join(names))
 
           with tarfile.open(sdists[0], "r:gz") as archive:
               names = archive.getnames()
