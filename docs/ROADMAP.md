@@ -7,7 +7,7 @@ This roadmap separates implemented behavior from planned work and release approv
 - **0.2 Linux inventory preview:** local system metadata, allowlisted PATH-only tool discovery without execution, explicit Linux/Python compatibility checks, five separate readiness dimensions, versioned JSON Schema, cooperative timeouts, and CLI reporting.
 
 ## Current work
-- **0.3 workload-profile foundation (under review):** deterministic resource and required-tool comparisons for the documented `agent-development` baseline. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.
+- **0.3 workload-profile foundation (under review):** host-facing resource observations and required-tool PATH checks for workload profiles; Resource readiness remains `unknown` until effective limits are established. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.
 - **Known limitation:** the initial resource baseline is host-observation-only. It does not yet account for cgroup CPU/memory limits or CPU affinity, so it must not be marketed as container-aware readiness.
 
 ## Next engineering phases
