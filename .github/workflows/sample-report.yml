@@ -41,6 +41,14 @@ jobs:
         run: |
           aicre report --profile agent-development --format json --output "$RUNNER_TEMP/report.json"
           cat "$RUNNER_TEMP/report.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("$RUNNER_TEMP/report.json").read_text(encoding="utf-8"))
+          resource = report["readiness"]["resource_readiness"]["status"]
+          assert resource == "unknown", f"Expected conservative Resource readiness, got {resource!r}"
+          PY
 
       - name: Add readiness output to job summary
         run: |
