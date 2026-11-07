@@ -146,6 +146,11 @@ def render_html(report: dict[str, Any]) -> str:
 
 
 def render_pdf(report: dict[str, Any]) -> bytes:
+    serialized = json.dumps(report, ensure_ascii=False, default=str)
+    if any(ord(character) > 255 for character in serialized):
+        raise RuntimeError(
+            "PDF output does not support characters outside the built-in WinAnsi font set; use HTML or Markdown."
+        )
     try:
         from io import BytesIO
         from xml.sax.saxutils import escape
