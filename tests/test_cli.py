@@ -24,10 +24,11 @@ def test_scan_requires_output_argument(tmp_path):
     assert exit_info.value.code == 2
 
 
-def test_scan_requires_profile_when_source_is_omitted():
+def test_scan_requires_profile_when_source_is_omitted(capsys):
     with pytest.raises(SystemExit) as exit_info:
         main(["scan"])
     assert exit_info.value.code == 2
+    assert "scan without SOURCE requires --profile" in capsys.readouterr().err
 
 
 def test_legacy_directory_scan_success_and_user_exclusion(tmp_path, capsys):
@@ -44,6 +45,21 @@ def test_legacy_directory_scan_success_and_user_exclusion(tmp_path, capsys):
     paths = {item["relative_path"] for item in json.loads(output.read_text(encoding="utf-8"))["items"]}
     assert "public.txt" in paths
     assert "private/item.txt" not in paths
+
+
+def test_partial_directory_scan_writes_report_and_returns_status_1(tmp_path, capsys):
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "partial-report.json"
+
+    result = main([
+        "scan", str(source), "--output", str(output), "--timeout", "0",
+    ])
+
+    assert result == 1
+    assert "errors: 1" in capsys.readouterr().out
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["summary"]["scan_errors"] == 1
 
 
 def test_cli_reports_scan_error_with_exit_code_2(tmp_path, capsys):
@@ -90,7 +106,30 @@ def test_system_json_command_emits_full_valid_report(capsys):
     assert not any(item["id"].startswith("tool.") for item in data["findings"])
 
 
-def test_inventory_and_readiness_commands(capsys):
+def test_inventory_and_readiness_commands(capsys, monkeypatch):
+    report = {
+        "aicre_version": "0.2.0",
+        "profile": "standard",
+        "findings": [{
+            "id": "tool.git", "category": "software", "status": "detected",
+            "value": "fixture", "source": "test", "confidence": "high",
+            "unit": "", "limitations": [],
+        }],
+        "readiness": {
+            name: {"status": "unknown", "explanation": "fixture", "evidence": []}
+            for name in (
+                "resource_readiness", "software_readiness", "compatibility_readiness",
+                "privacy_readiness", "security_readiness",
+            )
+        },
+    }
+
+    def fake_build_report(*, profile, excludes, timeout, include_tools=True):
+        assert profile == "standard"
+        assert include_tools
+        return report
+
+    monkeypatch.setattr("aicre.cli.build_report", fake_build_report)
     assert main(["inventory", "--timeout", "0"]) == 0
     inventory_text = capsys.readouterr().out
     assert "tool.git" in inventory_text
@@ -161,3 +200,31 @@ def test_invalid_timeout_has_usage_error():
     with pytest.raises(SystemExit) as exit_info:
         main(["inventory", "--timeout", "nan"])
     assert exit_info.value.code == 2
+
+
+def test_agent_development_profile_cli_is_selectable(capsys):
+    result = main(["readiness", "--profile", "agent-development", "--timeout", "0"])
+    assert result == 0
+    assert "agent-development" in capsys.readouterr().out
+
+
+def test_report_accepts_agent_development_profile(capsys):
+    result = main(["report", "--profile", "agent-development", "--timeout", "0"])
+    assert result == 0
+    data = json.loads(capsys.readouterr().out)
+    assert data["profile"] == "agent-development"
+    assert "profile.resource.cpu" in {item["id"] for item in data["findings"]}
+
+
+
+@pytest.mark.parametrize("arguments", [
+    ["scan", "--profile", "standard", "--force"],
+    ["scan", "source", "--force"],
+    ["report", "--force"],
+])
+def test_force_requires_an_output_destination(arguments, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(arguments)
+
+    assert exit_info.value.code == 2
+    assert "--force requires --output" in capsys.readouterr().err

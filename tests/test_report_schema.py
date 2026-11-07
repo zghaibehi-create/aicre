@@ -33,3 +33,8 @@ def test_schema_rejects_missing_finding_fields_and_invalid_status():
     invalid["findings"][0]["status"] = "safe"
     with pytest.raises(fastjsonschema.JsonSchemaException):
         VALIDATE_REPORT(invalid)
+
+
+def test_agent_development_report_validates_against_schema():
+    report = build_report(profile="agent-development", timeout=0)
+    assert VALIDATE_REPORT(report) == report

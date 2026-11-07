@@ -68,3 +68,9 @@ System inventory checks a cooperative deadline between observations. Directory s
 ## Verification and release status
 
 CI runs Ruff, JSON Schema validation, and tests on Ubuntu 24.04 with Python 3.11, 3.12, and 3.13. A successful run verifies only those checks. Independent review is required before any release; this document alone does not constitute that review.
+
+## Workload profile limitation
+
+The `agent-development` profile uses explicit project-defined thresholds only: >=2 logical CPUs, >=8 GiB total RAM, >=10 GiB free space on the root filesystem, and PATH presence of Git and Python 3. A missing, excluded, malformed, or timed-out observation remains unknown. These thresholds are not vendor requirements or performance guarantees. This profile does not inspect agent configuration, MCP servers, tool permissions, isolation, dependency provenance, or model inference capability.
+
+**Container and constrained-environment limitation:** CPU count is currently sourced from `os.cpu_count()`, and RAM from `/proc/meminfo` (`MemTotal`). These values may describe host resources rather than the resources effectively available to the process. The profile does not currently evaluate cgroup v1/v2 CPU or memory limits, CPU affinity, or orchestrator resource reservations. A pass must not be interpreted as proof that the container or process has those resources available. Container-aware resource assessment is future work and must return `unknown` whenever effective limits cannot be established safely.
