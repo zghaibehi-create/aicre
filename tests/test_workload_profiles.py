@@ -46,6 +46,27 @@ def test_host_observations_above_or_below_threshold_never_pass_or_fail_resource(
         assert cpu_check.value["satisfied"] is None
 
 
+def test_malformed_resource_observations_remain_unknown():
+    malformed_cases = (
+        ("resource.cpu.logical_count", True),
+        ("resource.memory.total_bytes", -1),
+        ("resource.storage.root", {"free_bytes": False}),
+    )
+    for source_id, value in malformed_cases:
+        base = observations()
+        index = next(i for i, item in enumerate(base) if item.id == source_id)
+        base[index] = finding(source_id, value)
+        checks = evaluate_workload_profile(base, "agent-development")
+        result = evaluate_readiness(base + checks, "agent-development")
+        assert result["resource_readiness"].status == "unknown"
+        resource_check = next(
+            item for item in checks
+            if item.id == "profile.resource." + source_id.rsplit(".", 1)[-1]
+        )
+        assert resource_check.status == "not_checked"
+        assert resource_check.value["actual"] is None
+
+
 def test_missing_required_tool_fails():
     base = observations()
     base[3] = finding("tool.git", None, status="not_detected", category="software")
