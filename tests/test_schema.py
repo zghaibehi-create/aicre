@@ -134,3 +134,11 @@ def test_v1_rejects_invalid_unicode_in_profile_and_limitations():
     report["findings"][0]["limitations"] = ["\ud800"]
     with pytest.raises(ReportValidationError, match="finite JSON value"):
         validate_v1_report(report)
+
+
+
+def test_v1_rejects_valid_uuidv5_that_does_not_match_report_evidence():
+    report = canonical_report(source_report("2026-01-01T00:00:00Z"))
+    report["scan_id"] = str(uuid.uuid5(uuid.NAMESPACE_DNS, "unrelated"))
+    with pytest.raises(ReportValidationError, match="does not match canonical report evidence"):
+        validate_v1_report(report)
