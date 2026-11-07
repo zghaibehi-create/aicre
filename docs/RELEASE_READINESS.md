@@ -46,8 +46,9 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations **only wit
 
 ## 3. Mandatory release gates
 
-- [ ] Independent external code/security review completed; findings triaged and blocking findings resolved.
-- [ ] Target Linux acceptance evidence recorded by the project owner: distribution/version, kernel, Python version, filesystem, installation method, commands, outputs, and deviations. Do not place private machine details in public issues.
+- [ ] **Copyright and provenance confirmation:** project owner verifies that the project has the necessary rights to distribute all existing project-authored code, documentation, examples, and assets under MIT; checks that the copyright notice is not misleading; and identifies and preserves any third-party notices or license obligations. Resolve employer/client ownership or other contributor restrictions before release.
+- [ ] **Independent external code/security review** completed; findings triaged and blocking findings resolved.
+- [ ] **Target Linux acceptance evidence** recorded by the project owner: distribution/version, kernel, Python version, filesystem, installation method, commands, outputs, and deviations. Do not place private machine details in public issues.
 - [x] GitHub Private Vulnerability Reporting visually verified enabled by the repository owner on 2026-11-07.
 - [x] Public repository description corrected and verified on 2026-11-07.
 - [x] Residual risks RR-01 through RR-08 documented with explicit 0.3.0 dispositions and usage constraints.
