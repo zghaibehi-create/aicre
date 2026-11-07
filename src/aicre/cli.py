@@ -9,7 +9,6 @@ import platform
 import subprocess
 import stat
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -250,9 +249,6 @@ def _render(report_data: dict[str, Any], fmt: str) -> tuple[str | bytes, str]:
     finally:
         os.close(directory_fd)
     return parent / target.name
-
-
-bsolute()
 
 
 def _open_report(path: Path) -> int:
