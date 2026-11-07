@@ -41,7 +41,6 @@ def evaluate_workload_profile(findings: Sequence[Finding], profile: str) -> list
                 actual = source.value
 
         valid = isinstance(actual, int) and not isinstance(actual, bool) and actual >= 0
-        ratio = actual / minimum if valid and minimum else None
         checks.append(Finding(
             id=f"profile.resource.{name}",
             category="profile",
