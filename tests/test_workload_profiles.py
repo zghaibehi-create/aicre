@@ -48,7 +48,7 @@ def test_host_observations_above_or_below_threshold_never_pass_or_fail_resource(
 
 def test_malformed_resource_observations_remain_unknown():
     malformed_cases = (
-        ("resource.cpu.logical_count", True, True),
+        ("resource.cpu.logical_count", True, None),
         ("resource.memory.total_bytes", -1, -1),
         ("resource.storage.root", {"free_bytes": False}, False),
     )
