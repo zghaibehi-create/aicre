@@ -48,11 +48,15 @@ def _timestamp(value: Any, field: str) -> None:
 def _string(value: Any, field: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ReportValidationError(f"{field} must be a non-empty string")
+    try:
+        value.encode("utf-8", "strict")
+    except UnicodeEncodeError as exc:
+        raise ReportValidationError(f"{field} contains invalid Unicode") from exc
 
 
 def _json_value(value: Any, field: str) -> None:
     try:
-        json.dumps(value, ensure_ascii=False, allow_nan=False)
+        json.dumps(value, ensure_ascii=False, allow_nan=False).encode("utf-8", "strict")
     except (TypeError, ValueError) as exc:
         raise ReportValidationError(f"{field} must be a finite JSON value") from exc
 
