@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.3.0 (unreleased candidate — not approved for publication)
+## 0.3.0 (release candidate — pending final validation)
 
-This section is a release-note draft. The package version remains 0.2.1 until the
-mandatory release gates in [RELEASE_READINESS.md](docs/RELEASE_READINESS.md)
-are complete and the project owner gives an explicit go decision.
+This section describes the 0.3.0 release candidate. Publication remains blocked until
+candidate CI and artifact validation pass and the project owner records the final
+go decision in [RELEASE_READINESS.md](docs/RELEASE_READINESS.md).
 
 - Add workload-profile foundations for `standard`, `agent-development`,
   `laptop-dev`, `agent-workstation`, and `ci-runner`, with five independent
