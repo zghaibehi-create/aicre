@@ -27,7 +27,7 @@ def test_report_input_renders_without_running_scanner(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, 'build_report', lambda **kwargs: (_ for _ in ()).throw(AssertionError('scanner called')))
     output = tmp_path / 'out.md'
     assert main(['report','--input',str(source),'--format','markdown','--output',str(output)]) == 0
-    assert 'cpu.logical' in output.read_text(encoding='utf-8')
+    assert 'cpu\\.logical' in output.read_text(encoding='utf-8')
 
 def test_report_diff_json_exposes_all_classifications(tmp_path, capsys):
     before = dict(FIXTURE)
