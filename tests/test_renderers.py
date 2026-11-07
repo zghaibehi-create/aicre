@@ -38,3 +38,31 @@ def test_diff_summary_is_visible_in_markdown_and_html():
     report['diff_counts'] = {'new': 1, 'resolved': 0, 'unchanged': 2, 'changed': 1}
     assert 'Diff summary' in render_markdown(report)
     assert 'Diff summary' in render_html(report)
+
+
+
+def test_markdown_escapes_untrusted_structure_and_uses_safe_json_fence():
+    fence = chr(96) * 3
+    report = {
+        "scan_id": "id|\n# forged-heading",
+        "generated_at": "now",
+        "profile": "profile",
+        "readiness": {
+            "cpu|\n| injected": {
+                "status": "pass|\n| forged",
+                "explanation": "safe | cell\n# forged heading [link](https://example.invalid)",
+            }
+        },
+        "findings": [{
+            "check_id": "check\n# forged",
+            "status": "detected",
+            "source": "source|\n## forged",
+            "value": "before\n" + fence + "\n## injected\n" + fence,
+        }],
+    }
+    text = render_markdown(report)
+    assert "| cpu\\| | injected" in text
+    assert "\\# forged heading" in text
+    assert "[link]" not in text
+    assert fence + fence + "json" in text
+    assert "## injected" in text  # remains inside the dynamically sized JSON fence
