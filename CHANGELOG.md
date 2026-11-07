@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.3.0 (release candidate — pending final validation)
+## 0.3.0 (candidate validated; pending GitHub pre-release publication)
 
-This section describes the 0.3.0 release candidate. Publication remains blocked until
-candidate CI and artifact validation pass and the project owner records the final
-go decision in [RELEASE_READINESS.md](docs/RELEASE_READINESS.md).
+The 0.3.0 candidate passed the documented Linux test, package-inspection, and install
+matrix. Publication as a GitHub pre-release is the remaining release operation; see
+[RELEASE_READINESS.md](docs/RELEASE_READINESS.md) for the owner-directed scope decisions.
 
 - Add workload-profile foundations for `standard`, `agent-development`,
   `laptop-dev`, `agent-workstation`, and `ci-runner`, with five independent
