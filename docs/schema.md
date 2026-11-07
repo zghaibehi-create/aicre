@@ -35,7 +35,7 @@ ReportLab's built-in Type 1 fonts avoid redistributing third-party fonts and the
 
 ## Validation rules for imported reports
 
-The CLI treats every imported JSON document as untrusted input. It rejects duplicate object keys (including nested keys), non-finite numeric constants, unknown schema versions, unknown or missing fields, malformed timestamps, invalid enum values, malformed identifiers, duplicate finding IDs, duplicate semantic check IDs, invalid readiness dimensions, and readiness evidence that references findings not present in the same report.
+The CLI treats every imported JSON document as untrusted input and limits imported files to 25 MiB before parsing. It rejects duplicate object keys (including nested keys), non-finite numeric constants, unknown schema versions, unknown or missing fields, malformed timestamps, invalid enum values, malformed identifiers, duplicate finding IDs, duplicate semantic check IDs, invalid readiness dimensions, and readiness evidence that references findings not present in the same report.
 
 Canonical schema 1.0.0 documents are fully validated before they are returned unchanged. Legacy schema 2.0 documents are validated before conversion; readiness evidence references are remapped to the canonical finding digests. Canonical finding digests are recomputed from collector, semantic check ID, status, value, and unit and must match the supplied ID. Diff operations pass through the same validation and reject duplicate semantic identities instead of overwriting one finding with another.
 
