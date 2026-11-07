@@ -1,4 +1,4 @@
-# AICRE 0.2.0 — Linux-first inventory and readiness preview
+# AICRE 0.2.1 — Linux-first inventory and readiness preview
 
 **Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
@@ -16,7 +16,7 @@ Reports can contain hardware details, software availability, and executable path
 
 Each finding has a stable ID, category, collection status, value and optional unit, named source, confidence, UTC collection timestamp, and limitations. Finding statuses are `detected`, `not_detected`, `unsupported`, `permission_denied`, `error`, and `not_checked`.
 
-Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. AICRE does not calculate a composite score. Resource and Software readiness remain `unknown` until workload resource thresholds and a required software manifest are defined. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
+Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. Resource and Software readiness are evaluated against the selected workload profile. The default `standard` profile remains inventory-only and leaves both dimensions `unknown`. The opt-in `--composite` report summary provides a weighted overview; it does not replace the five separate readiness dimensions. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
 
 The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
 
@@ -49,7 +49,7 @@ Emit the complete versioned JSON report to stdout or save it securely to a new f
 
 ```bash
 aicre report --format json
-aicre report --format json --output "$HOME/aicre-report.json"
+aicre report --format json --output "$HOME/aicre-report.json"\naicre report --profile laptop-dev --output "$HOME/aicre-report.json" --composite
 ```
 
 Set exclusions and a cooperative time budget for system inventory:
@@ -99,13 +99,38 @@ MIT. See [LICENSE](LICENSE).
 
 ## Workload profiles
 
-The default `standard` profile is inventory-only and deliberately leaves Resource and Software readiness unknown. The optional `agent-development` profile compares CPU count (>=2), total RAM (>=8 GiB), free root-filesystem storage (>=10 GiB), and PATH presence of Git and Python 3.
+The default `standard` profile is inventory-only. The `agent-development`
+profile is retained for compatibility. Additional profiles are:
+
+| Profile | CPU cores | RAM | Free root storage | Required tools |
+|---|---:|---:|---:|---|
+| `laptop-dev` | 4 | 16 GiB | 20 GiB | git, python3, node |
+| `agent-workstation` | 8 | 32 GiB | 50 GiB | git, python3, docker, ollama |
+| `ci-runner` | 2 | 8 GiB | 10 GiB | git, python3, pip |
+
+Resource values below 50% of a profile threshold fail, values from 50% to
+below 100% warn, and values at or above the threshold pass. Missing observations
+remain unknown. Software readiness passes when all required tools are found,
+warns for one missing tool, and fails for two or more missing tools; when all
+tool observations are unavailable, it remains unknown. Tool presence is based
+on permitted PATH entries only; programs are never executed.
+
+The optional composite output is written beside the main report as
+`report.summary.json`. It uses Resource 40%, Software 30%, Compatibility 15%,
+Privacy 10%, and Security 5%; unknown dimensions are excluded from the average.
+The summary is advisory and does not replace the full report.
 
 ```bash
 aicre readiness --profile agent-development
-aicre report --profile agent-development --format json
+aicre report --profile laptop-dev --format json --output "$HOME/aicre-report.json" --composite
 ```
 
-This is an advisory project-defined minimum, not a vendor specification or performance/safety guarantee. It does not assess local model inference, GPU drivers, concurrency, agent configuration, MCP permissions, sandboxing, or dependency provenance. Tool presence does not verify version or functionality.
+These are project-defined minimums, not vendor specifications or performance
+or safety guarantees. No profile currently requires a GPU. AICRE does not
+assess local model inference performance, drivers, concurrency, agent
+configuration, MCP permissions, sandboxing, or dependency provenance.
 
-**Container and constrained-environment limitation:** this profile currently uses host-facing observations (`os.cpu_count()` and `/proc/meminfo`) and does not account for cgroup CPU/memory quotas or CPU-affinity restrictions. In containers or restricted execution environments, reported CPU/RAM may exceed what the process can actually use. Treat the resource result as host-observation-only until container-aware limits are implemented and independently tested.
+**Container and constrained-environment limitation:** resource observations
+remain host-facing and do not account for cgroup CPU/memory quotas or
+CPU-affinity restrictions. Treat the result as a host-observation-only
+assessment.
