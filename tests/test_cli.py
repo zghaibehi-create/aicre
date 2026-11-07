@@ -354,3 +354,30 @@ def test_composite_summary_does_not_overwrite_existing_summary_without_force(
     assert summary.read_text(encoding="utf-8") == "KEEP"
     assert not output.exists()
     assert "Summary report already exists" in capsys.readouterr().err
+
+
+
+def test_composite_score_is_null_when_every_dimension_is_unknown(
+    tmp_path, monkeypatch, capsys
+):
+    report = {
+        "schema_version": "2.0",
+        "aicre_version": "0.2.1",
+        "profile": "standard",
+        "generated_at": "2026-11-07T00:00:00Z",
+        "findings": [],
+        "readiness": {
+            name: {"status": "unknown", "explanation": "fixture", "evidence": []}
+            for name in (
+                "resource_readiness", "software_readiness", "compatibility_readiness",
+                "privacy_readiness", "security_readiness",
+            )
+        },
+    }
+    monkeypatch.setattr("aicre.cli.build_report", lambda **kwargs: report)
+    output = tmp_path / "report.json"
+    assert main(["report", "--output", str(output), "--composite"]) == 0
+    capsys.readouterr()
+    summary = json.loads((tmp_path / "report.summary.json").read_text(encoding="utf-8"))
+    assert summary["composite_score"] is None
+    assert summary["recommendations"] == []
