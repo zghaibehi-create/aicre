@@ -64,6 +64,7 @@ def test_markdown_escapes_untrusted_structure_and_uses_safe_json_fence():
     assert "cpu\\| \\| injected" in text
     assert "\\# forged heading" in text
     assert "[link]" not in text
-    assert "<script>" not in text\n    assert "&lt;script&gt;" in text
+    assert "<script>" not in text
+    assert "&lt;script&gt;" in text
     assert (chr(96) * 4) + "json" in text
     assert "## injected" in text  # remains inside the dynamically sized JSON fence
