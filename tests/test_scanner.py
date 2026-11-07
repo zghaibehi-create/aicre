@@ -428,6 +428,8 @@ def test_permission_error_in_nested_directory_is_counted_and_scan_continues(tmp_
     paths = {item["relative_path"] for item in report["items"]}
 
     assert report["summary"]["scan_errors"] == 1
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "filesystem_errors"
     assert "ordinary/visible.txt" in paths
     assert "blocked/hidden.txt" not in paths
 
