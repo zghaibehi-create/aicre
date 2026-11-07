@@ -8,6 +8,14 @@ body:
       value: |
         Before submitting, review every report excerpt for usernames, private paths, hostnames, and other information you do not want to publish. AICRE reports may contain hardware details and executable paths. Redact them before pasting.
   - type: input
+    id: aicre-version
+    attributes:
+      label: AICRE version
+      description: Include the version shown by `aicre --version`.
+      placeholder: "0.2.1"
+    validations:
+      required: true
+  - type: input
     id: operating-system
     attributes:
       label: Operating system
