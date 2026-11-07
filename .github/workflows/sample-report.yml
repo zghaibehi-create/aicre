@@ -1,0 +1,52 @@
+name: Sample report
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/sample-report.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sample-report:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.12'
+
+      - name: Install locked CI toolchain and test dependencies
+        run: |
+          python -m pip install --require-hashes -r .github/requirements-ci.txt
+          python -m pip install --no-build-isolation --no-deps -e '.[dev]'
+          python -m pip check
+
+      - name: Show AICRE version
+        run: aicre --version
+
+      - name: Collect readiness output
+        run: |
+          aicre readiness --profile agent-development | tee "$RUNNER_TEMP/readiness.txt"
+
+      - name: Generate and print JSON report
+        run: |
+          aicre report --profile agent-development --format json --output "$RUNNER_TEMP/report.json"
+          cat "$RUNNER_TEMP/report.json"
+
+      - name: Add readiness output to job summary
+        run: |
+          {
+            echo '## AICRE readiness sample'
+            echo
+            echo 'Collected on a GitHub-hosted virtual runner; this does not represent a personal computer.'
+            echo
+            echo '```text'
+            cat "$RUNNER_TEMP/readiness.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
