@@ -79,3 +79,17 @@ def test_summary_document_is_an_unversioned_separate_contract():
         "derived_from", "generated_at", "profile", "composite_score",
         "dimensions", "recommendations",
     }
+
+
+
+def test_saved_report_file_validates_and_old_v2_versions_remain_valid(tmp_path):
+    from aicre.scanner import write_json_report
+
+    report = build_report(profile="agent-development", timeout=0)
+    old_v2_document = dict(report, aicre_version="0.2.0")
+    assert VALIDATE_REPORT(old_v2_document) == old_v2_document
+
+    output = tmp_path / "report.json"
+    write_json_report(output, report)
+    saved = json.loads(output.read_text(encoding="utf-8"))
+    assert VALIDATE_REPORT(saved) == saved
