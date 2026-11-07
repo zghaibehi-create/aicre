@@ -1,12 +1,17 @@
 # AICRE 0.2.0 — Linux-first inventory and readiness preview
 
-AICRE inventories selected Linux environment metadata and reports five separate readiness dimensions without combining them into a score.
+**Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI that collects a narrow set of environment metadata and reports five separate, evidence-backed readiness dimensions without combining them into a score. It does not run AI agents, install software, change system settings, or send machine information anywhere.
+
+> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. The 0.2 implementation is not a release approval; independent review remains required.
 
 ## Quick start
 
-1. Create and activate a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`.
-2. Install AICRE: `python -m pip install -e '.[dev]'`.
-3. Assess the agent-development profile: `aicre readiness --profile agent-development`.
+AICRE runs on Linux with Python 3.11 or newer and is installed from source.
+
+1. Get the source: `git clone https://github.com/zghaibehi-create/aicre.git && cd aicre`.
+2. Create and activate a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`.
+3. Install AICRE: `python -m pip install -e '.[dev]'`.
+4. Assess the agent-development profile: `aicre readiness --profile agent-development`.
 
 ## Sample output
 
@@ -27,12 +32,6 @@ AICRE 0.2.0 — profile: agent-development
 ```
 
 This sample describes a GitHub Actions virtual runner, not a personal computer. Resource observations are host-facing; container CPU and memory limits are not reflected.
-
-
-
-**Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
-
-> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. The 0.2 implementation is not a release approval; independent review remains required.
 
 ## Privacy and collection boundaries
 
