@@ -33,7 +33,7 @@ def _timeout_value(raw: str) -> float:
 
 
 def _add_inventory_options(parser: argparse.ArgumentParser, *, default_timeout: float) -> None:
-    parser.add_argument("--profile", choices=supported_profiles(), default="standard", help="workload baseline")
+    parser.add_argument("--profile", choices=supported_profiles(), default=None, help="workload baseline (default: standard)")
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument("--exclude", action="append", default=[],
                         help="relative path pattern to omit; repeatable")
