@@ -57,6 +57,41 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _plain(value: Any) -> str:
+    return str(value).replace("\r", " ").replace("\n", " ")
+
+
+def render_text(report: dict[str, Any]) -> str:
+    lines = [
+        "AICRE scan report",
+        f"Scan ID: {_plain(report.get('scan_id', 'legacy'))}",
+        f"Generated: {_plain(report.get('generated_at', 'unknown'))}",
+        f"Profile: {_plain(report.get('profile', 'unknown'))}",
+        "",
+        "READINESS",
+    ]
+    for name, item in report.get("readiness", {}).items():
+        lines.append(
+            f"- {_plain(name)}: {_plain(item.get('status', 'unknown'))} — "
+            f"{_plain(item.get('explanation', ''))}"
+        )
+    if report.get("diff_counts"):
+        lines.extend(["", "DIFF SUMMARY"])
+        lines.extend(
+            f"- {_plain(name)}: {int(count)}"
+            for name, count in report["diff_counts"].items()
+        )
+    lines.extend(["", "FINDINGS"])
+    for item in report.get("findings", []):
+        identifier = item.get("check_id", item.get("id", "unknown"))
+        lines.extend([
+            f"- {_plain(identifier)} [{_plain(item.get('status', 'unknown'))}]",
+            f"  Source: {_plain(item.get('source', 'unknown'))}",
+            "  Value: " + json.dumps(item.get("value"), ensure_ascii=False, sort_keys=True),
+        ])
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def render_html(report: dict[str, Any]) -> str:
     payload = json.dumps(report, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
