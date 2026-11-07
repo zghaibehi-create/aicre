@@ -1,9 +1,9 @@
 # AICRE 0.3.0 — Release Readiness and Residual-Risk Decision
 
-**Status:** preparation only; not release approval.  
+**Status:** release preparation; not yet a 0.3.0 publication approval.  
 **Current package version:** 0.2.1.  
 **Target:** 0.3.0.  
-**Release rule:** do not tag, publish, or announce 0.3.0 until every mandatory gate in this document is closed.
+**Release rule:** do not tag, publish, or announce 0.3.0 until the final candidate has been validated and the project owner records a go decision.
 
 ## 1. Scope of the 0.3.0 candidate
 
@@ -27,7 +27,7 @@ Not included and must not be implied:
 
 ## 2. Residual-risk register and engineering disposition
 
-The following dispositions are scoped to an experimental, local-first metadata tool. They are not claims that the risks are eliminated. Any external reviewer finding that contradicts these dispositions reopens the relevant item.
+The following dispositions are scoped to an experimental, local-first metadata tool. They are not claims that the risks are eliminated. Any future reviewer finding that contradicts these dispositions reopens the relevant item.
 
 | ID | Residual risk | Impact and existing controls | 0.3.0 engineering disposition |
 |---|---|---|---|
@@ -42,35 +42,36 @@ The following dispositions are scoped to an experimental, local-first metadata t
 
 ### Risk decision
 
-For 0.3.0, RR-01 through RR-08 are accepted as documented limitations **only within the product scope and constraints above**. No item is represented as mitigated or eliminated where it is not. If independent review identifies a concrete exploitable issue, privacy leak, incorrect completeness claim, or unsafe traversal behavior, the release is blocked until fixed and retested.
+For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only within the product scope and constraints above. No item is represented as mitigated or eliminated where it is not.
 
-## 3. Mandatory release gates
+## 3. Release gates and evidence
 
-- [x] **Owner ownership attestation and public notice:** on 2026-11-07, the project owner confirmed that they hold the rights necessary to distribute all current AICRE content under MIT and selected **AICRE Project** as the public-facing copyright designation. Recorded in PR #30 and merged to `main` at `16b6bee59422d97a8686d2b973c23342010225a8`. This is an owner representation, not an independent legal audit.
-- [x] **Repository content and dependency inventory:** reviewed tracked application source, tests, documentation, schemas, and CI configuration at the commit above. No vendored third-party source tree or bundled third-party asset was identified. Runtime dependencies are empty. Development/build dependencies, their upstream license metadata, and pinned GitHub Actions are recorded in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). This bounded inspection is not forensic proof of authorship and must be repeated for release artifacts and future changes.
-- [ ] **Independent external code/security review:** not performed. Use [EXTERNAL_REVIEW_BRIEF.md](EXTERNAL_REVIEW_BRIEF.md); obtain an independent report tied to the release-candidate commit, triage findings, and retest blocking fixes.
-- [ ] **Project-owner target Linux acceptance:** automated GitHub-hosted Linux CI is recorded in [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md). The owner-specific target environment record remains incomplete pending distribution/version, kernel, Python, filesystem, installation method, commands, outputs, and deviations. Do not publish private machine details.
+- [x] **Owner ownership attestation and public notice:** owner confirmed rights necessary to distribute current AICRE content under MIT and selected **AICRE Project** as the public-facing copyright designation. Recorded in PR #30. This is an owner representation, not an independent legal audit.
+- [ ] **Third-party source/license provenance audit:** deferred by explicit project-owner instruction for this release-preparation pass. It is not represented as complete. Runtime dependencies remain empty; see `THIRD_PARTY_NOTICES.md` for the bounded prior inventory.
+- [x] **AI-assisted internal security review:** performed on 2026-11-07 against commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12`. No new Critical/High finding was identified in the scoped review. See [INTERNAL_SECURITY_REVIEW.md](INTERNAL_SECURITY_REVIEW.md). This is not an independent third-party audit, penetration test, or security certification.
+- [ ] **Independent external code/security review:** not obtained. This remains distinct from the AI-assisted internal review. The project owner must explicitly decide whether to require it or accept the documented internal-review limitation for an experimental release.
+- [x] **Automated Linux support-matrix validation:** final main Tests workflow and Install smoke workflow passed 6/6 jobs each on commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12`, covering Ubuntu 22.04/24.04 and Python 3.11/3.12/3.13. See [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md). This does not claim the owner's own machine was tested.
+- [ ] **Owner-machine-specific Linux acceptance:** not supplied. Decide whether this is required for the intended audience; do not represent hosted CI as a test of the owner's device.
 - [x] GitHub Private Vulnerability Reporting visually verified enabled by the repository owner on 2026-11-07.
-- [x] Public repository description corrected and verified on 2026-11-07.
-- [x] Residual risks RR-01 through RR-08 documented with explicit 0.3.0 dispositions and usage constraints.
-- [x] **Post-PR #30 CI:** Tests run #522 passed all six Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 jobs on merge commit `16b6bee59422d97a8686d2b973c23342010225a8`.
-- [x] **Post-PR #31 / post-merge main Linux CI:** Tests run #533 and install-smoke run #29 both passed all six Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 jobs on main commit `1d0145752952a0a39e6ffa65510690e57cca1452`. PR #31's Tests run #532, install-smoke run #28, and sample-report run #18 also passed. See [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md) for exact run links and scope.
-- [ ] All required GitHub Actions checks green on the final 0.3.0 release-candidate commit, including the final install-smoke workflow and artifact inspection.
-- [ ] Final source distribution and wheel built from the release candidate; clean-environment install, metadata, entry point, and version checks pass; artifact contents inspected.
-- [ ] Release notes, version metadata, README, security model, schemas, and finding-ID reference are cross-checked for consistency.
-- [ ] Project owner makes the final go/no-go decision.
+- [x] Public repository description corrected and verified.
+- [x] Residual risks RR-01 through RR-08 documented with explicit dispositions.
+- [x] **Final main test workflow after PR #33:** run [42386187695](https://github.com/zghaibehi-create/aicre/actions/runs/42386187695), all six matrix jobs passed on commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12`.
+- [x] **Final main install/artifact inspection workflow after PR #33:** run [42386187780](https://github.com/zghaibehi-create/aicre/actions/runs/42386187780), all six matrix jobs passed on the same commit. It built wheel and sdist, inspected archive contents and metadata, checked version consistency and absence of runtime dependencies, installed both artifacts into clean virtual environments, and exercised CLI/report commands.
+- [ ] **0.3.0 release-candidate validation:** current CI artifact checks are for package version 0.2.1. After the owner decides the review/provenance/target-Linux gates, create the exact 0.3.0 candidate and rerun the complete matrix and artifact inspection against that candidate.
+- [ ] **Final consistency and approval:** align version metadata, `aicre.__version__`, CLI/report tests, README, changelog, security model, schemas, finding IDs, and release notes; then record the project owner's explicit go/no-go decision.
 
-## 4. Release execution checklist (after the gates)
+## 4. Release execution checklist
 
-1. Freeze the release-candidate commit; do not add unrelated features.
-2. Apply the 0.3.0 version consistently in package metadata, `aicre.__version__`, CLI/report tests, documentation, and issue templates. Keep the report schema version unchanged unless the JSON contract itself changes.
-3. Finalize the 0.3.0 changelog from merged behavior only; distinguish implemented behavior from deferred roadmap items.
-4. Run the complete CI matrix and build both wheel and source distribution.
-5. Install each artifact in a clean Python 3.11+ Linux virtual environment; verify `aicre --version`, CLI smoke commands, report schema validation, and absence of runtime dependencies.
-6. Inspect artifact contents and metadata; confirm license, README, package files, schemas, and third-party notices are present where required.
-7. Create a GitHub Release only after explicit go/no-go approval. Mark it as a pre-release if the project remains experimental.
-8. Preserve the exact tag, commit SHA, artifact filenames, hashes, and CI run links in the release record.
+1. Resolve the open gate decisions above without misrepresenting deferred work as completed.
+2. Freeze the release-candidate commit; do not add unrelated features.
+3. Apply the 0.3.0 version consistently in package metadata, `aicre.__version__`, CLI/report tests, documentation, and issue templates. Keep the report schema version unchanged unless the JSON contract itself changes.
+4. Finalize the 0.3.0 changelog from merged behavior only; distinguish implemented behavior from deferred roadmap items.
+5. Run the complete CI matrix and build both wheel and source distribution from the candidate.
+6. Install each artifact in a clean Python 3.11+ Linux virtual environment; verify `aicre --version`, CLI smoke commands, report schema validation, and absence of runtime dependencies.
+7. Inspect artifact contents and metadata; confirm license, README, package files, schemas, and third-party notices are present where required; record canonical release artifact SHA-256 hashes.
+8. Create a GitHub Release only after explicit go/no-go approval. Mark it as a pre-release if the project remains experimental.
+9. Preserve the exact tag, commit SHA, artifact filenames, hashes, and CI run links in the release record.
 
 ## 5. Current engineering recommendation
 
-**Conditional GO for release preparation; NO-GO for publishing.** The repository inventory is documented, but independent external review and owner-specific Linux acceptance evidence remain open. Final-candidate CI, build/install smoke checks, artifact inspection, and explicit owner approval are also required. Do not bump the package version or create a public tag until all gates are closed.
+**GO for technical validation of the current main snapshot; NO-GO for publishing 0.3.0 at this point.** The 0.2.1 main snapshot passed the latest Linux test and artifact-inspection matrix. The 0.3.0 candidate has not yet been versioned or built. The third-party provenance audit is deferred by owner instruction; the internal AI review is documented but is not an external independent review. Resolve those release-policy decisions, then validate the actual 0.3.0 candidate before publication.
