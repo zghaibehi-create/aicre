@@ -29,6 +29,18 @@ def test_every_profile_resolves_and_has_required_contract_fields():
         assert isinstance(profile["gpu_required"], bool)
 
 
+def test_existing_standard_and_agent_development_profiles_are_preserved():
+    assert resolve_profile("standard")["required_tools"] == []
+    assert resolve_profile("agent-development") == {
+        "description": "Conservative local agent-development baseline.",
+        "cores_min": 2,
+        "ram_gb_min": 8,
+        "disk_gb_min": 10,
+        "required_tools": ["git", "python3"],
+        "gpu_required": False,
+    }
+
+
 def test_new_profile_thresholds_and_required_tools_are_exact():
     assert resolve_profile("laptop-dev") == {
         "description": "General-purpose laptop development baseline.",
