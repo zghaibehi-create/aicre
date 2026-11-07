@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aicre:schemas:directory-scan-report-v2",
+  "title": "AICRE Directory Scan Report v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "aicre_version",
+    "source_name",
+    "generated_utc",
+    "summary",
+    "items"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2"
+    },
+    "aicre_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "generated_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "included_items",
+        "excluded_items",
+        "scan_errors",
+        "complete",
+        "termination_reason"
+      ],
+      "properties": {
+        "included_items": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded_items": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "scan_errors": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Filesystem and metadata errors only; timeout and configured limits are represented by termination_reason."
+        },
+        "complete": {
+          "type": "boolean",
+          "description": "True only when traversal finished without errors, timeout, or a configured cardinality limit."
+        },
+        "termination_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            null,
+            "item_limit",
+            "directory_entry_limit",
+            "timeout",
+            "filesystem_errors"
+          ]
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relative_path",
+        "type",
+        "extension",
+        "size_bytes",
+        "modified_utc"
+      ],
+      "properties": {
+        "relative_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "type": {
+          "enum": [
+            "file",
+            "directory"
+          ]
+        },
+        "extension": {
+          "type": "string",
+          "maxLength": 255
+        },
+        "size_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "modified_utc": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
