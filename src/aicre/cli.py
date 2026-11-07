@@ -7,6 +7,7 @@ import math
 import os
 import platform
 import subprocess
+import stat
 import sys
 import tempfile
 from pathlib import Path
@@ -196,34 +197,62 @@ def _render(report_data: dict[str, Any], fmt: str) -> tuple[str | bytes, str]:
         return render_html(report_data), ".html"
     if fmt == "pdf":
         return render_pdf(report_data), ".pdf"
-    raise ScanError(f"unsupported report format: {fmt}")
-
-
-def _write_output(path: str, data: str | bytes) -> Path:
+    raise ScanError(f"unsupported report formatdef _write_output(path: str, data: str | bytes) -> Path:
     target = Path(path).expanduser()
+    if target.name in {"", ".", ".."}:
+        raise ScanError("report destination must name a file")
     target.parent.mkdir(parents=True, exist_ok=True)
-    if target.is_symlink() or (target.exists() and not target.is_file()):
-        raise ScanError("report destination must be a regular file, not a symlink or special file")
-    if target.exists() and target.stat().st_nlink > 1:
-        raise ScanError("refusing to replace a hard-linked report destination")
-    fd, temporary = tempfile.mkstemp(prefix=".aicre-", suffix=".tmp", dir=target.parent)
+    parent = target.parent.resolve(strict=True)
+    flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        flags |= os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    directory_fd = os.open(parent, flags)
+    temporary_name = f".aicre-{os.getpid()}-{os.urandom(12).hex()}.tmp"
+    file_fd = None
     try:
+        try:
+            existing = os.stat(target.name, dir_fd=directory_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            existing = None
+        if existing is not None:
+            if not stat.S_ISREG(existing.st_mode):
+                raise ScanError("report destination must be a regular file, not a symlink or special file")
+            if existing.st_nlink > 1:
+                raise ScanError("refusing to replace a hard-linked report destination")
+        create_flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        if hasattr(os, "O_NOFOLLOW"):
+            create_flags |= os.O_NOFOLLOW
+        file_fd = os.open(temporary_name, create_flags, 0o600, dir_fd=directory_fd)
         if os.name == "posix":
-            os.fchmod(fd, 0o600)
-        mode = "wb"
-        with os.fdopen(fd, mode) as stream:
+            os.fchmod(file_fd, 0o600)
+        with os.fdopen(file_fd, "wb") as stream:
+            file_fd = None
             payload = data.encode("utf-8") if isinstance(data, str) else data
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, target)
+        os.replace(
+            temporary_name, target.name,
+            src_dir_fd=directory_fd, dst_dir_fd=directory_fd,
+        )
+        if os.name == "posix":
+            os.fsync(directory_fd)
     except Exception:
+        if file_fd is not None:
+            os.close(file_fd)
         try:
-            os.unlink(temporary)
+            os.unlink(temporary_name, dir_fd=directory_fd)
         except OSError:
             pass
         raise
-    return target.absolute()
+    finally:
+        os.close(directory_fd)
+    return parent / target.name
+
+
+bsolute()
 
 
 def _open_report(path: Path) -> int:
