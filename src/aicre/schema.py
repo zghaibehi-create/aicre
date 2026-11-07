@@ -63,7 +63,7 @@ def _validate_readiness(value: Any, finding_ids: set[str]) -> None:
     for name, dimension in value.items():
         if not isinstance(dimension, dict) or set(dimension) != DIMENSION_KEYS:
             raise ReportValidationError(f"readiness.{name} has an invalid structure")
-        if dimension["status"] not in READINESS_STATUSES:
+        if not isinstance(dimension["status"], str) or dimension["status"] not in READINESS_STATUSES:
             raise ReportValidationError(f"readiness.{name}.status is invalid")
         _string(dimension["explanation"], f"readiness.{name}.explanation")
         evidence = dimension["evidence"]
@@ -106,9 +106,9 @@ def validate_v1_report(report: Any) -> dict[str, Any]:
             raise ReportValidationError(f"duplicate check_id: {item['check_id']}")
         finding_ids.add(item["id"])
         check_ids.add(item["check_id"])
-        if item["status"] not in FINDING_STATUSES:
+        if not isinstance(item["status"], str) or item["status"] not in FINDING_STATUSES:
             raise ReportValidationError(f"{prefix}.status is invalid")
-        if item["confidence"] not in CONFIDENCE_LEVELS:
+        if not isinstance(item["confidence"], str) or item["confidence"] not in CONFIDENCE_LEVELS:
             raise ReportValidationError(f"{prefix}.confidence is invalid")
         if item["unit"] is not None and not isinstance(item["unit"], str):
             raise ReportValidationError(f"{prefix}.unit must be a string or null")
@@ -131,7 +131,7 @@ def validate_v2_report(report: Any) -> dict[str, Any]:
         raise ReportValidationError("legacy report has missing or unknown top-level fields")
     if report["schema_version"] != "2.0" or report["aicre_version"] != "0.2.0":
         raise ReportValidationError("unsupported legacy report version")
-    if report["profile"] not in {"standard", "agent-development"}:
+    if not isinstance(report["profile"], str) or report["profile"] not in {"standard", "agent-development"}:
         raise ReportValidationError("legacy report profile is invalid")
     _timestamp(report["generated_at"], "generated_at")
     findings = report["findings"]
