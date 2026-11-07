@@ -6,8 +6,8 @@ import json
 import math
 import os
 import platform
-import subprocess
 import stat
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
