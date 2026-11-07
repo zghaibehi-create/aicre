@@ -66,22 +66,18 @@ def test_agent_development_profile_passes_baseline():
     assert result["software_readiness"].status == "pass"
 
 
-def test_one_missing_required_tool_is_warning_and_two_are_failure():
+def test_one_missing_required_tool_warns_and_two_missing_tools_fail():
     base = observations()
-    one_missing = base + [
-        finding("tool.git", None, status="not_detected", category="software"),
-    ]
+    base.append(finding("tool.node", "/usr/bin/node", category="software"))
     one_missing = [
-        item for item in one_missing
-        if item.id != "tool.git"
+        item for item in base if item.id != "tool.git"
     ] + [finding("tool.git", None, status="not_detected", category="software")]
     result = evaluate_readiness(
-        one_missing + evaluate_workload_profile(one_missing, "agent-development"),
-        "agent-development",
+        one_missing + evaluate_workload_profile(one_missing, "laptop-dev"),
+        "laptop-dev",
     )
     assert result["software_readiness"].status == "warning"
 
-    base = observations()
     two_missing = [
         item for item in base if item.id not in {"tool.git", "tool.python3"}
     ] + [
@@ -89,11 +85,21 @@ def test_one_missing_required_tool_is_warning_and_two_are_failure():
         finding("tool.python3", None, status="not_detected", category="software"),
     ]
     result = evaluate_readiness(
-        two_missing + evaluate_workload_profile(two_missing, "agent-development"),
-        "agent-development",
+        two_missing + evaluate_workload_profile(two_missing, "laptop-dev"),
+        "laptop-dev",
+    )
+    assert result["software_readiness"].status == "fail"
+
+    all_unavailable = [
+        finding("tool.git", None, status="not_detected", category="software"),
+        finding("tool.python3", None, status="permission_denied", category="software"),
+        finding("tool.node", None, status="error", category="software"),
+    ]
+    result = evaluate_readiness(
+        all_unavailable + evaluate_workload_profile(all_unavailable, "laptop-dev"),
+        "laptop-dev",
     )
     assert result["software_readiness"].status == "unknown"
-
 
 def test_resource_profile_thresholds_are_generated_from_shared_profile():
     base = observations()
