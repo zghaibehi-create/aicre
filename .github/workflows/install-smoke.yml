@@ -38,19 +38,40 @@ jobs:
           set -o pipefail
           python -m pip wheel --no-deps --wheel-dir dist .
 
+      - name: Build source distribution with the locked setuptools backend
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pip install --require-hashes -r .github/requirements-ci.txt
+          mkdir -p dist-sdist
+          python -c "from setuptools.build_meta import build_sdist; build_sdist('dist-sdist')"
+          test -n "$(find dist-sdist -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
+
       - name: Install wheel into a fresh virtual environment
         shell: bash
         run: |
           set -o pipefail
-          python -m venv "$RUNNER_TEMP/aicre-smoke-venv"
-          "$RUNNER_TEMP/aicre-smoke-venv/bin/python" -m pip install --no-deps dist/*.whl
-          "$RUNNER_TEMP/aicre-smoke-venv/bin/python" -m pip check
+          python -m venv "$RUNNER_TEMP/aicre-wheel-venv"
+          "$RUNNER_TEMP/aicre-wheel-venv/bin/python" -m pip install --no-deps dist/*.whl
+          "$RUNNER_TEMP/aicre-wheel-venv/bin/python" -m pip check
+          "$RUNNER_TEMP/aicre-wheel-venv/bin/python" -c 'from importlib.metadata import distribution; requirements = distribution("aicre").requires or []; assert all("extra ==" in requirement for requirement in requirements), requirements'
 
-      - name: Exercise installed console commands
+      - name: Install source distribution into a fresh virtual environment
         shell: bash
         run: |
           set -o pipefail
-          AICRE="$RUNNER_TEMP/aicre-smoke-venv/bin/aicre"
-          "$AICRE" --version
-          "$AICRE" readiness --profile agent-development
-          "$AICRE" report --format json | "$RUNNER_TEMP/aicre-smoke-venv/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "2.0"; assert len(report["readiness"]) == 5'
+          python -m venv "$RUNNER_TEMP/aicre-sdist-venv"
+          "$RUNNER_TEMP/aicre-sdist-venv/bin/python" -m pip install --no-deps dist-sdist/*.tar.gz
+          "$RUNNER_TEMP/aicre-sdist-venv/bin/python" -m pip check
+          "$RUNNER_TEMP/aicre-sdist-venv/bin/python" -c 'from importlib.metadata import distribution; requirements = distribution("aicre").requires or []; assert all("extra ==" in requirement for requirement in requirements), requirements'
+
+      - name: Exercise installed wheel and source-distribution commands
+        shell: bash
+        run: |
+          set -o pipefail
+          for ENV in "$RUNNER_TEMP/aicre-wheel-venv" "$RUNNER_TEMP/aicre-sdist-venv"; do
+            AICRE="$ENV/bin/aicre"
+            "$AICRE" --version
+            "$AICRE" readiness --profile agent-development
+            "$AICRE" report --format json | "$ENV/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "2.0"; assert len(report["readiness"]) == 5'
+          done
