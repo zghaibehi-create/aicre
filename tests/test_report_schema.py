@@ -62,26 +62,6 @@ def test_schema_rejects_empty_findings_array():
         VALIDATE_REPORT(report)
 
 
-def test_summary_document_is_an_unversioned_separate_contract():
-    summary = {
-        "derived_from": "report.json",
-        "generated_at": "2026-11-07T00:00:00Z",
-        "profile": "standard",
-        "composite_score": None,
-        "dimensions": {
-            "resource": "unknown", "software": "unknown",
-            "compatibility": "unknown", "privacy": "unknown", "security": "unknown",
-        },
-        "recommendations": [],
-    }
-    assert "schema_version" not in summary
-    assert set(summary) == {
-        "derived_from", "generated_at", "profile", "composite_score",
-        "dimensions", "recommendations",
-    }
-
-
-
 def test_saved_report_file_validates_and_old_v2_versions_remain_valid(tmp_path):
     from aicre.scanner import write_json_report
 
