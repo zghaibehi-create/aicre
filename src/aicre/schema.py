@@ -123,6 +123,7 @@ def validate_v1_report(report: Any) -> dict[str, Any]:
         _timestamp(item["collected_at"], f"{prefix}.collected_at")
         if not isinstance(item["limitations"], list) or any(not isinstance(x, str) for x in item["limitations"]):
             raise ReportValidationError(f"{prefix}.limitations must be an array of strings")
+        _json_value(item["limitations"], f"{prefix}.limitations")
         _json_value(item["value"], f"{prefix}.value")
         expected_id = stable_finding_id(
             item["source"], item["check_id"],
@@ -166,6 +167,7 @@ def validate_v2_report(report: Any) -> dict[str, Any]:
         _timestamp(item["collected_at"], f"{prefix}.collected_at")
         if not isinstance(item["limitations"], list) or any(not isinstance(x, str) for x in item["limitations"]):
             raise ReportValidationError(f"{prefix}.limitations must be an array of strings")
+        _json_value(item["limitations"], f"{prefix}.limitations")
         _json_value(item["value"], f"{prefix}.value")
     _validate_readiness(report["readiness"], ids)
     return report
