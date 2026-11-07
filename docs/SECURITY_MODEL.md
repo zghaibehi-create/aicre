@@ -1,8 +1,8 @@
-# AICRE 0.2.1 — Security and Privacy Model
+# AICRE 0.3.0 candidate — Security and Privacy Model
 
 ## Purpose and non-goals
 
-AICRE 0.2.1 collects a bounded set of Linux environment and directory metadata and reports five independent readiness dimensions. It is not an agent sandbox, access-control manager, malware scanner, complete secret detector, backup tool, security certification, or authorization to run an autonomous agent. It does not install software, modify machine settings, or remediate findings. Windows and macOS support are not claimed.
+AICRE 0.3.0 candidate collects a bounded set of Linux environment and directory metadata and reports five independent readiness dimensions. It is not an agent sandbox, access-control manager, malware scanner, complete secret detector, backup tool, security certification, or authorization to run an autonomous agent. It does not install software, modify machine settings, or remediate findings. Windows and macOS support are not claimed.
 
 ## Trust boundary
 

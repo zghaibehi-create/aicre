@@ -1,7 +1,7 @@
 # AICRE Linux Acceptance Evidence
 
 **Purpose:** distinguish automated Linux CI evidence from acceptance on the project owner's intended Linux environment.  
-**Current package version:** 0.2.1.  
+**Current package version:** 0.3.0 (release candidate).  
 **Release target:** 0.3.0.
 
 ## 1. Automated Linux CI evidence

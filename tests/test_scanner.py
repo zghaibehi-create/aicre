@@ -456,7 +456,7 @@ def test_cooperative_scan_timeout_marks_partial_inventory(tmp_path):
 
     report = scan_directory(source, output, timeout=0)
 
-    assert report["aicre_version"] == "0.2.1"
+    assert report["aicre_version"] == "0.3.0"
     assert report["summary"]["included_items"] == 0
     assert report["summary"]["scan_errors"] == 0
     assert report["summary"]["complete"] is False

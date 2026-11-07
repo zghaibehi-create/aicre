@@ -1,4 +1,4 @@
-"""Command-line interface for AICRE 0.2.1."""
+"""Command-line interface for AICRE 0.3.0."""
 from __future__ import annotations
 
 import argparse

@@ -1,7 +1,7 @@
 # Canonical finding IDs
 
 This document is the canonical reference for the value shape and provenance of
-every finding ID emitted by AICRE 0.2.1. The report-v2 schema deliberately
+every finding ID emitted by AICRE 0.3.0 candidate. The report-v2 schema deliberately
 allows flexible JSON values; consumers must interpret each value according to
 its finding ID.
 
