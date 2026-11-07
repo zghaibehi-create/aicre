@@ -90,8 +90,33 @@ The automated tests cover system source filtering, executable discovery without 
 - [Security model](docs/SECURITY_MODEL.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Security reporting](SECURITY.md)
+- [Canonical report schema](schemas/report-v1.schema.json)
+- [Report schema and identity design](docs/schema.md)
 - [Contributing](CONTRIBUTING.md)
 - [JSON report schema](schemas/report-v2.schema.json)
+
+## Report formats and comparisons
+
+Render a canonical report as JSON, Markdown, HTML, or PDF:
+
+\`\`\`bash
+aicre report --format json
+aicre report --format markdown --output "$HOME/reports/aicre.md"
+aicre report --format html --output "$HOME/reports/aicre.html"
+aicre scan --profile standard --format html --output "$HOME/reports/system.html"
+\`\`\`
+
+PDF is optional: install it with \`python -m pip install -e '.[pdf]'\`, then use \`--format pdf\`. HTML has no scripts, remote assets, CDN dependencies, or external fonts. POSIX output files are created with mode \`0600\`; parent directories are created and existing regular files are atomically replaced.
+
+Render a previously saved JSON report, or compare two snapshots:
+
+\`\`\`bash
+aicre report --input "$HOME/aicre-report.json" --format html --output "$HOME/aicre.html"
+aicre report --diff before.json after.json --format json
+aicre report --diff before.json after.json --format markdown --output changes.md
+\`\`\`
+
+The diff classifies checks as \`new\`, \`resolved\`, \`unchanged\`, or \`changed\`. \`--open\` opens a completed output with \`xdg-open\` on Linux only. Exit code \`3\` indicates an unsupported output format or missing optional PDF support; \`6\` indicates that opening is unsupported on the current platform; \`7\` indicates that \`xdg-open\` could not be launched.
 
 ## License
 
