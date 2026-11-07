@@ -77,6 +77,18 @@ def _validate_readiness(value: Any, finding_ids: set[str]) -> None:
             raise ReportValidationError(f"readiness.{name}.evidence contains duplicate or unknown finding IDs")
 
 
+def _scan_identity(profile: str, findings: list[dict[str, Any]]) -> str:
+    stable_rows = sorted(
+        ({key: item.get(key) for key in (
+            "id", "check_id", "category", "status", "value", "source",
+            "confidence", "unit", "limitations",
+        )} for item in findings),
+        key=lambda item: item["check_id"],
+    )
+    seed = _canonical({"profile": profile, "findings": stable_rows})
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, "urn:aicre:scan:" + seed))
+
+
 def validate_v1_report(report: Any) -> dict[str, Any]:
     if not isinstance(report, dict) or set(report) != V1_TOP_LEVEL:
         raise ReportValidationError("canonical report has missing or unknown top-level fields")
@@ -120,6 +132,7 @@ def validate_v1_report(report: Any) -> dict[str, Any]:
             raise ReportValidationError(f"{prefix}.confidence is invalid")
         if item["unit"] is not None and not isinstance(item["unit"], str):
             raise ReportValidationError(f"{prefix}.unit must be a string or null")
+        _json_value(item["unit"], f"{prefix}.unit")
         _timestamp(item["collected_at"], f"{prefix}.collected_at")
         if not isinstance(item["limitations"], list) or any(not isinstance(x, str) for x in item["limitations"]):
             raise ReportValidationError(f"{prefix}.limitations must be an array of strings")
@@ -132,6 +145,8 @@ def validate_v1_report(report: Any) -> dict[str, Any]:
         if item["id"] != expected_id:
             raise ReportValidationError(f"{prefix}.id does not match its evidence")
     _validate_readiness(report["readiness"], finding_ids)
+    if report["scan_id"] != _scan_identity(report["profile"], findings):
+        raise ReportValidationError("scan_id does not match canonical report evidence")
     return report
 
 
@@ -164,6 +179,7 @@ def validate_v2_report(report: Any) -> dict[str, Any]:
             raise ReportValidationError(f"{prefix}.confidence is invalid")
         if item["unit"] is not None and not isinstance(item["unit"], str):
             raise ReportValidationError(f"{prefix}.unit must be a string or null")
+        _json_value(item["unit"], f"{prefix}.unit")
         _timestamp(item["collected_at"], f"{prefix}.collected_at")
         if not isinstance(item["limitations"], list) or any(not isinstance(x, str) for x in item["limitations"]):
             raise ReportValidationError(f"{prefix}.limitations must be an array of strings")
@@ -194,14 +210,7 @@ def canonical_report(report: dict[str, Any]) -> dict[str, Any]:
             "unit": item["unit"], "collected_at": item["collected_at"],
             "limitations": list(item["limitations"]),
         })
-    stable_rows = sorted(
-        ({key: item.get(key) for key in (
-            "id", "check_id", "category", "status", "value", "source", "confidence", "unit", "limitations"
-        )} for item in findings),
-        key=lambda item: item["check_id"],
-    )
-    seed = _canonical({"profile": report["profile"], "findings": stable_rows})
-    scan_id = str(uuid.uuid5(uuid.NAMESPACE_URL, "urn:aicre:scan:" + seed))
+    scan_id = _scan_identity(report["profile"], findings)
     id_map = {old["id"]: new["id"] for old, new in zip(report["findings"], findings)}
     readiness = {
         name: {
