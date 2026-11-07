@@ -1,6 +1,7 @@
 name: Install smoke test
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '.github/workflows/install-smoke.yml'
@@ -46,6 +47,73 @@ jobs:
           mkdir -p dist-sdist
           python -c "from setuptools.build_meta import build_sdist; build_sdist('dist-sdist')"
           test -n "$(find dist-sdist -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
+
+      - name: Inspect wheel and source distribution
+        shell: bash
+        run: |
+          set -o pipefail
+          python - <<'PY'
+          import hashlib
+          import pathlib
+          import tarfile
+          import tomllib
+          import zipfile
+          from email.parser import Parser
+
+          project = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+          expected_name = project["project"]["name"]
+          expected_version = project["project"]["version"]
+          init_text = pathlib.Path("src/aicre/__init__.py").read_text()
+          assert f'__version__ = "{expected_version}"' in init_text
+
+          wheels = sorted(pathlib.Path("dist").glob("*.whl"))
+          sdists = sorted(pathlib.Path("dist-sdist").glob("*.tar.gz"))
+          assert len(wheels) == 1, wheels
+          assert len(sdists) == 1, sdists
+
+          with zipfile.ZipFile(wheels[0]) as archive:
+              names = archive.namelist()
+              assert "aicre/__init__.py" in names, names
+              metadata_paths = [n for n in names if n.endswith(".dist-info/METADATA")]
+              assert len(metadata_paths) == 1, metadata_paths
+              metadata = Parser().parsestr(archive.read(metadata_paths[0]).decode())
+              assert metadata["Name"].lower() == expected_name.lower()
+              assert metadata["Version"] == expected_version
+              runtime_requirements = [
+                  requirement for requirement in metadata.get_all("Requires-Dist", [])
+                  if "extra ==" not in requirement
+              ]
+              assert not runtime_requirements, runtime_requirements
+              print("Wheel inventory:")
+              print("\n".join(names))
+
+          with tarfile.open(sdists[0], "r:gz") as archive:
+              names = archive.getnames()
+              root = names[0].split("/", 1)[0]
+              required = [
+                  f"{root}/pyproject.toml",
+                  f"{root}/README.md",
+                  f"{root}/LICENSE",
+                  f"{root}/src/aicre/__init__.py",
+                  f"{root}/PKG-INFO",
+              ]
+              missing = [name for name in required if name not in names]
+              assert not missing, missing
+              pkg_info = Parser().parsestr(archive.extractfile(f"{root}/PKG-INFO").read().decode())
+              assert pkg_info["Name"].lower() == expected_name.lower()
+              assert pkg_info["Version"] == expected_version
+              runtime_requirements = [
+                  requirement for requirement in pkg_info.get_all("Requires-Dist", [])
+                  if "extra ==" not in requirement
+              ]
+              assert not runtime_requirements, runtime_requirements
+              print("Source distribution required files: OK")
+
+          for artifact in [wheels[0], sdists[0]]:
+              digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+              print(f"SHA256  {digest}  {artifact}")
+          print(f"Distribution metadata and version checks: OK ({expected_name} {expected_version})")
+          PY
 
       - name: Install wheel into a fresh virtual environment
         shell: bash
