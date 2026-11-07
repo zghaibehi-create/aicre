@@ -97,7 +97,7 @@ The automated tests cover system source filtering, executable discovery without 
 
 ## Report formats and comparisons
 
-Render a canonical report as JSON, Markdown, HTML, or PDF:
+Render a canonical report as plain text, JSON, Markdown, HTML, or PDF:
 
 ```bash
 aicre report --format json
@@ -106,7 +106,7 @@ aicre report --format html --output "$HOME/reports/aicre.html"
 aicre scan --profile standard --format html --output "$HOME/reports/system.html"
 ```
 
-PDF is optional: install it with `python -m pip install -e '.[pdf]'`, then use `--format pdf`. HTML has no scripts, remote assets, CDN dependencies, or external fonts. POSIX output files are created with mode `0600`; parent directories are created and existing regular files are atomically replaced.
+PDF is optional: install it with `python -m pip install -e '.[pdf]'`, then use `--format pdf`. ReportLab's built-in fonts do not guarantee Arabic or full Unicode glyph coverage. HTML has no scripts, remote assets, CDN dependencies, or external fonts. POSIX output files are created with mode `0600`; parent directories are created and existing regular files are atomically replaced.
 
 Render a previously saved JSON report, or compare two snapshots:
 
