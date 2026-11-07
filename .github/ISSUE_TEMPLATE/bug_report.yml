@@ -1,35 +1,55 @@
 name: Bug report
-description: Report a reproducible AICRE issue without sharing private data.
+description: Report a reproducible AICRE problem
 title: "[Bug]: "
-labels: [bug]
+labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: "Do not upload inventory reports, personal filenames, credentials, or private directory contents."
+      value: |
+        Before submitting, review every report excerpt for usernames, private paths, hostnames, and other information you do not want to publish. AICRE reports may contain hardware details and executable paths. Redact them before pasting.
   - type: input
-    id: version
+    id: operating-system
     attributes:
-      label: AICRE version
-      placeholder: "0.1.0"
-    validations:
-      required: true
-  - type: input
-    id: os
-    attributes:
-      label: Linux distribution and version
+      label: Operating system
+      description: Linux distribution and version
       placeholder: "Ubuntu 24.04"
     validations:
       required: true
-  - type: textarea
-    id: steps
+  - type: input
+    id: python-version
     attributes:
-      label: Safe reproduction steps
-      description: Use disposable test folders and synthetic files only.
+      label: Python version
+      placeholder: "Python 3.12.16"
     validations:
       required: true
   - type: textarea
-    id: expected
+    id: command
     attributes:
-      label: Expected and actual behavior
+      label: Command run
+      description: Include the exact AICRE command and flags. Remove private paths if needed.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: redacted-report
+    attributes:
+      label: Redacted report or relevant output
+      description: Paste only the minimum output needed after reviewing and redacting it.
+      placeholder: "Review the report for usernames, private paths, hostnames, and other identifying details before pasting."
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy-review
+    attributes:
+      label: Report review
+      options:
+        - label: I reviewed the pasted output and removed private paths and information I do not intend to publish.
+          required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce and expected behavior
+      description: Describe what happened and what you expected instead.
     validations:
       required: true
