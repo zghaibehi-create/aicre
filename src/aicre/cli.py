@@ -187,7 +187,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_inventory_options(readiness, default_timeout=DEFAULT_TIMEOUT_SECONDS)
 
     report = subparsers.add_parser("report", help="emit the full versioned JSON report")
-    report.add_argument("--profile", choices=supported_profiles(), default="standard", help="workload baseline")
+    report.add_argument("--profile", choices=supported_profiles(), default=None, help="workload baseline (default: standard)")
     report.add_argument("--format", choices=("json",), default="json")
     report.add_argument("--output", help="optional report destination; stdout if omitted")
     report.add_argument("--force", action="store_true", help="explicitly replace an existing report")
