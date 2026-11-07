@@ -7,7 +7,8 @@ import pytest
 from aicre import cli
 from aicre.cli import main
 
-READINESS = {name: {'status': 'unknown', 'explanation': 'Not assessed.', 'evidence': []} for name in ('resource_readiness', 'software_readiness', 'compatibility_readiness', 'privacy_readiness', 'security_readiness')}\nFIXTURE = {'schema_version':'2.0','aicre_version':'0.2.0','profile':'standard','generated_at':'2026-01-01T00:00:00Z','findings':[{'id':'cpu.logical','category':'resource','status':'detected','value':4,'unit':'count','source':'cpu','confidence':'high','collected_at':'2026-01-01T00:00:00Z','limitations':[]}],'readiness':READINESS}
+READINESS = {name: {'status': 'unknown', 'explanation': 'Not assessed.', 'evidence': []} for name in ('resource_readiness', 'software_readiness', 'compatibility_readiness', 'privacy_readiness', 'security_readiness')}
+FIXTURE = {'schema_version':'2.0','aicre_version':'0.2.0','profile':'standard','generated_at':'2026-01-01T00:00:00Z','findings':[{'id':'cpu.logical','category':'resource','status':'detected','value':4,'unit':'count','source':'cpu','confidence':'high','collected_at':'2026-01-01T00:00:00Z','limitations':[]}],'readiness':READINESS}
 
 def test_explicit_html_output_creates_parents_and_replaces_regular_file(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(cli, 'build_report', lambda **kwargs: FIXTURE)
