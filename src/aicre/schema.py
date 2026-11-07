@@ -189,9 +189,18 @@ def canonical_report(report: dict[str, Any]) -> dict[str, Any]:
     )} for item in findings]
     seed = _canonical({"profile": report["profile"], "findings": stable_rows})
     scan_id = str(uuid.uuid5(uuid.NAMESPACE_URL, "urn:aicre:scan:" + seed))
+    id_map = {old["id"]: new["id"] for old, new in zip(report["findings"], findings)}
+    readiness = {
+        name: {
+            "status": dimension["status"],
+            "explanation": dimension["explanation"],
+            "evidence": [id_map[item] for item in dimension["evidence"]],
+        }
+        for name, dimension in report["readiness"].items()
+    }
     result = {
         "schema_version": "1.0.0", "aicre_version": report["aicre_version"],
         "scan_id": scan_id, "generated_at": report["generated_at"],
-        "profile": report["profile"], "findings": findings, "readiness": report["readiness"],
+        "profile": report["profile"], "findings": findings, "readiness": readiness,
     }
     return validate_v1_report(result)
