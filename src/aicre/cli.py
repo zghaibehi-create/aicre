@@ -30,6 +30,7 @@ from .workload_profiles import supported_profiles
 EXIT_UNSUPPORTED_FORMAT = 3
 EXIT_OPEN_UNSUPPORTED = 6
 EXIT_OPEN_FAILED = 7
+MAX_REPORT_INPUT_BYTES = 25 * 1024 * 1024
 FORMATS = ("text", "json", "markdown", "html", "pdf")
 
 
@@ -156,7 +157,13 @@ def _reject_nonfinite(value: str) -> None:
 
 def _load_json(path: str) -> dict[str, Any]:
     try:
-        text = Path(path).expanduser().read_text(encoding="utf-8")
+        with Path(path).expanduser().open("rb") as stream:
+            raw = stream.read(MAX_REPORT_INPUT_BYTES + 1)
+        if len(raw) > MAX_REPORT_INPUT_BYTES:
+            raise ReportValidationError(
+                f"report input exceeds the {MAX_REPORT_INPUT_BYTES}-byte safety limit"
+            )
+        text = raw.decode("utf-8")
         value = json.loads(
             text,
             object_pairs_hook=_unique_object,
