@@ -155,6 +155,8 @@ def _build_and_emit_report(args: argparse.Namespace, *, command: str, include_to
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if getattr(args, "force", False) and not getattr(args, "output", None):
+        parser.error("--force requires --output; it cannot be used with standard output.")
 
     try:
         if args.command == "scan":
@@ -175,7 +177,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"excluded: {summary['excluded_items']}; "
                     f"errors: {summary['scan_errors']}."
                 )
-                return 0
+                return 1 if summary["scan_errors"] > 0 else 0
             if args.profile is None:
                 parser.error("scan without SOURCE requires --profile")
             if args.output is not None:
