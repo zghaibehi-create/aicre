@@ -47,6 +47,21 @@ def test_legacy_directory_scan_success_and_user_exclusion(tmp_path, capsys):
     assert "private/item.txt" not in paths
 
 
+def test_partial_directory_scan_writes_report_and_returns_status_1(tmp_path, capsys):
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "partial-report.json"
+
+    result = main([
+        "scan", str(source), "--output", str(output), "--timeout", "0",
+    ])
+
+    assert result == 1
+    assert "errors: 1" in capsys.readouterr().out
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["summary"]["scan_errors"] == 1
+
+
 def test_cli_reports_scan_error_with_exit_code_2(tmp_path, capsys):
     source = tmp_path / "missing"
     output = tmp_path / "report.json"
@@ -199,3 +214,17 @@ def test_report_accepts_agent_development_profile(capsys):
     data = json.loads(capsys.readouterr().out)
     assert data["profile"] == "agent-development"
     assert "profile.resource.cpu" in {item["id"] for item in data["findings"]}
+
+
+
+@pytest.mark.parametrize("arguments", [
+    ["scan", "--profile", "standard", "--force"],
+    ["scan", "source", "--force"],
+    ["report", "--force"],
+])
+def test_force_requires_an_output_destination(arguments, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(arguments)
+
+    assert exit_info.value.code == 2
+    assert "--force requires --output" in capsys.readouterr().err
