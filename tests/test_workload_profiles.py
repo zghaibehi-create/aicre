@@ -21,6 +21,7 @@ def test_resource_readiness_stays_unknown_when_only_host_observations_exist():
     result = evaluate_readiness(base + checks, "agent-development")
 
     assert result["resource_readiness"].status == "unknown"
+    assert "effective process/container limits are not established" in result["resource_readiness"].explanation
     assert result["resource_readiness"].evidence == (
         "profile.resource.cpu", "profile.resource.memory", "profile.resource.storage"
     )
