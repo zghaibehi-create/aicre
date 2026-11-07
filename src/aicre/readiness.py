@@ -7,6 +7,7 @@ from typing import Any
 from aicre.models import Finding, ReadinessDimension
 from aicre.workload_profiles import PROFILES
 
+
 def _dimension(name: str, status: str, explanation: str, evidence: Sequence[str] = ()) -> ReadinessDimension:
     return ReadinessDimension(name, status, explanation, tuple(evidence))
 
