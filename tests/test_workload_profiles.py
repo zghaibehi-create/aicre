@@ -32,7 +32,7 @@ def test_every_profile_resolves_and_has_required_contract_fields():
 def test_existing_standard_and_agent_development_profiles_are_preserved():
     assert resolve_profile("standard")["required_tools"] == []
     assert resolve_profile("agent-development") == {
-        "description": "Conservative local agent-development baseline.",
+        "description": "Conservative local agent-development baseline; not a model-inference profile.",
         "cores_min": 2,
         "ram_gb_min": 8,
         "disk_gb_min": 10,
