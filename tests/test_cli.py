@@ -244,3 +244,66 @@ def test_cli_without_profile_uses_standard_label_but_explains_unknown_readiness(
     output = capsys.readouterr().out
     assert "AICRE 0.2.1 — profile: standard" in output
     assert output.count("No profile specified.") == 2
+
+
+def test_agent_development_readiness_shows_existing_values_and_unknown_footer(capsys, monkeypatch):
+    gib = 1024 ** 3
+    report = {
+        "aicre_version": "0.2.1",
+        "profile": "agent-development",
+        "findings": [
+            {"id": "profile.resource.cpu", "value": {"actual": 4, "minimum": 2}},
+            {"id": "profile.resource.memory", "value": {"actual": int(15.6 * gib), "minimum": 8 * gib}},
+            {"id": "profile.resource.storage", "value": {"actual": 80 * gib, "minimum": 10 * gib}},
+            {"id": "profile.software.git", "status": "detected"},
+            {"id": "profile.software.python3", "status": "detected"},
+        ],
+        "readiness": {
+            name: {"status": "unknown", "explanation": "fixture", "evidence": []}
+            for name in (
+                "resource_readiness", "software_readiness", "compatibility_readiness",
+                "privacy_readiness", "security_readiness",
+            )
+        },
+    }
+
+    def fake_build_report(*, profile, excludes, timeout, include_tools=True):
+        assert profile == "agent-development"
+        return report
+
+    monkeypatch.setattr("aicre.cli.build_report", fake_build_report)
+
+    assert main(["readiness", "--profile", "agent-development"]) == 0
+    output = capsys.readouterr().out
+    assert "CPU: 4 (min 2 logical CPUs)" in output
+    assert "RAM: 15.6 GiB (min 8.0 GiB)" in output
+    assert "Free disk: 80.0 GiB (min 10.0 GiB)" in output
+    assert "git: detected" in output
+    assert "python3: detected" in output
+    assert "unknown means not assessed, not failed" in output
+
+
+def test_agent_development_readiness_handles_missing_observations(capsys, monkeypatch):
+    report = {
+        "aicre_version": "0.2.1",
+        "profile": "agent-development",
+        "findings": [],
+        "readiness": {
+            name: {"status": "unknown", "explanation": "fixture", "evidence": []}
+            for name in (
+                "resource_readiness", "software_readiness", "compatibility_readiness",
+                "privacy_readiness", "security_readiness",
+            )
+        },
+    }
+
+    monkeypatch.setattr(
+        "aicre.cli.build_report",
+        lambda **kwargs: report,
+    )
+
+    assert main(["readiness", "--profile", "agent-development"]) == 0
+    output = capsys.readouterr().out
+    assert "CPU: not available (min None logical CPUs)" in output
+    assert "RAM: not available (min not available)" in output
+    assert "git: not checked" in output
