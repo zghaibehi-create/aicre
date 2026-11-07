@@ -76,10 +76,10 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--timeout", type=_timeout_value, default=None,
                       help="cooperative time budget; directory scans are unlimited unless set")
     scan.add_argument("--max-items", type=_positive_int, default=DEFAULT_MAX_ITEMS,
-                      help=f"maximum included directory entries (default: {DEFAULT_MAX_ITEMS})")
+                      help=f"maximum included files and directories (default: {DEFAULT_MAX_ITEMS})")
     scan.add_argument("--max-directory-entries", type=_positive_int,
                       default=DEFAULT_MAX_DIRECTORY_ENTRIES,
-                      help=f"maximum entries buffered per directory (default: {DEFAULT_MAX_DIRECTORY_ENTRIES})")
+                      help=f"maximum entries buffered per directory, including excluded entries (default: {DEFAULT_MAX_DIRECTORY_ENTRIES})")
 
     system = subparsers.add_parser("system", help="show local OS and resource metadata")
     _add_inventory_options(system, default_timeout=DEFAULT_TIMEOUT_SECONDS)
