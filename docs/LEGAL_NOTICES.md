@@ -12,13 +12,15 @@ Read the complete license before using or redistributing AICRE. If a copy of AIC
 
 Copyright protection and ownership depend on applicable national laws and the facts of authorship. The repository's public availability does not, by itself, transfer copyright ownership to the repository owner or to a project entity.
 
-Unless a separate written agreement says otherwise, each contributor retains whatever copyright they hold in their own original contribution. A contributor submitting a patch or other material to this repository offers that contribution for distribution under the repository's MIT License. This is an inbound license under the project's existing license; it is not a copyright assignment and does not authorize relicensing a contribution under different terms.
+**Owner confirmation (2026-11-07):** The project owner has confirmed that they hold the rights necessary to distribute all content currently in AICRE under the MIT License. At the owner's direction, the copyright notice uses **AICRE Project** as the public-facing project designation. This designation is a notice label; it does not, by itself, create a separate legal entity or transfer copyright.
+
+For contributions accepted in the future, unless a separate written agreement says otherwise, each contributor retains whatever copyright they hold in their own original contribution. A contributor submitting a patch or other material to this repository offers that contribution for distribution under the repository's MIT License. This is an inbound license under the project's existing license; it is not a copyright assignment and does not authorize relicensing a contribution under different terms.
 
 Contributors must have the legal right and any necessary employer or third-party permission to submit their contributions. They must preserve applicable third-party copyright and license notices and must not submit material copied from sources whose terms are incompatible with the proposed contribution.
 
 The project does not currently require a separate Contributor License Agreement (CLA) or Developer Certificate of Origin (DCO). This policy may be changed prospectively through a clearly documented project decision; it does not retroactively transfer rights in earlier contributions.
 
-The copyright notice in `LICENSE` is a project-level notice for the distributed work. It should not be read as proof that all contributions are owned by one person or legal entity.
+The copyright notice in `LICENSE` is the project's selected public-facing notice. The owner confirmation above records the owner's representation about current project content; it is not an independent legal audit of authorship, third-party provenance, or employment/client restrictions.
 
 ## 3. Third-party software and services
 

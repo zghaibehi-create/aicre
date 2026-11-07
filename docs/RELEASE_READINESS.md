@@ -46,7 +46,8 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations **only wit
 
 ## 3. Mandatory release gates
 
-- [ ] **Copyright and provenance confirmation:** project owner verifies that the project has the necessary rights to distribute all existing project-authored code, documentation, examples, and assets under MIT; checks that the copyright notice is not misleading; and identifies and preserves any third-party notices or license obligations. Resolve employer/client ownership or other contributor restrictions before release.
+- [x] **Owner ownership attestation and public notice:** on 2026-11-07, the project owner confirmed that they hold the rights necessary to distribute all current AICRE content under MIT and selected **AICRE Project** as the public-facing copyright designation. The notice is recorded in `LICENSE` and `docs/LEGAL_NOTICES.md`. This is an owner representation, not an independent legal audit.
+- [ ] **Content provenance and third-party obligations audit:** inspect current source, documentation, examples, assets, generated files, and build/release artifacts; identify any third-party-origin material and preserve applicable notices or resolve permissions. Confirm no employer/client or other contractual restriction applies. Do not infer that this audit is complete from the owner's attestation alone.
 - [ ] **Independent external code/security review** completed; findings triaged and blocking findings resolved.
 - [ ] **Target Linux acceptance evidence** recorded by the project owner: distribution/version, kernel, Python version, filesystem, installation method, commands, outputs, and deviations. Do not place private machine details in public issues.
 - [x] GitHub Private Vulnerability Reporting visually verified enabled by the repository owner on 2026-11-07.
