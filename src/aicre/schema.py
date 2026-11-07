@@ -98,6 +98,10 @@ def validate_v1_report(report: Any) -> dict[str, Any]:
             raise ReportValidationError(f"{prefix} has missing or unknown fields")
         for field in ("id", "check_id", "category", "source"):
             _string(item[field], f"{prefix}.{field}")
+        if not re.fullmatch(r"[a-z0-9][a-z0-9._-]*", item["check_id"]):
+            raise ReportValidationError(f"{prefix}.check_id is invalid")
+        if any(ord(char) < 32 or ord(char) == 127 for char in item["source"]):
+            raise ReportValidationError(f"{prefix}.source contains control characters")
         if not re.fullmatch(r"[a-f0-9]{64}", item["id"]):
             raise ReportValidationError(f"{prefix}.id must be a lowercase SHA-256 digest")
         if item["id"] in finding_ids:
@@ -184,9 +188,12 @@ def canonical_report(report: dict[str, Any]) -> dict[str, Any]:
             "unit": item["unit"], "collected_at": item["collected_at"],
             "limitations": list(item["limitations"]),
         })
-    stable_rows = [{key: item.get(key) for key in (
-        "id", "check_id", "category", "status", "value", "source", "confidence", "unit", "limitations"
-    )} for item in findings]
+    stable_rows = sorted(
+        ({key: item.get(key) for key in (
+            "id", "check_id", "category", "status", "value", "source", "confidence", "unit", "limitations"
+        )} for item in findings),
+        key=lambda item: item["check_id"],
+    )
     seed = _canonical({"profile": report["profile"], "findings": stable_rows})
     scan_id = str(uuid.uuid5(uuid.NAMESPACE_URL, "urn:aicre:scan:" + seed))
     id_map = {old["id"]: new["id"] for old, new in zip(report["findings"], findings)}
