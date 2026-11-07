@@ -1,0 +1,17 @@
+{
+  "derived_from": "report.json",
+  "generated_at": "2026-11-07T08:00:00Z",
+  "profile": "laptop-dev",
+  "composite_score": 82,
+  "dimensions": {
+    "resource": "warning",
+    "software": "pass",
+    "compatibility": "pass",
+    "privacy": "pass",
+    "security": "warning"
+  },
+  "recommendations": [
+    "Increase available RAM to at least 16 GiB (currently 12 GiB).",
+    "Run AICRE as a non-root user."
+  ]
+}
