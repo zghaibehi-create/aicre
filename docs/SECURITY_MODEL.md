@@ -59,7 +59,7 @@ Directory scans default to at most 25,000 included items and 5,000 entries buffe
 - Scan errors are aggregated rather than identifying every failed path.
 - DRM metadata covers only the Linux DRM sysfs interface. Other GPU providers and driver readiness may not be detected.
 - Resource/software readiness cannot be meaningfully passed or failed until workload requirements are supplied. Security readiness is not a host audit.
-- Filesystem, permission, mount, and metadata behavior vary across Linux distributions. CI targets Ubuntu 24.04; no Windows/macOS compatibility claim is made.
+- Filesystem, permission, mount, and metadata behavior vary across Linux distributions. CI targets Ubuntu 22.04 and 24.04; no Windows/macOS compatibility claim is made.
 - AICRE is not a security boundary against a hostile process with access to the host or scanned directory.
 
 ## Safe-use guidance
