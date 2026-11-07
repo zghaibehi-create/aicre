@@ -47,19 +47,23 @@ def evaluate_workload_profile(findings: Sequence[Finding], profile: str) -> list
             category="profile",
             status="detected" if valid else "not_checked",
             value={
-                "satisfied": ratio >= 1 if valid else None,
+                "satisfied": None,
                 "actual": actual,
                 "minimum": minimum,
-                "ratio": ratio,
+                "ratio": None,
                 "unit": unit,
                 "display_unit": "GiB" if divisor == GIB else unit,
                 "source_finding": source_id,
+                "comparison": "not_performed",
+                "observation_scope": "host_facing",
             },
             source=f"AICRE {profile} profile",
-            confidence="high" if valid else "low",
+            confidence="medium" if valid else "low",
             unit=unit,
-            limitations=() if valid else (
-                "Required observation unavailable, excluded, malformed, or timed out.",
+            limitations=(
+                "Host-facing observation only; effective process, container, cgroup, affinity, or filesystem quota limits are not established. Resource readiness remains unknown.",
+            ) if valid else (
+                "Required host observation unavailable, excluded, malformed, or timed out.",
             ),
         ))
 
