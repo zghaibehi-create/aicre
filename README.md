@@ -15,10 +15,16 @@ AICRE runs on Linux with Python 3.11 or newer and is installed from source.
 
 ## Sample output
 
-The following output was captured by the [GitHub Actions sample-report workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42370483317) on a GitHub-hosted Ubuntu 24.04 runner, using AICRE 0.2.1:
+The following output was captured by the [GitHub Actions sample-report workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42371048090) on a GitHub-hosted Ubuntu 24.04 runner, using AICRE 0.2.1 from the merge commit for PR #16:
 
 ```text
 AICRE 0.2.1 — profile: agent-development
+Observed values (host-facing; resource comparisons are not performed):
+  CPU: 4 (min 2 logical CPUs)
+  RAM: 15.6 GiB (min 8.0 GiB)
+  Free disk: 85.7 GiB (min 10.0 GiB)
+  git: detected
+  python3: detected
 [unknown] resource_readiness: Host-facing CPU, RAM, and root-storage observations are retained for context, but effective process/container limits are not established; resource thresholds are not evaluated and readiness remains unknown.
   evidence: profile.resource.cpu, profile.resource.memory, profile.resource.storage
 [pass] software_readiness: Compared PATH presence for required tools. Presence does not verify versions, configuration, security, or functionality.
@@ -29,6 +35,7 @@ AICRE 0.2.1 — profile: agent-development
   evidence: privacy.local_collection, privacy.user_exclusions
 [unknown] security_readiness: The process effective UID is nonzero; other host security controls were not assessed.
   evidence: security.effective_uid
+Note: unknown means not assessed, not failed.
 ```
 
 This sample describes a GitHub-hosted virtual runner, not a personal computer. Resource readiness remains `unknown` because the report does not establish effective process/container limits.
