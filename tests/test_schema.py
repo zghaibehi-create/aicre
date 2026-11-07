@@ -13,7 +13,6 @@ from aicre.schema import (
     validate_v1_report,
 )
 
-
 READINESS_KEYS = (
     "resource_readiness", "software_readiness", "compatibility_readiness",
     "privacy_readiness", "security_readiness",
