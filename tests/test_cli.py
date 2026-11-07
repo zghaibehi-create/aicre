@@ -410,3 +410,38 @@ def test_composite_average_excludes_unknown_dimensions():
     summary = _composite_summary(report, "report.json")
     assert summary["composite_score"] == 100
     assert summary["dimensions"]["software"] == "unknown"
+
+
+def test_composite_cli_subprocess_creates_summary_without_mutating_report(tmp_path):
+    import hashlib
+    import subprocess
+    import sys
+
+    report_path = tmp_path / "report.json"
+    command = [
+        sys.executable, "-m", "aicre", "report",
+        "--profile", "laptop-dev", "--output", "report.json",
+    ]
+
+    initial = subprocess.run(
+        command,
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert initial.returncode == 0, initial.stderr
+    before_hash = hashlib.sha256(report_path.read_bytes()).hexdigest()
+
+    composite = subprocess.run(
+        [*command, "--composite", "--force"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert composite.returncode == 0, composite.stderr
+    after_hash = hashlib.sha256(report_path.read_bytes()).hexdigest()
+
+    assert (tmp_path / "report.summary.json").is_file()
+    assert after_hash == before_hash
