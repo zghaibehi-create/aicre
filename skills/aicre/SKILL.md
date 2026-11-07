@@ -36,6 +36,6 @@ Use the installed `aicre` command. AICRE is Linux-only for now.
 ## Limitations
 
 - Directory scans are not atomic snapshots.
-- Resource checks use host-facing values and do not account for container limits.
+- CPU, RAM, and root-storage measurements are host-facing observations only. Effective process/container limits, cgroup quotas, CPU affinity, orchestrator reservations, and filesystem quotas are not established. Resource readiness therefore remains `unknown`; never infer Resource `pass` or `fail` from these measurements.
 - Tool detection checks PATH presence only; it does not verify versions or functionality.
 - AICRE does not assess agent configuration, MCP permissions, sandboxing, or dependency provenance.
