@@ -7,7 +7,7 @@ import pytest
 from aicre import cli
 from aicre.cli import main
 
-FIXTURE = {'schema_version':'2.0','aicre_version':'0.2.0','profile':'standard','generated_at':'2026-01-01T00:00:00Z','findings':[{'id':'cpu.logical','category':'resource','status':'detected','value':4,'unit':'count','source':'cpu','confidence':'high','collected_at':'2026-01-01T00:00:00Z','limitations':[]}],'readiness':{}}
+READINESS = {name: {'status': 'unknown', 'explanation': 'Not assessed.', 'evidence': []} for name in ('resource_readiness', 'software_readiness', 'compatibility_readiness', 'privacy_readiness', 'security_readiness')}\nFIXTURE = {'schema_version':'2.0','aicre_version':'0.2.0','profile':'standard','generated_at':'2026-01-01T00:00:00Z','findings':[{'id':'cpu.logical','category':'resource','status':'detected','value':4,'unit':'count','source':'cpu','confidence':'high','collected_at':'2026-01-01T00:00:00Z','limitations':[]}],'readiness':READINESS}
 
 def test_explicit_html_output_creates_parents_and_replaces_regular_file(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(cli, 'build_report', lambda **kwargs: FIXTURE)
@@ -32,7 +32,7 @@ def test_report_diff_json_exposes_all_classifications(tmp_path, capsys):
     before = dict(FIXTURE)
     before['findings'] = [dict(FIXTURE['findings'][0])]
     after = dict(FIXTURE)
-    after['findings'] = [dict(FIXTURE['findings'][0]), {'id':'ram','check_id':'ram','category':'resource','status':'detected','value':8,'source':'mem','confidence':'high','unit':'GiB','limitations':[]}]
+    after['findings'] = [dict(FIXTURE['findings'][0]), {'id':'ram','category':'resource','status':'detected','value':8,'unit':'GiB','source':'mem','confidence':'high','collected_at':'2026-01-01T00:00:00Z','limitations':[]}]
     left, right = tmp_path/'before.json', tmp_path/'after.json'
     left.write_text(json.dumps(before), encoding='utf-8')
     right.write_text(json.dumps(after), encoding='utf-8')
