@@ -1,7 +1,7 @@
 import copy
 import json
-import uuid
 from pathlib import Path
+import uuid
 
 import fastjsonschema
 import pytest
