@@ -10,8 +10,9 @@ from typing import Any
 def _markdown_inline(value: Any) -> str:
     """Escape untrusted text so it cannot create Markdown structure."""
     text = str(value).replace("\r", " ").replace("\n", " ")
+    text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     text = text.replace(chr(96), r"\`")
-    return re.sub(r"([\\*_{}\[\]()#+.!|>~-])", r"\\\1", text)
+    return re.sub(r"([\\*_{}\[\]()#+.!|~-])", r"\\\1", text)
 
 
 def _markdown_cell(value: Any) -> str:
