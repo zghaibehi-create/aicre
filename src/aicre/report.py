@@ -21,7 +21,7 @@ DEFAULT_TIMEOUT_SECONDS = 15.0
 
 def build_report(
     *,
-    profile: str = "standard",
+    profile: str | None = None,
     excludes: Sequence[str] = (),
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
     include_tools: bool = True,
@@ -33,7 +33,8 @@ def build_report(
     subprocesses, remote connections, remediation, or user-file content reads
     are performed by this orchestrator.
     """
-    if profile not in supported_profiles():
+    selected_profile = "standard" if profile is None else profile
+    if selected_profile not in supported_profiles():
         raise ValueError(f"unsupported profile: {profile}")
     if not math.isfinite(timeout) or timeout < 0:
         raise ValueError("timeout must be a finite, non-negative number")
@@ -44,7 +45,8 @@ def build_report(
     if include_tools:
         findings.extend(discover_tools(patterns, deadline=deadline))
     findings.extend(evaluate_compatibility("standard", deadline=deadline))
-    findings.extend(evaluate_workload_profile(findings, profile))
+    if profile is not None:
+        findings.extend(evaluate_workload_profile(findings, selected_profile))
     findings.extend([
         Finding(
             id="privacy.local_collection",
@@ -80,7 +82,7 @@ def build_report(
     return {
         "schema_version": REPORT_SCHEMA_VERSION,
         "aicre_version": __version__,
-        "profile": profile,
+        "profile": selected_profile,
         "generated_at": utc_now(),
         "findings": [finding.to_dict() for finding in findings],
         "readiness": {
