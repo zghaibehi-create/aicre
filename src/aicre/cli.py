@@ -376,7 +376,8 @@ def main(argv: list[str] | None = None) -> int:
     except (ScanError, ValueError, OSError, RuntimeError) as exc:
         print(f"AICRE: {exc}", file=sys.stderr)
         if ("unsupported report format" in str(exc)
-                or "requires the optional ReportLab dependency" in str(exc)\n                or "PDF output does not support" in str(exc)):
+                or "requires the optional ReportLab dependency" in str(exc)
+                or "PDF output does not support" in str(exc)):
             return EXIT_UNSUPPORTED_FORMAT
         return 2
     return 2
