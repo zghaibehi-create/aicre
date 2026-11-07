@@ -228,3 +228,129 @@ def test_force_requires_an_output_destination(arguments, capsys):
 
     assert exit_info.value.code == 2
     assert "--force requires --output" in capsys.readouterr().err
+
+
+
+def test_unknown_profile_is_a_usage_error_listing_available_profiles(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(["report", "--profile", "unknown"])
+    assert exit_info.value.code == 2
+    error = capsys.readouterr().err
+    assert "laptop-dev" in error
+    assert "agent-workstation" in error
+
+
+def test_composite_requires_a_report_output_path():
+    with pytest.raises(SystemExit) as exit_info:
+        main(["report", "--composite"])
+    assert exit_info.value.code == 2
+
+
+def test_composite_writes_separate_summary_without_mutating_main_report(
+    tmp_path, monkeypatch, capsys
+):
+    from aicre.report import serialize_report
+
+    gib = 1024 ** 3
+    report = {
+        "schema_version": "2.0",
+        "aicre_version": "0.2.1",
+        "profile": "laptop-dev",
+        "generated_at": "2026-11-07T00:00:00Z",
+        "findings": [
+            {
+                "id": "profile.resource.cpu", "status": "detected",
+                "value": {"actual": 1, "minimum": 4, "ratio": 0.25},
+            },
+            {
+                "id": "profile.resource.memory", "status": "detected",
+                "value": {"actual": 8 * gib, "minimum": 16 * gib, "ratio": 0.5},
+            },
+            {
+                "id": "profile.resource.storage", "status": "detected",
+                "value": {"actual": 30 * gib, "minimum": 20 * gib, "ratio": 1.5},
+            },
+            {
+                "id": "profile.software.node", "status": "not_detected",
+                "value": {"required_tool": "node"},
+            },
+            {
+                "id": "compatibility.platform.linux", "status": "detected",
+                "value": {"satisfied": True},
+            },
+            {
+                "id": "compatibility.python.minimum", "status": "detected",
+                "value": {"satisfied": True},
+            },
+            {"id": "security.effective_uid", "status": "detected", "value": 0},
+        ],
+        "readiness": {
+            "resource_readiness": {"status": "fail", "explanation": "fixture", "evidence": []},
+            "software_readiness": {"status": "warning", "explanation": "fixture", "evidence": []},
+            "compatibility_readiness": {"status": "pass", "explanation": "fixture", "evidence": []},
+            "privacy_readiness": {"status": "pass", "explanation": "fixture", "evidence": []},
+            "security_readiness": {"status": "warning", "explanation": "fixture", "evidence": []},
+        },
+    }
+    original = serialize_report(report)
+    monkeypatch.setattr(
+        "aicre.cli.build_report",
+        lambda **kwargs: report,
+    )
+    output = tmp_path / "report.json"
+
+    assert main([
+        "report", "--profile", "laptop-dev", "--output", str(output), "--composite",
+    ]) == 0
+    capsys.readouterr()
+
+    summary_path = tmp_path / "report.summary.json"
+    saved_report = output.read_text(encoding="utf-8")
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert saved_report == original
+    assert report == json.loads(original)
+    assert summary["derived_from"] == "report.json"
+    assert summary["profile"] == "laptop-dev"
+    assert summary["composite_score"] == 46
+    assert summary["dimensions"] == {
+        "resource": "fail",
+        "software": "warning",
+        "compatibility": "pass",
+        "privacy": "pass",
+        "security": "warning",
+    }
+    assert 1 <= len(summary["recommendations"]) <= 5
+    assert any("node" in item and "PATH" in item for item in summary["recommendations"])
+    assert "schema_version" not in summary
+
+
+def test_composite_summary_does_not_overwrite_existing_summary_without_force(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.setattr(
+        "aicre.cli.build_report",
+        lambda **kwargs: {
+            "schema_version": "2.0",
+            "aicre_version": "0.2.1",
+            "profile": "standard",
+            "generated_at": "2026-11-07T00:00:00Z",
+            "findings": [],
+            "readiness": {
+                name: {"status": "unknown", "explanation": "fixture", "evidence": []}
+                for name in (
+                    "resource_readiness", "software_readiness", "compatibility_readiness",
+                    "privacy_readiness", "security_readiness",
+                )
+            },
+        },
+    )
+    output = tmp_path / "report.json"
+    summary = tmp_path / "report.summary.json"
+    summary.write_text("KEEP", encoding="utf-8")
+
+    assert main([
+        "report", "--output", str(output), "--composite",
+    ]) == 2
+    assert summary.read_text(encoding="utf-8") == "KEEP"
+    assert not output.exists()
+    assert "Summary report already exists" in capsys.readouterr().err
