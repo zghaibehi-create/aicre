@@ -24,10 +24,11 @@ def test_scan_requires_output_argument(tmp_path):
     assert exit_info.value.code == 2
 
 
-def test_scan_requires_profile_when_source_is_omitted():
+def test_scan_requires_profile_when_source_is_omitted(capsys):
     with pytest.raises(SystemExit) as exit_info:
         main(["scan"])
     assert exit_info.value.code == 2
+    assert "scan without SOURCE requires --profile" in capsys.readouterr().err
 
 
 def test_legacy_directory_scan_success_and_user_exclusion(tmp_path, capsys):
@@ -90,7 +91,30 @@ def test_system_json_command_emits_full_valid_report(capsys):
     assert not any(item["id"].startswith("tool.") for item in data["findings"])
 
 
-def test_inventory_and_readiness_commands(capsys):
+def test_inventory_and_readiness_commands(capsys, monkeypatch):
+    report = {
+        "aicre_version": "0.2.0",
+        "profile": "standard",
+        "findings": [{
+            "id": "tool.git", "category": "software", "status": "detected",
+            "value": "fixture", "source": "test", "confidence": "high",
+            "unit": "", "limitations": [],
+        }],
+        "readiness": {
+            name: {"status": "unknown", "explanation": "fixture", "evidence": []}
+            for name in (
+                "resource_readiness", "software_readiness", "compatibility_readiness",
+                "privacy_readiness", "security_readiness",
+            )
+        },
+    }
+
+    def fake_build_report(*, profile, excludes, timeout, include_tools=True):
+        assert profile == "standard"
+        assert include_tools
+        return report
+
+    monkeypatch.setattr("aicre.cli.build_report", fake_build_report)
     assert main(["inventory", "--timeout", "0"]) == 0
     inventory_text = capsys.readouterr().out
     assert "tool.git" in inventory_text

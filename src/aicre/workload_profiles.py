@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from .models import Finding
 
+from .models import Finding
 
 GIB = 1024 ** 3
 PROFILES = {

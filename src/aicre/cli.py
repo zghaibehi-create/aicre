@@ -48,9 +48,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    scan = subparsers.add_parser("scan", help="inventory a directory or run the standard system profile")
-    scan.add_argument("source", nargs="?", help="directory to scan (omit for a system profile)")
-    scan.add_argument("--profile", choices=supported_profiles(), default="standard", help="system inventory/workload profile")
+    scan = subparsers.add_parser("scan", help="inventory a directory or run a selected system profile")
+    scan.add_argument("source", nargs="?", help="directory to scan (omit only when --profile is supplied)")
+    scan.add_argument("--profile", choices=supported_profiles(), default=None,
+                      help="system inventory/workload profile (required when SOURCE is omitted)")
     scan.add_argument("--output", help="JSON report path")
     scan.add_argument("--exclude", action="append", default=[],
                       help="private relative path/glob to exclude; repeatable")
@@ -175,8 +176,8 @@ def main(argv: list[str] | None = None) -> int:
                     f"errors: {summary['scan_errors']}."
                 )
                 return 0
-            if args.profile not in supported_profiles():
-                parser.error("unsupported workload profile")
+            if args.profile is None:
+                parser.error("scan without SOURCE requires --profile")
             if args.output is not None:
                 reason = path_exclusion_reason(args.output, args.exclude)
                 if reason:

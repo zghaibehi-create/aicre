@@ -20,6 +20,12 @@ def test_agent_development_profile_passes_baseline():
     result = evaluate_readiness(base + evaluate_workload_profile(base, "agent-development"), "agent-development")
     assert result["resource_readiness"].status == "pass"
     assert result["software_readiness"].status == "pass"
+    assert result["resource_readiness"].evidence == (
+        "profile.resource.cpu", "profile.resource.memory", "profile.resource.storage"
+    )
+    assert result["software_readiness"].evidence == (
+        "profile.software.git", "profile.software.python3"
+    )
 
 def test_resource_below_minimum_fails():
     base = observations()

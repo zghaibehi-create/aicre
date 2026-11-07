@@ -11,6 +11,17 @@ from aicre.workload_profiles import PROFILES
 def _dimension(name: str, status: str, explanation: str, evidence: Sequence[str] = ()) -> ReadinessDimension:
     return ReadinessDimension(name, status, explanation, tuple(evidence))
 
+
+def _resource_evidence(findings: Sequence[Finding]) -> tuple[str, ...]:
+    terms = ("cpu", "ram", "memory", "storage", "disk")
+    return tuple(
+        item.id
+        for item in findings
+        if isinstance(item, Finding)
+        and any(term in f"{item.id} {item.category}".lower() for term in terms)
+    )
+
+
 def _uid_value(value: Any) -> int | None:
     if isinstance(value, int) and not isinstance(value, bool):
         return value
@@ -35,14 +46,15 @@ def evaluate_readiness(findings: Sequence[Finding], profile: str = "standard") -
     if profile not in PROFILES:
         raise ValueError(f"unsupported profile: {profile}")
     by_id = {item.id: item for item in findings if isinstance(item, Finding)}
-    resource_ids = tuple(key for key in by_id if key.startswith(("resource.", "profile.resource.")))
     if profile == "standard":
+        resource_ids = _resource_evidence(findings)
         resource = _dimension("resource_readiness", "unknown",
-            "No workload baseline is defined; CPU, RAM, and storage observations are informational only.", resource_ids)
+            "No workload resource baseline is defined, so CPU, RAM, and storage capacity cannot be assessed against requirements.", resource_ids)
         software = _dimension("software_readiness", "unknown",
             "No mandatory software manifest is defined for the inventory-only profile.",
             tuple(sorted(key for key in by_id if key.startswith("tool."))))
     else:
+        resource_ids = tuple(key for key in by_id if key.startswith(("resource.", "profile.resource.")))
         status, evidence = _profile_status(by_id, "profile.resource", ("cpu", "memory", "storage"))
         resource = _dimension("resource_readiness", status,
             "Compared CPU count, total RAM, and free root-filesystem storage with documented agent-development minimums. This is not a performance guarantee.",
