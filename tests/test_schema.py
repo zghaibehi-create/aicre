@@ -6,7 +6,8 @@ from pathlib import Path
 import fastjsonschema
 import pytest
 
-from aicre.schema import (\n    ReportValidationError,\n    canonical_report,\n    stable_finding_id,\n    validate_v1_report,\n)
+from aicre.schema import (
+    ReportValidationError,\n    canonical_report,\n    stable_finding_id,\n    validate_v1_report,\n)
 
 
 READINESS_KEYS = (
