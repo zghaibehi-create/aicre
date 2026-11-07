@@ -84,3 +84,9 @@ def test_text_renderer_is_plain_text_not_markdown():
     assert "##" not in output
     assert "|---|" not in output
     assert "cpu.count [detected]" in output
+
+
+
+def test_pdf_renderer_fails_clearly_for_arabic_with_builtin_fonts():
+    with pytest.raises(RuntimeError, match="PDF output does not support"):
+        render_pdf({"findings": [{"value": "مرحبا"}]})
