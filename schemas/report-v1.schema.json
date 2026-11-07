@@ -4,32 +4,178 @@
   "title": "AICRE Canonical Scan Report 1.0.0",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "aicre_version", "scan_id", "generated_at", "profile", "findings", "readiness"],
+  "required": [
+    "schema_version",
+    "aicre_version",
+    "scan_id",
+    "generated_at",
+    "profile",
+    "findings",
+    "readiness"
+  ],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
-    "aicre_version": {"type": "string"},
-    "scan_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
-    "generated_at": {"type": "string", "format": "date-time"},
-    "profile": {"type": "string", "minLength": 1},
-    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
-    "readiness": {"type": "object"}
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "aicre_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scan_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_readiness",
+        "software_readiness",
+        "compatibility_readiness",
+        "privacy_readiness",
+        "security_readiness"
+      ],
+      "properties": {
+        "resource_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "software_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "compatibility_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "privacy_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        },
+        "security_readiness": {
+          "$ref": "#/$defs/readiness_dimension"
+        }
+      }
+    }
   },
   "$defs": {
     "finding": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "check_id", "category", "status", "value", "source", "confidence", "unit", "collected_at", "limitations"],
+      "required": [
+        "id",
+        "check_id",
+        "category",
+        "status",
+        "value",
+        "source",
+        "confidence",
+        "unit",
+        "collected_at",
+        "limitations"
+      ],
       "properties": {
-        "id": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-        "check_id": {"type": "string", "minLength": 1},
-        "category": {"type": "string", "minLength": 1},
-        "status": {"enum": ["detected", "not_detected", "unsupported", "permission_denied", "error", "not_checked"]},
-        "value": {"type": ["object", "array", "string", "number", "integer", "boolean", "null"]},
-        "source": {"type": "string", "minLength": 1},
-        "confidence": {"enum": ["high", "medium", "low"]},
-        "unit": {"type": ["string", "null"]},
-        "collected_at": {"type": "string", "format": "date-time"},
-        "limitations": {"type": "array", "items": {"type": "string"}}
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "detected",
+            "not_detected",
+            "unsupported",
+            "permission_denied",
+            "error",
+            "not_checked"
+          ]
+        },
+        "value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "readiness_dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "explanation",
+        "evidence"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "warning",
+            "fail",
+            "unknown"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
       }
     }
   }
