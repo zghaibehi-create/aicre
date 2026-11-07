@@ -13,6 +13,26 @@ AICRE runs on Linux with Python 3.11 or newer and is installed from source.
 3. Install AICRE: `python -m pip install -e '.[dev]'`.
 4. Assess the agent-development profile: `aicre readiness --profile agent-development`.
 
+## Sample output
+
+The following readiness output was captured by the [GitHub Actions sample-report workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42369934343) on a GitHub-hosted Ubuntu 24.04 virtual runner, using the code after PR #10:
+
+```text
+AICRE 0.2.0 — profile: agent-development
+[unknown] resource_readiness: Host-facing CPU, RAM, and root-storage observations are recorded, but effective process/container limits are not established; resource thresholds are not evaluated and readiness remains unknown.
+  evidence: profile.resource.cpu, profile.resource.memory, profile.resource.storage
+[pass] software_readiness: Compared allowlisted PATH presence for required tools. Presence does not verify versions, configuration, security, or functionality.
+  evidence: profile.software.git, profile.software.python3
+[pass] compatibility_readiness: Linux platform and minimum Python compatibility are assessed from explicit runtime checks only.
+  evidence: compatibility.platform.linux, compatibility.python.minimum
+[pass] privacy_readiness: Describes AICRE's local collection and exclusion behavior only; it is not a host-wide privacy guarantee.
+  evidence: privacy.local_collection, privacy.user_exclusions
+[unknown] security_readiness: The process effective UID is nonzero; other host security controls were not assessed.
+  evidence: security.effective_uid
+```
+
+This sample describes a GitHub-hosted virtual runner, not a personal computer. Host-facing resource observations are informational only; Resource readiness remains `unknown`.
+
 ## Privacy and collection boundaries
 
 AICRE uses only narrowly scoped local sources: Python's `platform`, `os`, `sys`, and `sysconfig` interfaces; Linux `/etc/os-release`/`/usr/lib/os-release`, `/proc/meminfo`, `/sys/class/drm` vendor/device identifiers; `shutil.disk_usage("/")`; and `shutil.which` for a fixed allowlist of executable names. The allowlist is `git`, `python3`, `pip`, `uv`, `pipx`, `node`, `npm`, `docker`, `podman`, `codex`, `claude`, `aider`, and `ollama`. Tool detection searches permitted `PATH` entries only: `detected` does not verify version or functionality, and `not_detected` does not prove the tool is absent elsewhere.
