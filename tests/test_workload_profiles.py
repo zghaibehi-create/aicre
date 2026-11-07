@@ -15,23 +15,63 @@ def observations():
             finding("tool.python3", "/usr/bin/python3", category="software")]
 
 
-def test_agent_development_profile_passes_baseline():
+def test_resource_readiness_stays_unknown_when_only_host_observations_exist():
     base = observations()
-    result = evaluate_readiness(base + evaluate_workload_profile(base, "agent-development"), "agent-development")
-    assert result["resource_readiness"].status == "pass"
-    assert result["software_readiness"].status == "pass"
+    checks = evaluate_workload_profile(base, "agent-development")
+    result = evaluate_readiness(base + checks, "agent-development")
+
+    assert result["resource_readiness"].status == "unknown"
+    assert "effective process/container limits are not established" in result["resource_readiness"].explanation
     assert result["resource_readiness"].evidence == (
         "profile.resource.cpu", "profile.resource.memory", "profile.resource.storage"
     )
-    assert result["software_readiness"].evidence == (
-        "profile.software.git", "profile.software.python3"
-    )
+    for check in checks:
+        if check.id.startswith("profile.resource."):
+            assert check.status == "detected"
+            assert check.value["satisfied"] is None
+            assert check.value["comparison"] == "not_performed"
+            assert check.value["observation_scope"] == "host_facing"
+            assert any("effective process" in item for item in check.limitations)
 
-def test_resource_below_minimum_fails():
-    base = observations()
-    base[0] = finding("resource.cpu.logical_count", 1)
-    result = evaluate_readiness(base + evaluate_workload_profile(base, "agent-development"), "agent-development")
-    assert result["resource_readiness"].status == "fail"
+
+def test_host_observations_above_or_below_threshold_never_pass_or_fail_resource():
+    for cpu_count in (1, 8):
+        base = observations()
+        base[0] = finding("resource.cpu.logical_count", cpu_count)
+        checks = evaluate_workload_profile(base, "agent-development")
+        result = evaluate_readiness(base + checks, "agent-development")
+        assert result["resource_readiness"].status == "unknown"
+        cpu_check = next(item for item in checks if item.id == "profile.resource.cpu")
+        assert cpu_check.value["actual"] == cpu_count
+        assert cpu_check.value["satisfied"] is None
+
+
+def test_malformed_resource_observations_remain_unknown():
+    malformed_cases = (
+        ("resource.cpu.logical_count", True, None),
+        ("resource.memory.total_bytes", -1, -1),
+        ("resource.storage.root", {"free_bytes": False}, False),
+    )
+    for source_id, value, observed_actual in malformed_cases:
+        base = observations()
+        index = next(i for i, item in enumerate(base) if item.id == source_id)
+        base[index] = finding(source_id, value)
+        checks = evaluate_workload_profile(base, "agent-development")
+        result = evaluate_readiness(base + checks, "agent-development")
+        assert result["resource_readiness"].status == "unknown"
+        resource_name = {
+            "resource.cpu.logical_count": "cpu",
+            "resource.memory.total_bytes": "memory",
+            "resource.storage.root": "storage",
+        }[source_id]
+        resource_check = next(
+            item for item in checks
+            if item.id == f"profile.resource.{resource_name}"
+        )
+        assert resource_check.status == "not_checked"
+        assert resource_check.value["satisfied"] is None
+        assert resource_check.value["actual"] == observed_actual
+
 
 def test_missing_required_tool_fails():
     base = observations()

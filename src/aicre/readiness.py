@@ -57,7 +57,7 @@ def evaluate_readiness(findings: Sequence[Finding], profile: str = "standard") -
         resource_ids = tuple(key for key in by_id if key.startswith(("resource.", "profile.resource.")))
         status, evidence = _profile_status(by_id, "profile.resource", ("cpu", "memory", "storage"))
         resource = _dimension("resource_readiness", status,
-            "Compared CPU count, total RAM, and free root-filesystem storage with documented agent-development minimums. This is not a performance guarantee.",
+            "Host-facing CPU, RAM, and root-storage observations are recorded, but effective process/container limits are not established; resource thresholds are not evaluated and readiness remains unknown.",
             evidence or resource_ids)
         status, evidence = _profile_status(by_id, "profile.software", tuple(PROFILES[profile]["required_tools"]))
         software = _dimension("software_readiness", status,
