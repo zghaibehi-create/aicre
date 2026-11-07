@@ -1,37 +1,41 @@
 ---
 name: aicre
-description: Check whether a Linux machine or a folder is ready for an AI agent, using the local-first aicre CLI. Use before starting agent work, or when the user asks to inventory the environment or scan a messy folder. Reads metadata only.
+description: Use the AICRE CLI to inventory a Linux environment, assess its five readiness dimensions, or collect metadata about a directory. Use when a user asks for an AICRE readiness check or directory inventory.
 ---
 
-# aicre skill
+# AICRE
 
-Run the `aicre` CLI, read its report, and explain the result honestly.
+Use the installed `aicre` command. AICRE is Linux-only for now.
 
 ## Rules
 
-- Linux only. On Windows or macOS, say aicre is not supported there and stop.
-- aicre must already be installed (`aicre --version`). Never install software without asking.
-- Metadata only. Never read file contents, `.env` files, keys or credentials.
-- Never move, rename or delete the user's files. aicre does not need to.
-- Never claim a machine or folder is "safe" or "secure". aicre is an inventory tool, not a sandbox or a security product.
-- Report values `not_checked` or `unknown` as unknown. They do not mean absent or passing.
-- Reports can contain hardware details and executable paths. Tell the user to review a report before sharing it.
+- Check availability with `aicre --version`. Do not install software unless the user asks.
+- Collect metadata only. Do not read file contents, credentials, keys, or `.env` contents.
+- Do not move, rename, delete, or modify user files.
+- Never describe a machine or folder as safe or secure. AICRE is not a security product, sandbox, malware scanner, or secret scanner.
+- Treat `not_checked` and `unknown` as unknown, not as absent or passing.
+- Reports may contain hardware details and executable paths. Ask the user to review a report before sharing it.
 
-## Check the machine
+## Assess system readiness
 
 1. Run `aicre readiness --profile agent-development`.
-2. Summarize the five dimensions (Resource, Software, Compatibility, Privacy, Security) as pass, warning, fail or unknown, each with its evidence.
-3. If the user wants the full report: `aicre report --format json --output "$HOME/aicre-report.json"`. Do not use `--force` unless the user asks to overwrite an existing report.
+2. Explain Resource, Software, Compatibility, Privacy, and Security separately, using each reported status and its evidence.
+3. Do not calculate or imply a composite score.
+4. For the full JSON report, run `aicre report --profile agent-development --format json`.
+5. To save it to a new file, add `--output "<path>"`. Do not overwrite an existing file unless the user explicitly approves `--force`.
 
-## Scan a folder
+## Inventory a directory
 
-1. Ask which folder and which subfolders to exclude.
-2. Run `aicre scan "<folder>" --output "<path outside the folder>" --exclude '<pattern>'`. The report must be written outside the scanned folder.
-3. If `scan_errors` is above zero, say the inventory is incomplete.
-4. Based on the report, suggest a folder structure and list likely duplicates. Do not apply anything. Wait for the user's approval.
+1. Confirm the directory and any private paths the user wants excluded.
+2. Choose a report destination outside the directory.
+3. Run `aicre scan "<directory>" --output "<report-path>"`.
+4. Repeat `--exclude "<pattern>"` for each path pattern the user wants excluded.
+5. If the report summary has `scan_errors` above zero, state that the inventory is incomplete.
+6. Describe only metadata present in the report. Do not infer file contents, duplicates, or a recommended folder structure.
 
-## Limits to state when relevant
+## Limitations
 
-- The scan is not an atomic snapshot.
-- Resource checks use host values and ignore container limits.
-- Tool detection only checks PATH. It does not verify versions.
+- Directory scans are not atomic snapshots.
+- Resource checks use host-facing values and do not account for container limits.
+- Tool detection checks PATH presence only; it does not verify versions or functionality.
+- AICRE does not assess agent configuration, MCP permissions, sandboxing, or dependency provenance.
