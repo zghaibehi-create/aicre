@@ -6,12 +6,14 @@ from aicre.workload_profiles import GIB, evaluate_workload_profile
 def finding(identifier, value, status="detected", category="resource"):
     return Finding(id=identifier, category=category, status=status, value=value, source="test")
 
+
 def observations():
     return [finding("resource.cpu.logical_count", 8),
             finding("resource.memory.total_bytes", 16 * GIB),
             finding("resource.storage.root", {"total_bytes": 100 * GIB, "free_bytes": 50 * GIB}),
             finding("tool.git", "/usr/bin/git", category="software"),
             finding("tool.python3", "/usr/bin/python3", category="software")]
+
 
 def test_agent_development_profile_passes_baseline():
     base = observations()
