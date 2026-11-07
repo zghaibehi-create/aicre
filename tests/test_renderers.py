@@ -68,3 +68,19 @@ def test_markdown_escapes_untrusted_structure_and_uses_safe_json_fence():
     assert "&lt;script&gt;" in text
     assert (chr(96) * 4) + "json" in text
     assert "## injected" in text  # remains inside the dynamically sized JSON fence
+
+
+
+def test_text_renderer_is_plain_text_not_markdown():
+    report = {
+        "scan_id": "abc",
+        "generated_at": "today",
+        "profile": "standard",
+        "readiness": {"cpu": {"status": "unknown", "explanation": "No result."}},
+        "findings": [{"check_id": "cpu.count", "status": "detected", "source": "sys", "value": 4}],
+    }
+    output = render_text(report)
+    assert "AICRE scan report" in output
+    assert "##" not in output
+    assert "|---|" not in output
+    assert "cpu.count [detected]" in output
