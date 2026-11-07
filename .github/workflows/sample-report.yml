@@ -30,7 +30,7 @@ jobs:
           python -m pip install --no-build-isolation --no-deps -e '.[dev]'
           python -m pip check
 
-      - { name: "Check bidi controls", run: "git grep -nP '[\\x{202A}-\\x{202E}\\x{2066}-\\x{2069}\\x{200E}\\x{200F}]' -- .; rc=$?; if [ $rc -eq 0 ]; then exit 1; elif [ $rc -ne 1 ]; then exit $rc; fi" }
+      - { name: "Check bidi controls", run: "if git grep -nP '[\\x{202A}-\\x{202E}\\x{2066}-\\x{2069}\\x{200E}\\x{200F}]' -- .; then exit 1; else rc=$?; test $rc -eq 1; fi" }
       - name: Show AICRE version
         run: aicre --version
 
