@@ -1,4 +1,4 @@
-# AICRE 0.2.0 — Linux-first inventory and readiness preview
+# AICRE 0.2.1 — Linux-first inventory and readiness preview
 
 **Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
@@ -16,7 +16,7 @@ Reports can contain hardware details, software availability, and executable path
 
 Each finding has a stable ID, category, collection status, value and optional unit, named source, confidence, UTC collection timestamp, and limitations. Finding statuses are `detected`, `not_detected`, `unsupported`, `permission_denied`, `error`, and `not_checked`.
 
-Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. AICRE does not calculate a composite score. In the inventory-only `standard` profile, Resource and Software readiness remain `unknown` because no workload resource baseline or required software manifest is applied. The optional `agent-development` profile checks only PATH presence for its required tools; its Resource readiness remains `unknown` because host-facing measurements do not establish effective process/container limits. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
+Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. Resource and Software readiness are evaluated independently. The default `standard` profile remains inventory-only and leaves both dimensions `unknown`. Workload profiles may assess PATH presence for required tools, but host-facing CPU, RAM, and storage observations are never used to pass or fail Resource readiness; it remains `unknown` until effective process/container limits can be established. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
 
 The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
 
@@ -99,13 +99,33 @@ MIT. See [LICENSE](LICENSE).
 
 ## Workload profiles
 
-The default `standard` profile is inventory-only and deliberately leaves Resource and Software readiness unknown. The optional `agent-development` profile records host-facing CPU count, total RAM, and free root-filesystem storage alongside project-defined reference thresholds (>=2 CPUs, >=8 GiB RAM, >=10 GiB free storage). Because effective process/container, cgroup, CPU-affinity, and filesystem-quota limits are not established, these observations are not used to pass or fail Resource readiness; that dimension remains `unknown`. Software readiness can assess only PATH presence of Git and Python 3, not their versions, configuration, security, or functionality.
+The default `standard` profile is inventory-only. The `agent-development`
+profile is retained for compatibility. Additional profiles are listed below.
+The CPU, RAM, and storage values are project reference thresholds only; they are
+not compared into Resource readiness because effective process/container limits
+are not established.
+
+| Profile | Reference CPU | Reference RAM | Reference free storage | Required tools |
+|---|---:|---:|---:|---|
+| `agent-development` | 2 | 8 GiB | 10 GiB | git, python3 |
+| `laptop-dev` | 4 | 16 GiB | 20 GiB | git, python3, node |
+| `agent-workstation` | 8 | 32 GiB | 50 GiB | git, python3, docker, ollama |
+| `ci-runner` | 2 | 8 GiB | 10 GiB | git, python3, pip |
+
+Resource observations are retained for context only. AICRE does not establish effective process/container limits, cgroup quotas, CPU affinity, orchestrator reservations, or filesystem quotas. Therefore profile thresholds are not compared into Resource `pass` or `fail`; Resource readiness remains `unknown`. Software readiness assesses PATH presence only; it does not verify versions, configuration, security, or functionality.
 
 ```bash
 aicre readiness --profile agent-development
 aicre report --profile agent-development --format json
 ```
 
-This is an advisory project-defined minimum, not a vendor specification or performance/safety guarantee. It does not assess local model inference, GPU drivers, concurrency, agent configuration, MCP permissions, sandboxing, or dependency provenance. Tool presence does not verify version or functionality.
+These are project-defined minimums, not vendor specifications or performance
+or safety guarantees. No profile currently requires a GPU. AICRE does not
+assess local model inference performance, drivers, concurrency, agent
+configuration, MCP permissions, sandboxing, or dependency provenance.
 
-**Resource limitation:** `os.cpu_count()`, `/proc/meminfo`, and `shutil.disk_usage("/")` provide host-facing observations, not a portable measurement of effective resources available to the process. AICRE does not establish cgroup v1/v2 limits, CPU affinity, orchestrator reservations, or filesystem quotas. Consequently, the `agent-development` profile preserves these observations for context but does not compare them into a Resource `pass` or `fail`; Resource readiness remains `unknown`. Container-aware assessment is deferred until it can be implemented and independently tested without overstating effective capacity.
+**Container and constrained-environment limitation:** resource observations
+remain host-facing and do not account for cgroup CPU/memory quotas or
+CPU-affinity restrictions. Treat the result as a host-observation-only
+assessment.
+
