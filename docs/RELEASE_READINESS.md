@@ -1,6 +1,6 @@
 # AICRE 0.3.0 — Release Readiness and Residual-Risk Decision
 
-**Status:** 0.3.0 release candidate; final candidate CI is pending.  
+**Status:** 0.3.0 candidate validation passed; awaiting publication decision.  
 **Current package version:** 0.3.0.  
 **Target:** 0.3.0.  
 **Release rule:** do not tag, publish, or announce 0.3.0 until the final candidate has been validated and the project owner records a go decision.
@@ -57,8 +57,9 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only withi
 - [x] Residual risks RR-01 through RR-08 documented with explicit dispositions.
 - [x] **Final main test workflow after PR #33:** run [42386187695](https://github.com/zghaibehi-create/aicre/actions/runs/42386187695), all six matrix jobs passed on commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12`.
 - [x] **Final main install/artifact inspection workflow after PR #33:** run [42386187780](https://github.com/zghaibehi-create/aicre/actions/runs/42386187780), all six matrix jobs passed on the same commit. It built wheel and sdist, inspected archive contents and metadata, checked version consistency and absence of runtime dependencies, installed both artifacts into clean virtual environments, and exercised CLI/report commands.
-- [ ] **0.3.0 release-candidate validation:** candidate branch now carries version 0.3.0. Run the complete test and install/artifact-inspection matrix against the exact candidate commit before publication.
-- [ ] **Final consistency and approval:** align version metadata, `aicre.__version__`, CLI/report tests, README, changelog, security model, schemas, finding IDs, and release notes; then record the project owner's explicit go/no-go decision.
+- [x] **0.3.0 release-candidate validation:** PR #35 merge validation passed on the exact integrated candidate tree: Tests run #566 (6/6), Install smoke run #38 (6/6), and Sample report run #19 (passed). The install-smoke run built and inspected wheel/sdist, checked metadata and zero runtime dependencies, installed both artifacts in clean virtual environments, and exercised CLI/report behavior. Evidence is recorded in `LINUX_ACCEPTANCE.md`.
+- [x] **Final consistency:** package metadata, `aicre.__version__`, CLI/report tests, README, changelog, security model, schemas, finding-ID reference, and issue template are aligned at 0.3.0; the CI artifact-inspection workflow confirmed version metadata consistency.
+- [ ] **Publication authorization and execution:** record the owner's final go/no-go decision, create the `v0.3.0` tag, and publish the GitHub pre-release with the validated source and release notes.
 
 ## 4. Release execution checklist
 
@@ -74,4 +75,4 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only withi
 
 ## 5. Current engineering recommendation
 
-**GO for final validation of the 0.3.0 candidate; NO-GO for publication until candidate CI and artifact inspection pass.** The owner deferred the third-party provenance audit, accepted the AI-assisted internal review in place of an external review for this experimental release, and accepted the Ubuntu CI matrix as Linux support evidence. These decisions are recorded transparently and do not imply an external audit or a test on the owner's own machine.
+**GO for 0.3.0 pre-release publication.** The candidate passed the full test, install/artifact-inspection, and sample-report workflows. The owner deferred the third-party provenance audit and accepted the AI-assisted internal review in place of an external review for this experimental release. The Ubuntu CI matrix is accepted as Linux support evidence; the owner's personal machine was not tested. No external audit or host-security certification is claimed.
