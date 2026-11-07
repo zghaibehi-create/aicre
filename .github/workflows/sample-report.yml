@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - '.github/workflows/sample-report.yml'
+      - 'src/aicre/**'
+      - 'pyproject.toml'
+      - '.github/requirements-ci.txt'
 
 permissions:
   contents: read
