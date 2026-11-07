@@ -317,7 +317,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "scan":
             if args.source is not None:
                 if args.format not in (None, "json"):
-                    raise ScanError("directory metadata scans currently support JSON output only")
+                    raise ScanError("unsupported report format for directory metadata scans: only json is supported")
                 if args.output is None:
                     parser.error("scan SOURCE requires --output")
                 report = scan_directory(args.source, args.output, excludes=args.exclude,
@@ -375,7 +375,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
     except (ScanError, ValueError, OSError, RuntimeError) as exc:
         print(f"AICRE: {exc}", file=sys.stderr)
-        if "unsupported report format" in str(exc) or "requires the optional ReportLab dependency" in str(exc):
+        if ("unsupported report format" in str(exc)\n                or "requires the optional ReportLab dependency" in str(exc)\n                or "PDF output does not support" in str(exc)):
             return EXIT_UNSUPPORTED_FORMAT
         return 2
     return 2
