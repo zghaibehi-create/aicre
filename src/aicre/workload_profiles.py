@@ -9,6 +9,8 @@ from .profiles import PROFILES, list_profiles, resolve_profile
 
 GIB = 1024 ** 3
 
+__all__ = ["GIB", "PROFILES", "evaluate_workload_profile", "supported_profiles"]
+
 
 def supported_profiles() -> tuple[str, ...]:
     """Return profile names in their documented order."""
