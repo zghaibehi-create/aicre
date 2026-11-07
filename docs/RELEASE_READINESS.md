@@ -1,7 +1,7 @@
 # AICRE 0.3.0 — Release Readiness and Residual-Risk Decision
 
-**Status:** release preparation; not yet a 0.3.0 publication approval.  
-**Current package version:** 0.2.1.  
+**Status:** 0.3.0 release candidate; final candidate CI is pending.  
+**Current package version:** 0.3.0.  
 **Target:** 0.3.0.  
 **Release rule:** do not tag, publish, or announce 0.3.0 until the final candidate has been validated and the project owner records a go decision.
 
@@ -47,17 +47,17 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only withi
 ## 3. Release gates and evidence
 
 - [x] **Owner ownership attestation and public notice:** owner confirmed rights necessary to distribute current AICRE content under MIT and selected **AICRE Project** as the public-facing copyright designation. Recorded in PR #30. This is an owner representation, not an independent legal audit.
-- [ ] **Third-party source/license provenance audit:** deferred by explicit project-owner instruction for this release-preparation pass. It is not represented as complete. Runtime dependencies remain empty; see `THIRD_PARTY_NOTICES.md` for the bounded prior inventory.
+- [x] **Third-party source/license provenance audit deferral:** explicitly deferred by the project owner for this release. This is a scope decision, not a completed audit. Runtime dependencies remain empty; see `THIRD_PARTY_NOTICES.md` for the bounded prior inventory.
 - [x] **AI-assisted internal security review:** performed on 2026-11-07 against commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12`. No new Critical/High finding was identified in the scoped review. See [INTERNAL_SECURITY_REVIEW.md](INTERNAL_SECURITY_REVIEW.md). This is not an independent third-party audit, penetration test, or security certification.
-- [ ] **Independent external code/security review:** not obtained. This remains distinct from the AI-assisted internal review. The project owner must explicitly decide whether to require it or accept the documented internal-review limitation for an experimental release.
+- [x] **Owner-directed security-review substitution:** the owner directed the assistant to perform an AI-assisted internal review in place of an external review. The internal review is documented in `INTERNAL_SECURITY_REVIEW.md`; no external reviewer was engaged. This is not represented as an independent third-party audit or certification.
 - [x] **Automated Linux support-matrix validation:** final main Tests workflow and Install smoke workflow passed 6/6 jobs each on commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12`, covering Ubuntu 22.04/24.04 and Python 3.11/3.12/3.13. See [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md). This does not claim the owner's own machine was tested.
-- [ ] **Owner-machine-specific Linux acceptance:** not supplied. Decide whether this is required for the intended audience; do not represent hosted CI as a test of the owner's device.
+- [x] **Linux acceptance scope:** the owner accepts the Ubuntu 22.04/24.04 CI matrix as the Linux support evidence for this release. The owner's personal machine was not tested; no claim is made that it was.
 - [x] GitHub Private Vulnerability Reporting visually verified enabled by the repository owner on 2026-11-07.
 - [x] Public repository description corrected and verified.
 - [x] Residual risks RR-01 through RR-08 documented with explicit dispositions.
 - [x] **Final main test workflow after PR #33:** run [42386187695](https://github.com/zghaibehi-create/aicre/actions/runs/42386187695), all six matrix jobs passed on commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12`.
 - [x] **Final main install/artifact inspection workflow after PR #33:** run [42386187780](https://github.com/zghaibehi-create/aicre/actions/runs/42386187780), all six matrix jobs passed on the same commit. It built wheel and sdist, inspected archive contents and metadata, checked version consistency and absence of runtime dependencies, installed both artifacts into clean virtual environments, and exercised CLI/report commands.
-- [ ] **0.3.0 release-candidate validation:** current CI artifact checks are for package version 0.2.1. After the owner decides the review/provenance/target-Linux gates, create the exact 0.3.0 candidate and rerun the complete matrix and artifact inspection against that candidate.
+- [ ] **0.3.0 release-candidate validation:** candidate branch now carries version 0.3.0. Run the complete test and install/artifact-inspection matrix against the exact candidate commit before publication.
 - [ ] **Final consistency and approval:** align version metadata, `aicre.__version__`, CLI/report tests, README, changelog, security model, schemas, finding IDs, and release notes; then record the project owner's explicit go/no-go decision.
 
 ## 4. Release execution checklist
@@ -74,4 +74,4 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only withi
 
 ## 5. Current engineering recommendation
 
-**GO for technical validation of the current main snapshot; NO-GO for publishing 0.3.0 at this point.** The 0.2.1 main snapshot passed the latest Linux test and artifact-inspection matrix. The 0.3.0 candidate has not yet been versioned or built. The third-party provenance audit is deferred by owner instruction; the internal AI review is documented but is not an external independent review. Resolve those release-policy decisions, then validate the actual 0.3.0 candidate before publication.
+**GO for final validation of the 0.3.0 candidate; NO-GO for publication until candidate CI and artifact inspection pass.** The owner deferred the third-party provenance audit, accepted the AI-assisted internal review in place of an external review for this experimental release, and accepted the Ubuntu CI matrix as Linux support evidence. These decisions are recorded transparently and do not imply an external audit or a test on the owner's own machine.
