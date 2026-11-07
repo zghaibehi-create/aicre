@@ -91,8 +91,7 @@
       "properties": {
         "relative_path": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 4096
+          "minLength": 1
         },
         "type": {
           "enum": [
