@@ -144,3 +144,13 @@ def test_ignores_non_finding_entries_without_crashing():
     result = evaluate_readiness([None, {"id": "tool.fake"}])
     assert result["software_readiness"].evidence == ()
     assert result["compatibility_readiness"].status == "unknown"
+
+
+
+def test_standard_profile_keeps_exact_0_2_explanations():
+    result = evaluate_readiness([])
+    assert result["resource_readiness"].explanation == "No workload resource baseline is defined, so CPU, RAM, and storage capacity cannot be assessed against requirements."
+    assert result["software_readiness"].explanation == "No mandatory software manifest is defined, so detected tools cannot be judged against required software."
+    assert result["compatibility_readiness"].explanation == "Linux platform and minimum Python compatibility are assessed only from explicit detected requirement results."
+    assert result["privacy_readiness"].explanation == "Local-only collection and path-exclusion findings are incomplete; these AICRE properties do not establish a host-wide privacy guarantee."
+    assert result["security_readiness"].explanation == "Effective UID is unavailable or malformed, and other host security controls were not assessed; no security guarantee is inferred."
