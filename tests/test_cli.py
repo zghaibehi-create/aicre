@@ -198,7 +198,8 @@ def test_report_input_rejects_shallow_valid_but_invalid_canonical_report(tmp_pat
         "readiness": {},
     }), encoding="utf-8")
     assert main(["report", "--input", str(source)]) == 2
-    error = capsys.readouterr().err\n    assert "UUIDv5" in error or "readiness" in error
+    error = capsys.readouterr().err
+    assert "UUIDv5" in error or "readiness" in error
 
 
 def test_report_output_refuses_symlink_and_hardlink_destinations(tmp_path, capsys):
