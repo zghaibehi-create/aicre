@@ -100,16 +100,22 @@ Show built-in exclusions:
 aicre exclusions show
 ```
 
-The original directory metadata scanner is retained:
+The original directory metadata scanner is retained. Its default cardinality limits can be overridden deliberately:
 
 ```bash
 aicre scan "$HOME/Documents" --output "$HOME/aicre-directory-report.json" \
   --exclude 'Projects/Client-A/**' --exclude '**/Personal/**'
+
+# Example: increase both bounds for a large, trusted directory
+aicre scan "$HOME/Documents" --output "$HOME/aicre-directory-report.json" \
+  --max-items 50000 --max-directory-entries 10000
 ```
 
-For directory scans, exclusions are matched against paths relative to the selected scan root. For system inventory and tool discovery, they are matched against root-relative paths and, when applicable, home-relative paths. `--timeout` is cooperative between observations; it cannot interrupt a filesystem call already in progress. A timed-out directory scan writes a partial report with a non-zero `scan_errors` count. The system/inventory/report commands represent observations not reached before the deadline as `not_checked`.
+For directory scans, exclusions are matched against paths relative to the selected scan root. For system inventory and tool discovery, they are matched against root-relative paths and, when applicable, home-relative paths. Directory scans use two cardinality limits by default: `--max-items 25000` caps included files and directories in the report, and `--max-directory-entries 5000` caps the temporary entry buffer used to sort any one directory. Both values can be lowered or raised explicitly. The per-directory limit counts all directory entries, including entries later excluded by policy.
 
-To intentionally replace an existing regular report file, supply `--force`. Symlinks, hard-linked destinations, directories, FIFOs, sockets, devices, and other non-regular destinations are rejected. A directory scan must still write its report outside the scan root. A non-zero `scan_errors` count means the directory inventory is incomplete.
+A directory scan that reaches either limit stops and writes the records collected so far as an explicitly incomplete report. It does not silently skip entries and continue as if the scan were complete. The report uses schema version `2`, with `summary.complete` and `summary.termination_reason` (`item_limit`, `directory_entry_limit`, `timeout`, or `filesystem_errors`). Timeout is cooperative; it cannot interrupt a filesystem call already in progress. `scan_errors` counts filesystem/metadata errors only; timeout and configured limits are reported separately. The CLI returns exit code `1` for any incomplete directory scan. The system/inventory/report commands represent observations not reached before their deadline as `not_checked`.
+
+To intentionally replace an existing regular report file, supply `--force`. Symlinks, hard-linked destinations, directories, FIFOs, sockets, devices, and other non-regular destinations are rejected. A directory scan must still write its report outside the scan root.
 
 ## Development and verification
 
@@ -131,7 +137,8 @@ See the [AICRE agent skill](skills/aicre/SKILL.md) for instructions an AI agent 
 - [Roadmap](docs/ROADMAP.md)
 - [Security reporting](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
-- [JSON report schema](schemas/report-v2.schema.json)
+- [JSON readiness report schema](schemas/report-v2.schema.json)
+- [JSON directory scan report schema](schemas/directory-scan-report-v2.schema.json)
 
 ## License
 
