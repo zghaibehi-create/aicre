@@ -52,7 +52,8 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--output", help="JSON report path")
     scan.add_argument("--exclude", action="append", default=[],
                       help="private relative path/glob to exclude; repeatable")
-    scan.add_argument("--force", action="store_true", help="explicitly replace an existing report")
+    scan.add_argument("--force", action="store_true",
+                      help="replace an existing report (requires --output)")
     scan.add_argument("--timeout", type=_timeout_value, default=None,
                       help="cooperative time budget; directory scans are unlimited unless set")
 
@@ -68,7 +69,8 @@ def build_parser() -> argparse.ArgumentParser:
     report = subparsers.add_parser("report", help="emit the full versioned JSON report")
     report.add_argument("--format", choices=("json",), default="json")
     report.add_argument("--output", help="optional report destination; stdout if omitted")
-    report.add_argument("--force", action="store_true", help="explicitly replace an existing report")
+    report.add_argument("--force", action="store_true",
+                        help="replace an existing report (requires --output)")
     report.add_argument("--exclude", action="append", default=[],
                         help="filesystem source or executable path pattern to omit; repeatable")
     report.add_argument("--timeout", type=_timeout_value, default=DEFAULT_TIMEOUT_SECONDS,
@@ -151,6 +153,8 @@ def _build_and_emit_report(args: argparse.Namespace, *, command: str, include_to
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if getattr(args, "force", False) and not getattr(args, "output", None):
+        parser.error("--force requires --output; it cannot be used with standard output.")
 
     try:
         if args.command == "scan":
@@ -171,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"excluded: {summary['excluded_items']}; "
                     f"errors: {summary['scan_errors']}."
                 )
-                return 0
+                return 1 if summary["scan_errors"] > 0 else 0
             if args.profile != "standard":
                 parser.error("use scan --profile standard for a system inventory")
             if args.output is not None:

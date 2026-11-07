@@ -73,7 +73,7 @@ aicre scan "$HOME/Documents" --output "$HOME/aicre-directory-report.json" \
 
 For directory scans, exclusions are matched against paths relative to the selected scan root. For system inventory and tool discovery, they are matched against root-relative paths and, when applicable, home-relative paths. `--timeout` is cooperative between observations; it cannot interrupt a filesystem call already in progress. A timed-out directory scan writes a partial report with a non-zero `scan_errors` count. The system/inventory/report commands represent observations not reached before the deadline as `not_checked`.
 
-To intentionally replace an existing regular report file, supply `--force`. Symlinks, hard-linked destinations, directories, FIFOs, sockets, devices, and other non-regular destinations are rejected. A directory scan must still write its report outside the scan root. A non-zero `scan_errors` count means the directory inventory is incomplete.
+To intentionally replace an existing regular report file, supply `--force` together with `--output`; using `--force` when the report goes to standard output is a usage error. Symlinks, hard-linked destinations, directories, FIFOs, sockets, devices, and other non-regular destinations are rejected. A directory scan must still write its report outside the scan root. If the scan encounters errors or reaches its timeout, it still writes the partial report and returns exit code `1` (`0` means complete; `2` means a fatal or usage error). A non-zero `scan_errors` count means the directory inventory is incomplete.
 
 ## Development and verification
 
