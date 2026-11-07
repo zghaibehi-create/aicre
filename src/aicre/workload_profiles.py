@@ -43,11 +43,23 @@ def evaluate_workload_profile(findings: Sequence[Finding], profile: str) -> list
         checks.append(Finding(
             id=f"profile.resource.{name}", category="profile",
             status="detected" if valid else "not_checked",
-            value={"satisfied": actual >= minimum if valid else None, "actual": actual,
-                   "minimum": minimum, "unit": unit, "source_finding": source_id},
+            value={
+                "satisfied": None,
+                "actual": actual,
+                "minimum": minimum,
+                "unit": unit,
+                "source_finding": source_id,
+                "comparison": "not_performed",
+                "observation_scope": "host_facing",
+            },
             source="AICRE agent-development baseline",
-            confidence="high" if valid else "low", unit=unit,
-            limitations=() if valid else ("Required observation unavailable, excluded, malformed, or timed out.",),
+            confidence="medium" if valid else "low", unit=unit,
+            limitations=(
+                "Host-facing observation only; effective process, container, cgroup, affinity, "
+                "or filesystem quota limits are not established. Resource readiness remains unknown.",
+            ) if valid else (
+                "Required host observation unavailable, excluded, malformed, or timed out.",
+            ),
         ))
     for tool in PROFILES[profile]["required_tools"]:
         source = by_id.get(f"tool.{tool}")
