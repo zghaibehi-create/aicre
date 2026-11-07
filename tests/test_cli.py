@@ -320,7 +320,8 @@ def test_composite_writes_separate_summary_without_mutating_main_report(
         "security": "warning",
     }
     assert len(summary["recommendations"]) == 3
-    assert any("node" in item and "PATH" in item for item in summary["recommendations"])\n    assert not any("Free at least" in item for item in summary["recommendations"])
+    assert any("node" in item and "PATH" in item for item in summary["recommendations"])
+    assert not any("Free at least" in item for item in summary["recommendations"])
     assert "schema_version" not in summary
 
 
