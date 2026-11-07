@@ -5,6 +5,7 @@ from collections.abc import Sequence
 
 from .models import Finding
 
+
 GIB = 1024 ** 3
 PROFILES = {
     "standard": {"description": "Inventory only; no workload assumptions.", "required_tools": ()},
