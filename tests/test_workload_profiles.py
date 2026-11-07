@@ -15,23 +15,35 @@ def observations():
             finding("tool.python3", "/usr/bin/python3", category="software")]
 
 
-def test_agent_development_profile_passes_baseline():
+def test_resource_readiness_stays_unknown_when_only_host_observations_exist():
     base = observations()
-    result = evaluate_readiness(base + evaluate_workload_profile(base, "agent-development"), "agent-development")
-    assert result["resource_readiness"].status == "pass"
-    assert result["software_readiness"].status == "pass"
+    checks = evaluate_workload_profile(base, "agent-development")
+    result = evaluate_readiness(base + checks, "agent-development")
+
+    assert result["resource_readiness"].status == "unknown"
     assert result["resource_readiness"].evidence == (
         "profile.resource.cpu", "profile.resource.memory", "profile.resource.storage"
     )
-    assert result["software_readiness"].evidence == (
-        "profile.software.git", "profile.software.python3"
-    )
+    for check in checks:
+        if check.id.startswith("profile.resource."):
+            assert check.status == "detected"
+            assert check.value["satisfied"] is None
+            assert check.value["comparison"] == "not_performed"
+            assert check.value["observation_scope"] == "host_facing"
+            assert any("effective process" in item for item in check.limitations)
 
-def test_resource_below_minimum_fails():
-    base = observations()
-    base[0] = finding("resource.cpu.logical_count", 1)
-    result = evaluate_readiness(base + evaluate_workload_profile(base, "agent-development"), "agent-development")
-    assert result["resource_readiness"].status == "fail"
+
+def test_host_observations_above_or_below_threshold_never_pass_or_fail_resource():
+    for cpu_count in (1, 8):
+        base = observations()
+        base[0] = finding("resource.cpu.logical_count", cpu_count)
+        checks = evaluate_workload_profile(base, "agent-development")
+        result = evaluate_readiness(base + checks, "agent-development")
+        assert result["resource_readiness"].status == "unknown"
+        cpu_check = next(item for item in checks if item.id == "profile.resource.cpu")
+        assert cpu_check.value["actual"] == cpu_count
+        assert cpu_check.value["satisfied"] is None
+
 
 def test_missing_required_tool_fails():
     base = observations()
