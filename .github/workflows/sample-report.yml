@@ -36,7 +36,7 @@ jobs:
 
       - name: Collect readiness output
         run: |
-          aicre readiness --profile laptop-dev | tee "$RUNNER_TEMP/readiness.txt"
+          aicre readiness --profile agent-development | tee "$RUNNER_TEMP/readiness.txt"
 
       - name: Generate and print JSON report
         run: |
