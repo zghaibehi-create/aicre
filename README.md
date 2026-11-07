@@ -136,6 +136,7 @@ configuration, MCP permissions, sandboxing, or dependency provenance.
 remain host-facing and do not account for cgroup CPU/memory quotas or
 CPU-affinity restrictions. Treat the result as a host-observation-only
 assessment.
+
 ## Composite score
 
 Run `aicre report --profile laptop-dev --output report.json --composite` to create the separate summary.
