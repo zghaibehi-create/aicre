@@ -1,4 +1,4 @@
-"""Command-line interface for AICRE 0.2."""
+"""Command-line interface for AICRE 0.2.1."""
 from __future__ import annotations
 
 import argparse
@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from .models import utc_now
 from .policy import (
     SENSITIVE_CONFIG_DIR_PAIRS,
     SENSITIVE_DIRS,
@@ -16,7 +17,6 @@ from .policy import (
     SENSITIVE_SUFFIXES,
 )
 from .privacy import path_exclusion_reason
-from .models import utc_now
 from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
 from .scanner import ScanError, scan_directory, write_json_report
 from .workload_profiles import supported_profiles
