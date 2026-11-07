@@ -38,11 +38,13 @@ jobs:
           set -o pipefail
           python -m pip wheel --no-deps --wheel-dir dist .
 
-      - name: Build source distribution
+      - name: Build source distribution with the locked setuptools backend
         shell: bash
         run: |
           set -o pipefail
-          python -m pip download --no-deps --no-binary=:all: --dest dist-sdist .
+          python -m pip install --require-hashes -r .github/requirements-ci.txt
+          mkdir -p dist-sdist
+          python -c "from setuptools.build_meta import build_sdist; build_sdist('dist-sdist')"
           test -n "$(find dist-sdist -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
 
       - name: Install wheel into a fresh virtual environment
