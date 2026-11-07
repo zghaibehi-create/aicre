@@ -685,3 +685,10 @@ def test_directory_scan_report_matches_published_schema(tmp_path):
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
     fastjsonschema.validate(schema, report)
+
+    invalid_report = {
+        **report,
+        "summary": {**report["summary"], "complete": False},
+    }
+    with pytest.raises(fastjsonschema.JsonSchemaException):
+        fastjsonschema.validate(schema, invalid_report)
