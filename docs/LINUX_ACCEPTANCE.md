@@ -12,35 +12,42 @@ The following evidence is available from GitHub Actions:
 |---|---|---|---|---|
 | Tests run #533 (post-merge on main) | `1d0145752952a0a39e6ffa65510690e57cca1452` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, full test suite, CLI entry point |
 | Install smoke run #29 (post-merge on main) | `1d0145752952a0a39e6ffa65510690e57cca1452` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
+| **Final main Tests workflow after PR #33** | `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Ruff, full pytest suite, CLI entry point |
+| **Final main Install smoke workflow after PR #33** | `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Wheel/sdist build, archive inventory, version/metadata/runtime-dependency checks, clean installs, CLI/report smoke checks |
 | Tests run #532 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, full test suite, CLI entry point |
 | Install smoke run #28 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
 | Sample report run #18 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 24.04 × Python 3.12 | Passed | Sample report generation and conservative Resource readiness check |
 
-Links:
+Latest main run links:
+- [Final main Tests workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42386187695)
+- [Final main Install smoke workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42386187780)
+- [PR #33 artifact-inspection change](https://github.com/zghaibehi-create/aicre/commit/d9ee4977f6057a79c9f1fec2289f2de05ec33c12)
+
+Earlier evidence:
 - [Tests run #533](https://github.com/zghaibehi-create/aicre/actions/runs/42385655762)
 - [Install smoke run #29](https://github.com/zghaibehi-create/aicre/actions/runs/42385655772)
 - [Tests run #532](https://github.com/zghaibehi-create/aicre/actions/runs/42385579698)
 - [Install smoke run #28](https://github.com/zghaibehi-create/aicre/actions/runs/42385579695)
 - [Sample report run #18](https://github.com/zghaibehi-create/aicre/actions/runs/42385579678)
 
-These are GitHub-hosted Ubuntu runner results. They do not identify or prove acceptance on the project owner's own target machine, filesystem, distribution configuration, or deployment environment. The install-smoke workflow validates build/install behavior on GitHub-hosted runners, not a release artifact uploaded to a public release.
+The final workflow logs confirm that both workflows checked out the exact main commit above. The install-smoke logs show successful wheel and source-distribution builds, archive inspection, clean virtual-environment installs, `pip check`, CLI execution, and JSON report contract checks. Example artifact hashes are emitted per matrix job; they are build outputs for those CI jobs, not a single canonical release artifact hash.
+
+These are GitHub-hosted Ubuntu runner results. They do not identify or prove acceptance on the project owner's own target machine, filesystem, distribution configuration, or deployment environment. The install-smoke workflow validates CI-built artifacts, not an artifact uploaded to a public release.
 
 ## 2. Project-owner target Linux acceptance record
 
-**Status: awaiting owner-supplied environment evidence.**
-
-Fill this section only after running the commands below on the intended target Linux machine.
+**Status: not supplied.** No claim is made that the owner's own Linux machine was tested.
 
 | Field | Recorded value |
 |---|---|
-| Distribution and version | Not yet supplied |
-| Kernel and architecture | Not yet supplied |
-| Python version | Not yet supplied |
-| Filesystem type for working directory | Not yet supplied |
-| Installation method | Not yet supplied |
-| AICRE version / commit | Not yet supplied |
-| Test date (UTC) | Not yet supplied |
-| Deviations or failures | Not yet supplied |
+| Distribution and version | Not supplied |
+| Kernel and architecture | Not supplied |
+| Python version | Not supplied |
+| Filesystem type for working directory | Not supplied |
+| Installation method | Not supplied |
+| AICRE version / commit | Not supplied |
+| Test date (UTC) | Not supplied |
+| Deviations or failures | Not supplied |
 
 Do not publish private hostnames, usernames, private directory paths, serial numbers, or full inventory reports. AICRE reports may disclose machine and path metadata.
 
@@ -80,4 +87,4 @@ Record command exit codes and any environment-specific deviations. Do not run as
 
 ## 5. Release gate
 
-Automated CI is useful Linux evidence but is not a substitute for the project-owner target-environment record above. Do not mark the owner acceptance gate complete until the table in Section 2 is populated and reviewed.
+Automated CI acceptance for the declared Ubuntu support matrix is complete on the recorded main commit. Owner-machine-specific acceptance remains untested and is not implied by the CI results. The release decision must state whether that additional machine-specific check is required for the intended audience.
