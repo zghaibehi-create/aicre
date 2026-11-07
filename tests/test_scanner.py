@@ -33,7 +33,10 @@ def test_inventory_metadata_and_source_unchanged(tmp_path):
     result = scan_directory(source, output)
 
     assert result["summary"]["included_items"] == 2
+    assert result["summary"]["complete"] is True
+    assert result["summary"]["termination_reason"] is None
     data = json.loads(output.read_text(encoding="utf-8"))
+    assert data["schema_version"] == "2"
     assert set(data) == {"schema_version", "aicre_version", "source_name", "generated_utc", "summary", "items"}
     file_record = next(item for item in data["items"] if item["relative_path"] == "nested/sample.txt")
     assert file_record["type"] == "file"
@@ -425,6 +428,8 @@ def test_permission_error_in_nested_directory_is_counted_and_scan_continues(tmp_
     paths = {item["relative_path"] for item in report["items"]}
 
     assert report["summary"]["scan_errors"] == 1
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "filesystem_errors"
     assert "ordinary/visible.txt" in paths
     assert "blocked/hidden.txt" not in paths
 
@@ -453,8 +458,12 @@ def test_cooperative_scan_timeout_marks_partial_inventory(tmp_path):
 
     assert report["aicre_version"] == "0.2.1"
     assert report["summary"]["included_items"] == 0
-    assert report["summary"]["scan_errors"] >= 1
-    assert json.loads(output.read_text(encoding="utf-8"))["summary"]["scan_errors"] >= 1
+    assert report["summary"]["scan_errors"] == 0
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "timeout"
+    saved = json.loads(output.read_text(encoding="utf-8"))
+    assert saved["summary"]["complete"] is False
+    assert saved["summary"]["termination_reason"] == "timeout"
 
 
 def test_scan_rejects_invalid_timeout(tmp_path):
@@ -586,3 +595,100 @@ def test_rejects_reparse_point_scan_root(tmp_path, monkeypatch):
     monkeypatch.setattr(Path, "lstat", fake_lstat)
     with pytest.raises(ScanError, match="reparse point"):
         scan_directory(source, tmp_path / "report.json")
+
+
+
+def test_item_limit_writes_explicit_partial_report(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    for name in ("a.txt", "b.txt", "c.txt"):
+        (source / name).write_text("fixture", encoding="utf-8")
+    output = tmp_path / "report.json"
+
+    report = scan_directory(source, output, max_items=2)
+
+    assert report["schema_version"] == "2"
+    assert report["summary"]["included_items"] == 2
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "item_limit"
+    assert report["summary"]["scan_errors"] == 0
+    assert len(report["items"]) == 2
+    assert json.loads(output.read_text(encoding="utf-8")) == report
+
+
+def test_item_limit_exact_boundary_can_still_be_complete(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    for name in ("a.txt", "b.txt"):
+        (source / name).write_text("fixture", encoding="utf-8")
+
+    report = scan_directory(source, tmp_path / "report.json", max_items=2)
+
+    assert report["summary"]["included_items"] == 2
+    assert report["summary"]["complete"] is True
+    assert report["summary"]["termination_reason"] is None
+
+
+def test_per_directory_entry_limit_bounds_sort_buffer_and_marks_partial(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    for name in ("a.txt", "b.txt", "c.txt"):
+        (source / name).write_text("fixture", encoding="utf-8")
+    output = tmp_path / "report.json"
+
+    report = scan_directory(source, output, max_directory_entries=2)
+
+    assert report["summary"]["included_items"] == 0
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "directory_entry_limit"
+    assert report["summary"]["scan_errors"] == 0
+    assert json.loads(output.read_text(encoding="utf-8")) == report
+
+
+def test_per_directory_entry_limit_exact_boundary_can_complete(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    for name in ("a.txt", "b.txt"):
+        (source / name).write_text("fixture", encoding="utf-8")
+
+    report = scan_directory(source, tmp_path / "report.json", max_directory_entries=2)
+
+    assert report["summary"]["included_items"] == 2
+    assert report["summary"]["complete"] is True
+    assert report["summary"]["termination_reason"] is None
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"max_items": 0}, "Maximum item count"),
+        ({"max_items": True}, "Maximum item count"),
+        ({"max_directory_entries": 0}, "Maximum directory entry count"),
+        ({"max_directory_entries": False}, "Maximum directory entry count"),
+    ],
+)
+def test_scan_rejects_invalid_cardinality_limits(tmp_path, kwargs, message):
+    source = tmp_path / "source"
+    source.mkdir()
+    with pytest.raises(ScanError, match=message):
+        scan_directory(source, tmp_path / "report.json", **kwargs)
+
+
+def test_directory_scan_report_matches_published_schema(tmp_path):
+    import fastjsonschema
+
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "item.txt").write_text("fixture", encoding="utf-8")
+    report = scan_directory(source, tmp_path / "report.json")
+    schema_path = Path(__file__).resolve().parents[1] / "schemas" / "directory-scan-report-v2.schema.json"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+    fastjsonschema.validate(schema, report)
+
+    invalid_report = {
+        **report,
+        "summary": {**report["summary"], "complete": False},
+    }
+    with pytest.raises(fastjsonschema.JsonSchemaException):
+        fastjsonschema.validate(schema, invalid_report)

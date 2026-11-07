@@ -44,14 +44,18 @@ Inventory code reads only the allowlisted metadata sources. Tool discovery uses 
 
 Report files are written through a same-directory temporary file and atomically published. On POSIX, they have owner-only `0600` permissions. Without `--force`, an existing destination is not replaced; with `--force`, only a single-link regular file may be replaced. Symlinks and special files are rejected.
 
-System inventory checks a cooperative deadline between observations. Directory scans check it between filesystem operations and emit a partial report with non-zero `scan_errors` if the time budget expires. A deadline cannot interrupt a filesystem or kernel call already in progress; it is not a hard real-time bound.
+System inventory checks a cooperative deadline between observations. Directory scans check it between filesystem operations. A timed-out directory scan emits a partial report with `complete: false` and `termination_reason: "timeout"`; timeout is not counted as a filesystem error. A deadline cannot interrupt a filesystem or kernel call already in progress; it is not a hard real-time bound.
+
+Directory scans default to at most 25,000 included items and 5,000 entries buffered for sorting in any one directory. The first limit bounds retained report records; the second bounds temporary per-directory enumeration. Both can be explicitly overridden with `--max-items` and `--max-directory-entries`. If a directory exceeds its entry buffer limit, that directory is not processed and traversal stops. If the report item limit is reached and another includable item is encountered, traversal stops before adding that item. The partial report is still published atomically and is never represented as complete. Directory scan reports use `schemas/directory-scan-report-v2.schema.json`; their `summary.complete` and `summary.termination_reason` fields distinguish a complete traversal from a limit, timeout, or filesystem-error outcome. `scan_errors` counts filesystem/metadata errors only.
 
 ## Residual risks and unsupported cases
 
 - Path/name rules cannot find every secret. An ordinary-looking path may still appear in a directory inventory.
 - This is not a filesystem snapshot. Concurrent changes can produce incomplete or inconsistent results.
 - The directory scanner refuses cross-device traversal but cannot reliably distinguish same-device bind mounts.
-- Very large directory scans can consume substantial time and memory; there is no configurable item or memory ceiling.
+- The scanner bounds item cardinality and its per-directory sort buffer, but it does not enforce a hard byte-level memory ceiling. Memory still depends on path lengths, Python object overhead, report serialization, and caller-selected overrides. The limits are safeguards against unbounded enumeration, not a sandbox or a guarantee against resource exhaustion.
+- The per-directory entry limit counts all entries before privacy exclusions are applied. A directory exceeding that limit stops the scan rather than selecting an arbitrary subset; the report explicitly records the incomplete outcome.
+- A configured item limit is checked only when another includable item is encountered, so a scan that contains exactly the configured number of items can still be complete.
 - Scan errors are aggregated rather than identifying every failed path.
 - DRM metadata covers only the Linux DRM sysfs interface. Other GPU providers and driver readiness may not be detected.
 - Resource/software readiness cannot be meaningfully passed or failed until workload requirements are supplied. Security readiness is not a host audit.

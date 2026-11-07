@@ -23,11 +23,29 @@ class _ScanDeadlineExceeded(Exception):
     """Internal signal for a cooperative timeout during directory enumeration."""
 
 
-def _sorted_entries(iterator: Any, deadline: float | None) -> list[Any]:
+class _ScanLimitExceeded(Exception):
+    """Internal signal when a configured scan cardinality limit is exceeded."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+
+
+DEFAULT_MAX_ITEMS = 25_000
+DEFAULT_MAX_DIRECTORY_ENTRIES = 5_000
+
+
+def _sorted_entries(
+    iterator: Any,
+    deadline: float | None,
+    max_directory_entries: int,
+) -> list[Any]:
+    """Collect and sort one directory without exceeding its configured buffer."""
     entries = []
     for entry in iterator:
         if deadline is not None and time.monotonic() >= deadline:
             raise _ScanDeadlineExceeded
+        if len(entries) >= max_directory_entries:
+            raise _ScanLimitExceeded("directory_entry_limit")
         entries.append(entry)
     if deadline is not None and time.monotonic() >= deadline:
         raise _ScanDeadlineExceeded
@@ -179,10 +197,16 @@ def write_json_report(output: str | Path, report: dict[str, Any], *, force: bool
     return normalized
 
 
-def scan_directory(source: str | Path, output: str | Path, *,
-                   excludes: tuple[str, ...] | list[str] = (),
-                   force: bool = False,
-                   timeout: float | None = None) -> dict[str, Any]:
+def scan_directory(
+    source: str | Path,
+    output: str | Path,
+    *,
+    excludes: tuple[str, ...] | list[str] = (),
+    force: bool = False,
+    timeout: float | None = None,
+    max_items: int = DEFAULT_MAX_ITEMS,
+    max_directory_entries: int = DEFAULT_MAX_DIRECTORY_ENTRIES,
+) -> dict[str, Any]:
     """Inventory metadata below source and write JSON outside source.
 
     On POSIX systems with descriptor-relative no-follow operations, directory
@@ -190,10 +214,20 @@ def scan_directory(source: str | Path, output: str | Path, *,
     It is not an atomic filesystem snapshot and does not prevent concurrent
     changes to file metadata or mount topology.
     ``timeout`` is cooperative between filesystem operations; an in-progress
-    kernel/filesystem call cannot be interrupted safely.
+    kernel/filesystem call cannot be interrupted safely. The item and per-directory
+    limits bound retained scan metadata and temporary directory sorting. Hitting
+    either limit writes an explicitly incomplete report; no entries are silently dropped.
     """
     if timeout is not None and (not math.isfinite(timeout) or timeout < 0):
         raise ScanError("Timeout must be a finite, non-negative number.")
+    if isinstance(max_items, bool) or not isinstance(max_items, int) or max_items < 1:
+        raise ScanError("Maximum item count must be a positive integer.")
+    if (
+        isinstance(max_directory_entries, bool)
+        or not isinstance(max_directory_entries, int)
+        or max_directory_entries < 1
+    ):
+        raise ScanError("Maximum directory entry count must be a positive integer.")
     deadline = time.monotonic() + timeout if timeout is not None else None
     source_path = Path(source).expanduser().absolute()
     output_path = Path(output).expanduser().absolute()
@@ -235,14 +269,14 @@ def scan_directory(source: str | Path, output: str | Path, *,
         records: list[dict[str, Any]] = []
         errors = 0
         excluded = 0
-        timed_out = False
+        termination_reason: str | None = None
         stack: list[tuple[PurePosixPath, int, int]] = [
             (PurePosixPath(), opened_root_stat.st_dev, opened_root_stat.st_ino)
         ]
 
         while stack:
             if deadline is not None and time.monotonic() >= deadline:
-                errors += 1
+                termination_reason = "timeout"
                 break
             current_relative, expected_dev, expected_ino = stack.pop()
             current_fd: int | None = None
@@ -254,11 +288,10 @@ def scan_directory(source: str | Path, output: str | Path, *,
                     continue
 
                 with os.scandir(current_fd) as iterator:
-                    entries = _sorted_entries(iterator, deadline)
+                    entries = _sorted_entries(iterator, deadline, max_directory_entries)
                     for entry in entries:
                         if deadline is not None and time.monotonic() >= deadline:
-                            errors += 1
-                            timed_out = True
+                            termination_reason = "timeout"
                             break
                         try:
                             item_stat = entry.stat(follow_symlinks=False)
@@ -270,8 +303,6 @@ def scan_directory(source: str | Path, output: str | Path, *,
                             excluded += 1
                             continue
                         if item_stat.st_dev != opened_root_stat.st_dev:
-                            # Do not cross into a different filesystem mounted
-                            # beneath the selected root.
                             excluded += 1
                             continue
 
@@ -281,7 +312,17 @@ def scan_directory(source: str | Path, output: str | Path, *,
                             excluded += 1
                             continue
 
-                        if stat.S_ISDIR(item_stat.st_mode):
+                        is_directory = stat.S_ISDIR(item_stat.st_mode)
+                        is_regular_file = stat.S_ISREG(item_stat.st_mode)
+                        if not is_directory and not is_regular_file:
+                            excluded += 1
+                            continue
+                        if len(records) >= max_items:
+                            termination_reason = "item_limit"
+                            break
+
+                        child_to_stack: tuple[PurePosixPath, int, int] | None = None
+                        if is_directory:
                             item_type = "directory"
                             extension = ""
                             size = None
@@ -299,18 +340,13 @@ def scan_directory(source: str | Path, output: str | Path, *,
                                 ):
                                     errors += 1
                                 else:
-                                    stack.append((relative_path, child_stat.st_dev, child_stat.st_ino))
+                                    child_to_stack = (relative_path, child_stat.st_dev, child_stat.st_ino)
                             except OSError:
-                                # The entry may have changed since lstat; never
-                                # descend through a path that no longer matches.
                                 errors += 1
-                        elif stat.S_ISREG(item_stat.st_mode):
+                        else:
                             item_type = "file"
                             extension = Path(entry.name).suffix.lower()
                             size = item_stat.st_size
-                        else:
-                            excluded += 1
-                            continue
 
                         records.append({
                             "relative_path": relative,
@@ -319,20 +355,26 @@ def scan_directory(source: str | Path, output: str | Path, *,
                             "size_bytes": size,
                             "modified_utc": _utc_timestamp(item_stat.st_mtime),
                         })
+                        if child_to_stack is not None:
+                            stack.append(child_to_stack)
             except _ScanDeadlineExceeded:
-                errors += 1
-                timed_out = True
+                termination_reason = "timeout"
+            except _ScanLimitExceeded as exc:
+                termination_reason = exc.reason
             except OSError:
                 errors += 1
             finally:
                 if current_fd is not None:
                     os.close(current_fd)
-            if timed_out:
+            if termination_reason is not None:
                 break
+
+        if termination_reason is None and errors:
+            termination_reason = "filesystem_errors"
 
         records.sort(key=lambda record: record["relative_path"].casefold())
         report = {
-            "schema_version": "1",
+            "schema_version": "2",
             "aicre_version": __version__,
             "source_name": source_path.name,
             "generated_utc": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
@@ -340,6 +382,8 @@ def scan_directory(source: str | Path, output: str | Path, *,
                 "included_items": len(records),
                 "excluded_items": excluded,
                 "scan_errors": errors,
+                "complete": termination_reason is None,
+                "termination_reason": termination_reason,
             },
             "items": records,
         }

@@ -57,9 +57,39 @@ def test_partial_directory_scan_writes_report_and_returns_status_1(tmp_path, cap
     ])
 
     assert result == 1
-    assert "errors: 1" in capsys.readouterr().out
+    output_text = capsys.readouterr().out
+    assert "complete: no" in output_text
+    assert "termination: timeout" in output_text
     report = json.loads(output.read_text(encoding="utf-8"))
-    assert report["summary"]["scan_errors"] == 1
+    assert report["summary"]["scan_errors"] == 0
+    assert report["summary"]["termination_reason"] == "timeout"
+
+
+def test_cli_exposes_item_and_directory_entry_limits(tmp_path, capsys):
+    source = tmp_path / "source"
+    source.mkdir()
+    for name in ("a.txt", "b.txt", "c.txt"):
+        (source / name).write_text("fixture", encoding="utf-8")
+    output = tmp_path / "limited-report.json"
+
+    result = main([
+        "scan", str(source), "--output", str(output),
+        "--max-items", "2", "--max-directory-entries", "10",
+    ])
+
+    assert result == 1
+    output_text = capsys.readouterr().out
+    assert "complete: no" in output_text
+    assert "termination: item_limit" in output_text
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["summary"]["included_items"] == 2
+    assert report["summary"]["termination_reason"] == "item_limit"
+
+
+def test_cli_rejects_non_positive_scan_limits():
+    with pytest.raises(SystemExit) as exit_info:
+        main(["scan", "source", "--output", "report.json", "--max-items", "0"])
+    assert exit_info.value.code == 2
 
 
 def test_cli_reports_scan_error_with_exit_code_2(tmp_path, capsys):
