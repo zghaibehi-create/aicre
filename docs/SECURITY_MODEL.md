@@ -54,7 +54,7 @@ System inventory checks a cooperative deadline between observations. Directory s
 - Very large directory scans can consume substantial time and memory; there is no configurable item or memory ceiling.
 - Scan errors are aggregated rather than identifying every failed path.
 - DRM metadata covers only the Linux DRM sysfs interface. Other GPU providers and driver readiness may not be detected.
-- Resource/software readiness cannot be meaningfully passed or failed until workload requirements are supplied. Security readiness is not a host audit.
+- Resource readiness remains `unknown` when effective process/container limits are not established. Software readiness in `agent-development` reflects PATH presence of required tools only, not their functionality or security. Security readiness is not a host audit.
 - Filesystem, permission, mount, and metadata behavior vary across Linux distributions. CI targets Ubuntu 24.04; no Windows/macOS compatibility claim is made.
 - AICRE is not a security boundary against a hostile process with access to the host or scanned directory.
 
