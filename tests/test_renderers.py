@@ -56,7 +56,7 @@ def test_markdown_escapes_untrusted_structure_and_uses_safe_json_fence():
         "findings": [{
             "check_id": "check\n# forged",
             "status": "detected",
-            "source": "source|\n## forged",
+            "source": "source|\n## forged <script>alert(1)</script>",
             "value": "before\n" + fence + "\n## injected\n" + fence,
         }],
     }
