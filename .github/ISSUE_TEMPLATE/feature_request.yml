@@ -1,24 +1,33 @@
 name: Feature request
-description: Suggest a focused improvement to AICRE.
+description: Suggest a focused improvement to AICRE
 title: "[Feature]: "
-labels: [enhancement]
+labels: ["enhancement"]
 body:
   - type: textarea
     id: problem
     attributes:
       label: Problem to solve
+      description: What concrete problem are you encountering?
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed behavior
+      label: Proposed change
+      description: Describe the smallest useful change.
     validations:
       required: true
   - type: textarea
-    id: security
+    id: alternatives
     attributes:
-      label: Privacy or security implications
-      description: Explain whether this would read content, access the network, elevate privileges, or modify source files.
+      label: Alternatives considered
+      description: What workarounds or alternatives have you considered?
     validations:
-      required: true
+      required: false
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Project boundaries
+      options:
+        - label: I understand AICRE is a local-first Linux preview, not a security product or sandbox.
+          required: true
