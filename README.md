@@ -16,7 +16,7 @@ Reports can contain hardware details, software availability, and executable path
 
 Each finding has a stable ID, category, collection status, value and optional unit, named source, confidence, UTC collection timestamp, and limitations. Finding statuses are `detected`, `not_detected`, `unsupported`, `permission_denied`, `error`, and `not_checked`.
 
-Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. Resource and Software readiness are evaluated against the selected workload profile. The default `standard` profile remains inventory-only and leaves both dimensions `unknown`. The opt-in `--composite` report summary provides a weighted overview; it does not replace the five separate readiness dimensions. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
+Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. Resource and Software readiness are evaluated independently. The default `standard` profile remains inventory-only and leaves both dimensions `unknown`. Workload profiles may assess PATH presence for required tools, but host-facing CPU, RAM, and storage observations are never used to pass or fail Resource readiness; it remains `unknown` until effective process/container limits can be established. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
 
 The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
 
@@ -50,7 +50,6 @@ Emit the complete versioned JSON report to stdout or save it securely to a new f
 ```bash
 aicre report --format json
 aicre report --format json --output "$HOME/aicre-report.json"
-aicre report --profile laptop-dev --output "$HOME/aicre-report-composite.json" --composite
 ```
 
 Set exclusions and a cooperative time budget for system inventory:
@@ -110,21 +109,11 @@ profile is retained for compatibility. Additional profiles are:
 | `agent-workstation` | 8 | 32 GiB | 50 GiB | git, python3, docker, ollama |
 | `ci-runner` | 2 | 8 GiB | 10 GiB | git, python3, pip |
 
-Resource values below 50% of a profile threshold fail, values from 50% to
-below 100% warn, and values at or above the threshold pass. Missing observations
-remain unknown. Software readiness passes when all required tools are found,
-warns for one missing tool, and fails for two or more missing tools; when all
-tool observations are unavailable, it remains unknown. Tool presence is based
-on permitted PATH entries only; programs are never executed.
-
-The optional composite output is written beside the main report as
-`report.summary.json`. It uses Resource 40%, Software 30%, Compatibility 15%,
-Privacy 10%, and Security 5%; unknown dimensions are excluded from the average.
-The summary is advisory and does not replace the full report.
+Resource observations are retained for context only. AICRE does not establish effective process/container limits, cgroup quotas, CPU affinity, orchestrator reservations, or filesystem quotas. Therefore profile thresholds are not compared into Resource `pass` or `fail`; Resource readiness remains `unknown`. Software readiness assesses PATH presence only; it does not verify versions, configuration, security, or functionality.
 
 ```bash
 aicre readiness --profile agent-development
-aicre report --profile laptop-dev --format json --output "$HOME/aicre-report.json" --composite
+aicre report --profile agent-development --format json
 ```
 
 These are project-defined minimums, not vendor specifications or performance
@@ -137,7 +126,3 @@ remain host-facing and do not account for cgroup CPU/memory quotas or
 CPU-affinity restrictions. Treat the result as a host-observation-only
 assessment.
 
-## Composite score
-
-Run `aicre report --profile laptop-dev --output report.json --composite` to create the separate summary.
-The generated `report.summary.json` is NOT validated by any schema.
