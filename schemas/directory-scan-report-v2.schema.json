@@ -121,21 +121,32 @@
     {
       "if": {
         "properties": {
-          "complete": {
-            "const": true
+          "summary": {
+            "properties": {
+              "complete": {
+                "const": true
+              }
+            },
+            "required": [
+              "complete"
+            ]
           }
         },
         "required": [
-          "complete"
+          "summary"
         ]
       },
       "then": {
         "properties": {
-          "termination_reason": {
-            "const": null
-          },
-          "scan_errors": {
-            "const": 0
+          "summary": {
+            "properties": {
+              "termination_reason": {
+                "const": null
+              },
+              "scan_errors": {
+                "const": 0
+              }
+            }
           }
         }
       }
@@ -143,18 +154,29 @@
     {
       "if": {
         "properties": {
-          "complete": {
-            "const": false
+          "summary": {
+            "properties": {
+              "complete": {
+                "const": false
+              }
+            },
+            "required": [
+              "complete"
+            ]
           }
         },
         "required": [
-          "complete"
+          "summary"
         ]
       },
       "then": {
         "properties": {
-          "termination_reason": {
-            "type": "string"
+          "summary": {
+            "properties": {
+              "termination_reason": {
+                "type": "string"
+              }
+            }
           }
         }
       }
