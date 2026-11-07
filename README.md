@@ -105,7 +105,8 @@ profile is retained for compatibility. Additional profiles are:
 
 | Profile | CPU cores | RAM | Free root storage | Required tools |
 |---|---:|---:|---:|---|
-| `agent-development` | 2 | 8 GiB | 10 GiB | git, python3 |\n| `laptop-dev` | 4 | 16 GiB | 20 GiB | git, python3, node |
+| `agent-development` | 2 | 8 GiB | 10 GiB | git, python3 |
+| `laptop-dev` | 4 | 16 GiB | 20 GiB | git, python3, node |
 | `agent-workstation` | 8 | 32 GiB | 50 GiB | git, python3, docker, ollama |
 | `ci-runner` | 2 | 8 GiB | 10 GiB | git, python3, pip |
 
