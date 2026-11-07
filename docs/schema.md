@@ -30,7 +30,7 @@ The HTML renderer is self-contained: inline CSS only, no JavaScript, remote asse
 Report output paths create missing parent directories and replace existing regular files atomically. POSIX output files are mode `0600`. Symlinks, special files, and hard-linked destinations are rejected. The explicit `--open` option invokes `xdg-open` only on Linux.
 
 
-ReportLab's built-in Type 1 fonts avoid redistributing third-party fonts and their licenses. They do not guarantee correct rendering of every Unicode script (including Arabic); users requiring full multilingual glyph coverage need a separately licensed, explicitly configured font in a future phase.
+ReportLab's built-in Type 1 fonts avoid redistributing third-party fonts and their licenses. The renderer rejects text outside the built-in WinAnsi character set; this includes Arabic and other non-Latin scripts. Users requiring full multilingual glyph coverage need a separately licensed, explicitly configured font in a future phase.
 
 
 ## Validation rules for imported reports
