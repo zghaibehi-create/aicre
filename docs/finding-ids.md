@@ -14,7 +14,7 @@ its finding ID.
 | `resource.memory.available_bytes` | integer or null | bytes | `/proc/meminfo` | Memory currently available to new workloads, reported by MemAvailable. |
 | `resource.storage.root` | object or null | bytes | `shutil.disk_usage('/')` | Root filesystem total, used, and free byte counts. |
 | `resource.gpu` | object or null | — | Linux DRM sysfs metadata | DRM devices with validated vendor and device identifiers; this does not establish driver or compute readiness. |
-| `python.environment` | object | — | `sys`, `platform`, and `sysconfig` | Python version, implementation, platform, ABI, permitted executable/prefix paths, and virtual-environment flag. |
+| `python.environment` | object or null | — | `sys`, `platform`, and `sysconfig` | Python version, implementation, platform, ABI, permitted executable/prefix paths, and virtual-environment flag. |
 | `security.effective_uid` | integer or null | UID | `os.geteuid` | Effective user ID of the AICRE process. |
 | `tool.git` | absolute path string or null | — | `shutil.which('git')` | Whether Git is found in permitted PATH entries; executable is not run. |
 | `tool.python3` | absolute path string or null | — | `shutil.which('python3')` | Whether Python 3 is found in permitted PATH entries; executable is not run. |
@@ -29,8 +29,8 @@ its finding ID.
 | `tool.claude` | absolute path string or null | — | `shutil.which('claude')` | Whether Claude CLI is found in permitted PATH entries; executable is not run. |
 | `tool.aider` | absolute path string or null | — | `shutil.which('aider')` | Whether Aider is found in permitted PATH entries; executable is not run. |
 | `tool.ollama` | absolute path string or null | — | `shutil.which('ollama')` | Whether Ollama is found in permitted PATH entries; executable is not run. |
-| `compatibility.platform.linux` | object | — | `platform.system()` | Actual platform name, required platform, and whether they match the Linux requirement. |
-| `compatibility.python.minimum` | object | — | `sys.version_info` | Actual Python version, required minimum, and whether Python 3.11 or newer is available. |
+| `compatibility.platform.linux` | object or null | — | `platform.system()` | Actual platform name, required platform, and whether they match the Linux requirement. |
+| `compatibility.python.minimum` | object or null | — | `sys.version_info` | Actual Python version, required minimum, and whether Python 3.11 or newer is available. |
 | `privacy.local_collection` | object | — | AICRE collection policy | Declares AICRE's local-only collection boundaries and that it does not execute discovered programs or read credential/document contents. |
 | `privacy.user_exclusions` | object | — | AICRE path policy | Number of supplied exclusion patterns and the source classes to which they apply. |
 | `profile.resource.cpu` | object | logical CPUs | AICRE selected profile plus `resource.cpu.logical_count` | Actual logical CPU count, minimum, ratio to minimum, and source finding ID. |
