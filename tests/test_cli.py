@@ -252,3 +252,12 @@ def test_report_input_rejects_duplicate_nested_json_object_keys(tmp_path, capsys
     source.write_text('{"outer":{"duplicate":1,"duplicate":2}}', encoding="utf-8")
     assert main(["report", "--input", str(source)]) == 2
     assert "duplicate JSON object key" in capsys.readouterr().err
+
+
+
+def test_report_input_enforces_size_limit(tmp_path, capsys, monkeypatch):
+    source = tmp_path / "oversized.json"
+    source.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr("aicre.cli.MAX_REPORT_INPUT_BYTES", 1)
+    assert main(["report", "--input", str(source)]) == 2
+    assert "safety limit" in capsys.readouterr().err
