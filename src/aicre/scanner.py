@@ -279,6 +279,9 @@ def scan_directory(
                 termination_reason = "timeout"
                 break
             current_relative, expected_dev, expected_ino = stack.pop()
+            # Release the previous directory's bounded sort buffer before
+            # allocating the next one, avoiding a transient two-buffer peak.
+            entries: list[Any] = []
             current_fd: int | None = None
             try:
                 current_fd = _open_directory_beneath(root_fd, current_relative, flags)

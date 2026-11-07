@@ -61,7 +61,7 @@ The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/repor
 - Linux-first. Windows and macOS support are not claimed.
 - Python 3.11 or newer.
 - No runtime third-party dependencies. `pytest`, Ruff, and `fastjsonschema` are development/test-only dependencies.
-- GitHub Actions checks Ubuntu 24.04 with Python 3.11, 3.12, and 3.13; CI tools are version- and hash-locked in `.github/requirements-ci.txt`.
+- GitHub Actions checks Ubuntu 22.04 and 24.04 with Python 3.11, 3.12, and 3.13; CI tools are version- and hash-locked in `.github/requirements-ci.txt`.
 
 ```bash
 python3 -m venv .venv

@@ -5,6 +5,7 @@ This roadmap separates implemented behavior from planned work and release approv
 ## Implemented on main
 - **0.1 security hardening:** descriptor-relative directory scanning, conservative sensitive-path policy, private atomic reports, locked CI, and regression coverage.
 - **0.2 Linux inventory preview:** local system metadata, allowlisted PATH-only tool discovery without execution, explicit Linux/Python compatibility checks, five separate readiness dimensions, versioned JSON Schema, cooperative timeouts, and CLI reporting.
+- **0.3 bounded directory scanning (implemented on main):** per-directory and total-item limits, deterministic completed output, explicit partial-report semantics, and a versioned directory-scan JSON Schema. These cardinality bounds do not constitute a hard byte-level memory ceiling.
 
 ## Current work
 - **0.3 workload-profile foundation (implemented on main):** host-facing resource observations and required-tool PATH checks for workload profiles; Resource readiness remains `unknown` until effective limits are established. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.

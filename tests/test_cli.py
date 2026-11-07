@@ -86,6 +86,26 @@ def test_cli_exposes_item_and_directory_entry_limits(tmp_path, capsys):
     assert report["summary"]["termination_reason"] == "item_limit"
 
 
+def test_cli_reports_directory_entry_limit_separately(tmp_path, capsys):
+    source = tmp_path / "source"
+    source.mkdir()
+    for name in ("a.txt", "b.txt", "c.txt"):
+        (source / name).write_text("fixture", encoding="utf-8")
+    output = tmp_path / "directory-limited-report.json"
+
+    result = main([
+        "scan", str(source), "--output", str(output),
+        "--max-items", "10", "--max-directory-entries", "2",
+    ])
+
+    assert result == 1
+    output_text = capsys.readouterr().out
+    assert "termination: directory_entry_limit" in output_text
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["scan_errors"] == 0
+
+
 def test_cli_rejects_non_positive_scan_limits():
     with pytest.raises(SystemExit) as exit_info:
         main(["scan", "source", "--output", "report.json", "--max-items", "0"])
