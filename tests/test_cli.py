@@ -219,3 +219,15 @@ def test_report_output_refuses_symlink_and_hardlink_destinations(tmp_path, capsy
         with pytest.raises(ScanError, match="hard-linked"):
             _write_output(str(hardlink), "REPLACE")
         assert target.read_text(encoding="utf-8") == "KEEP"
+
+
+
+@pytest.mark.parametrize("arguments", [
+    ["scan", "--profile", "standard", "--force"],
+    ["report", "--force"],
+])
+def test_force_requires_an_output_destination(arguments, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(arguments)
+    assert exit_info.value.code == 2
+    assert "--force requires --output" in capsys.readouterr().err
