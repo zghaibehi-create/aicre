@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
-from .models import utc_now
 from .policy import (
     SENSITIVE_CONFIG_DIR_PAIRS,
     SENSITIVE_DIRS,
@@ -41,122 +40,6 @@ def _add_inventory_options(parser: argparse.ArgumentParser, *, default_timeout: 
                         help="cooperative collection time budget in seconds")
 
 
-
-_COMPOSITE_WEIGHTS = {
-    "resource": 40,
-    "software": 30,
-    "compatibility": 15,
-    "privacy": 10,
-    "security": 5,
-}
-_STATUS_SCORES = {"pass": 100, "warning": 60, "fail": 0}
-
-
-def _composite_summary(report: dict[str, Any], report_filename: str) -> dict[str, Any]:
-    readiness = report["readiness"]
-    dimensions = {
-        "resource": readiness["resource_readiness"]["status"],
-        "software": readiness["software_readiness"]["status"],
-        "compatibility": readiness["compatibility_readiness"]["status"],
-        "privacy": readiness["privacy_readiness"]["status"],
-        "security": readiness["security_readiness"]["status"],
-    }
-    included = [
-        (dimensions[name], weight)
-        for name, weight in _COMPOSITE_WEIGHTS.items()
-        if dimensions[name] != "unknown"
-    ]
-    if included:
-        weighted = sum(_STATUS_SCORES[status] * weight for status, weight in included)
-        total_weight = sum(weight for _, weight in included)
-        composite_score = math.floor(weighted / total_weight + 0.5)
-    else:
-        composite_score = None
-
-    findings = {item["id"]: item for item in report["findings"]}
-    recommendations: list[str] = []
-
-    if dimensions["resource"] in {"warning", "fail"}:
-        actions: list[str] = []
-        labels = {
-            "cpu": ("CPU capacity", "logical cores"),
-            "memory": ("RAM", "GiB"),
-            "storage": ("root-filesystem free space", "GiB"),
-        }
-        for metric, (label, unit) in labels.items():
-            item = findings.get(f"profile.resource.{metric}")
-            value = item.get("value") if item else None
-            ratio = value.get("ratio") if isinstance(value, dict) else None
-            if (
-                not isinstance(value, dict)
-                or not isinstance(ratio, (int, float))
-                or isinstance(ratio, bool)
-                or ratio >= 1
-            ):
-                continue
-            minimum = value.get("minimum")
-            actual = value.get("actual")
-            if metric == "cpu":
-                actions.append(
-                    f"Increase available {label} to at least {minimum} {unit}."
-                )
-            else:
-                minimum_gib = minimum / (1024 ** 3)
-                actual_gib = actual / (1024 ** 3)
-                if metric == "memory":
-                    actions.append(
-                        f"Increase available RAM to at least {minimum_gib:g} GiB (currently {actual_gib:g} GiB)."
-                    )
-                else:
-                    actions.append(
-                        f"Free at least {minimum_gib:g} GiB on the root filesystem (currently {actual_gib:g} GiB free)."
-                    )
-        if actions:
-            recommendations.append(" ".join(actions))
-
-    if dimensions["software"] in {"warning", "fail"}:
-        missing = [
-            item["value"]["required_tool"]
-            for item in report["findings"]
-            if item["id"].startswith("profile.software.")
-            and item["status"] == "not_detected"
-            and isinstance(item.get("value"), dict)
-            and item["value"].get("required_tool")
-        ]
-        if missing:
-            recommendations.append(
-                "Add " + ", ".join(sorted(missing)) + " to PATH."
-            )
-
-    if dimensions["compatibility"] in {"warning", "fail"}:
-        actions = []
-        platform = findings.get("compatibility.platform.linux")
-        python = findings.get("compatibility.python.minimum")
-        if platform and platform["status"] in {"unsupported", "not_detected"}:
-            actions.append("Run AICRE on a supported Linux system.")
-        if python and isinstance(python.get("value"), dict) and python["value"].get("satisfied") is False:
-            actions.append("Use Python 3.11 or newer.")
-        if actions:
-            recommendations.append(" ".join(actions))
-
-    if dimensions["privacy"] in {"warning", "fail"}:
-        recommendations.append(
-            "Review the privacy-policy findings before sharing this report."
-        )
-
-    if dimensions["security"] in {"warning", "fail"}:
-        uid = findings.get("security.effective_uid")
-        if uid and uid.get("value") == 0:
-            recommendations.append("Run AICRE as a non-root user.")
-
-    return {
-        "derived_from": report_filename,
-        "generated_at": utc_now(),
-        "profile": report["profile"],
-        "composite_score": composite_score,
-        "dimensions": dimensions,
-        "recommendations": recommendations[:5],
-    }
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -191,7 +74,6 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--format", choices=("json",), default="json")
     report.add_argument("--output", help="optional report destination; stdout if omitted")
     report.add_argument("--force", action="store_true", help="explicitly replace an existing report")
-    report.add_argument("--composite", action="store_true", help="also write report.summary.json beside the report")
     report.add_argument("--exclude", action="append", default=[],
                         help="filesystem source or executable path pattern to omit; repeatable")
     report.add_argument("--timeout", type=_timeout_value, default=DEFAULT_TIMEOUT_SECONDS,
@@ -329,8 +211,6 @@ def main(argv: list[str] | None = None) -> int:
             return _build_and_emit_report(args, command="readiness")
 
         if args.command == "report":
-            if args.composite and not args.output:
-                parser.error("--composite requires --output so the summary can be written beside the report.")
             report = build_report(
                 profile=args.profile,
                 excludes=args.exclude,
@@ -341,22 +221,8 @@ def main(argv: list[str] | None = None) -> int:
                 if reason:
                     raise ScanError("Report destination is excluded by the privacy policy; choose another path.")
                 output_path = Path(args.output).expanduser().absolute()
-                summary_path = output_path.parent / "report.summary.json"
-                if args.composite:
-                    if summary_path == output_path:
-                        raise ScanError("The main report cannot be named report.summary.json when --composite is used.")
-                    summary_reason = path_exclusion_reason(summary_path, args.exclude)
-                    if summary_reason:
-                        raise ScanError("Summary destination is excluded by the privacy policy; choose another path.")
-                    if (summary_path.exists() or summary_path.is_symlink()) and not args.force:
-                        raise ScanError("Summary report already exists; pass --force to replace it.")
                 write_json_report(output_path, report, force=args.force)
-                if args.composite:
-                    summary = _composite_summary(report, output_path.name)
-                    write_json_report(summary_path, summary, force=args.force)
-                    print(f"AICRE report and summary written to {output_path} and {summary_path}")
-                else:
-                    print(f"AICRE report written to {output_path}")
+                print(f"AICRE report written to {output_path}")
             else:
                 print(serialize_report(report), end="")
             return 0
