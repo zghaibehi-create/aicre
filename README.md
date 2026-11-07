@@ -99,7 +99,7 @@ MIT. See [LICENSE](LICENSE).
 
 ## Workload profiles
 
-The default `standard` profile is inventory-only and deliberately leaves Resource and Software readiness unknown. The optional `agent-development` profile compares CPU count (>=2), total RAM (>=8 GiB), free root-filesystem storage (>=10 GiB), and PATH presence of Git and Python 3.
+The default `standard` profile is inventory-only and deliberately leaves Resource and Software readiness unknown. The optional `agent-development` profile records host-facing CPU count, total RAM, and free root-filesystem storage alongside project-defined reference thresholds (>=2 CPUs, >=8 GiB RAM, >=10 GiB free storage). Because effective process/container, cgroup, CPU-affinity, and filesystem-quota limits are not established, these observations are not used to pass or fail Resource readiness; that dimension remains `unknown`. Software readiness can assess only PATH presence of Git and Python 3, not their versions, configuration, security, or functionality.
 
 ```bash
 aicre readiness --profile agent-development
@@ -108,4 +108,4 @@ aicre report --profile agent-development --format json
 
 This is an advisory project-defined minimum, not a vendor specification or performance/safety guarantee. It does not assess local model inference, GPU drivers, concurrency, agent configuration, MCP permissions, sandboxing, or dependency provenance. Tool presence does not verify version or functionality.
 
-**Container and constrained-environment limitation:** this profile currently uses host-facing observations (`os.cpu_count()` and `/proc/meminfo`) and does not account for cgroup CPU/memory quotas or CPU-affinity restrictions. In containers or restricted execution environments, reported CPU/RAM may exceed what the process can actually use. Treat the resource result as host-observation-only until container-aware limits are implemented and independently tested.
+**Resource limitation:** `os.cpu_count()`, `/proc/meminfo`, and `shutil.disk_usage("/")` provide host-facing observations, not a portable measurement of effective resources available to the process. AICRE does not establish cgroup v1/v2 limits, CPU affinity, orchestrator reservations, or filesystem quotas. Consequently, the `agent-development` profile preserves these observations for context but does not compare them into a Resource `pass` or `fail`; Resource readiness remains `unknown`. Container-aware assessment is deferred until it can be implemented and independently tested without overstating effective capacity.
