@@ -33,9 +33,9 @@ its finding ID.
 | `compatibility.python.minimum` | object or null | — | `sys.version_info` | Actual Python version, required minimum, and whether Python 3.11 or newer is available. |
 | `privacy.local_collection` | object | — | AICRE collection policy | Declares AICRE's local-only collection boundaries and that it does not execute discovered programs or read credential/document contents. |
 | `privacy.user_exclusions` | object | — | AICRE path policy | Number of supplied exclusion patterns and the source classes to which they apply. |
-| `profile.resource.cpu` | object | logical CPUs | AICRE selected profile plus `resource.cpu.logical_count` | Actual logical CPU count, minimum, ratio to minimum, and source finding ID. |
-| `profile.resource.memory` | object | bytes | AICRE selected profile plus `resource.memory.total_bytes` | Actual total RAM, minimum bytes, ratio to minimum, and source finding ID. |
-| `profile.resource.storage` | object | bytes | AICRE selected profile plus `resource.storage.root` | Actual free root-filesystem bytes, minimum bytes, ratio to minimum, and source finding ID. |
+| `profile.resource.cpu` | object | logical CPUs | AICRE selected profile plus `resource.cpu.logical_count` | Host-facing logical CPU observation and project reference minimum; no resource comparison is performed, and readiness remains unknown. |
+| `profile.resource.memory` | object | bytes | AICRE selected profile plus `resource.memory.total_bytes` | Host-facing total RAM observation and project reference minimum; no resource comparison is performed, and readiness remains unknown. |
+| `profile.resource.storage` | object | bytes | AICRE selected profile plus `resource.storage.root` | Host-facing free root-filesystem observation and project reference minimum; no resource comparison is performed, and readiness remains unknown. |
 | `profile.software.git` | object | — | AICRE selected profile plus `tool.git` | Required-tool presence result and source finding ID. |
 | `profile.software.python3` | object | — | AICRE selected profile plus `tool.python3` | Required-tool presence result and source finding ID. |
 | `profile.software.node` | object | — | AICRE selected profile plus `tool.node` | Required-tool presence result and source finding ID. |
