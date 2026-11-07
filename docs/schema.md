@@ -31,3 +31,18 @@ Report output paths create missing parent directories and replace existing regul
 
 
 ReportLab's built-in Type 1 fonts avoid redistributing third-party fonts and their licenses. They do not guarantee correct rendering of every Unicode script (including Arabic); users requiring full multilingual glyph coverage need a separately licensed, explicitly configured font in a future phase.
+
+
+## Validation rules for imported reports
+
+The CLI treats every imported JSON document as untrusted input. It rejects duplicate object keys (including nested keys), non-finite numeric constants, unknown schema versions, unknown or missing fields, malformed timestamps, invalid enum values, malformed identifiers, duplicate finding IDs, duplicate semantic check IDs, invalid readiness dimensions, and readiness evidence that references findings not present in the same report.
+
+Canonical schema 1.0.0 documents are fully validated before they are returned unchanged. Legacy schema 2.0 documents are validated before conversion; readiness evidence references are remapped to the canonical finding digests. Canonical finding digests are recomputed from collector, semantic check ID, status, value, and unit and must match the supplied ID. Diff operations pass through the same validation and reject duplicate semantic identities instead of overwriting one finding with another.
+
+The Python runtime validator is intentionally implemented with the standard library. The JSON Schema file is the public interchange contract and is independently exercised in the development test suite; runtime safety does not depend on an optional schema package.
+
+## Markdown and output-path safety
+
+Markdown renderers escape untrusted text used in headings, table cells, and labels. JSON values are serialized as JSON and enclosed in a dynamically sized code fence longer than any backtick run in the payload. HTML output escapes report-controlled values and contains no scripts or remote resources.
+
+The report writer creates a temporary file relative to an opened destination-directory descriptor, writes with owner-only permissions, fsyncs the file, and atomically renames it relative to that same descriptor. Existing symlinks, non-regular files, and hard-linked destinations are refused. This narrows path substitution races; it does not protect against a hostile process that can modify the destination directory concurrently or a compromised kernel.
