@@ -98,3 +98,39 @@ def test_v1_rejects_malformed_uuid_and_forged_finding_digest():
     report["findings"][0]["id"] = "0" * 64
     with pytest.raises(ReportValidationError, match="does not match"):
         validate_v1_report(report)
+
+
+
+def test_canonical_scan_identity_is_independent_of_finding_order():
+    timestamp = "2026-01-01T00:00:00Z"
+    report = source_report(timestamp)
+    extra = {
+        "id": "memory.total", "category": "resource", "status": "detected",
+        "value": 8192, "unit": "MiB", "source": "memory-collector",
+        "confidence": "high", "collected_at": timestamp, "limitations": [],
+    }
+    report["findings"].append(extra)
+    report["readiness"]["resource_readiness"]["evidence"].append("memory.total")
+    left = canonical_report(report)
+    reversed_report = copy.deepcopy(report)
+    reversed_report["findings"].reverse()
+    right = canonical_report(reversed_report)
+    assert left["scan_id"] == right["scan_id"]
+
+
+def test_canonicalization_remaps_legacy_readiness_evidence():
+    report = canonical_report(source_report("2026-01-01T00:00:00Z"))
+    assert report["readiness"]["resource_readiness"]["evidence"] == [
+        report["findings"][0]["id"]
+    ]
+
+
+def test_v1_rejects_invalid_unicode_in_profile_and_limitations():
+    report = canonical_report(source_report("2026-01-01T00:00:00Z"))
+    report["profile"] = "\ud800"
+    with pytest.raises(ReportValidationError, match="invalid Unicode"):
+        validate_v1_report(report)
+    report = canonical_report(source_report("2026-01-01T00:00:00Z"))
+    report["findings"][0]["limitations"] = ["\ud800"]
+    with pytest.raises(ReportValidationError, match="finite JSON value"):
+        validate_v1_report(report)
