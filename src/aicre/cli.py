@@ -24,7 +24,7 @@ from .privacy import path_exclusion_reason
 from .renderers import render_html, render_markdown, render_pdf
 from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
 from .scanner import ScanError, scan_directory, write_json_report
-from .schema import canonical_report
+from .schema import ReportValidationError, canonical_report
 from .workload_profiles import supported_profiles
 
 EXIT_UNSUPPORTED_FORMAT = 3
@@ -141,26 +141,32 @@ def _show_exclusions() -> None:
     print("User patterns are supplied per command with --exclude and are not persisted.")
 
 
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key: {key!r}")
+        result[key] = value
+    return result
+
+
+def _reject_nonfinite(value: str) -> None:
+    raise ValueError(f"non-finite JSON number is not permitted: {value}")
+
+
 def _load_json(path: str) -> dict[str, Any]:
     try:
-        value = json.loads(Path(path).expanduser().read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise ScanError(f"cannot read JSON report {path!r}: {exc}") from exc
-    required = {"schema_version", "aicre_version", "profile", "generated_at", "findings", "readiness"}
-    if (not isinstance(value, dict)
-            or not required.issubset(value)
-            or value.get("schema_version") not in {"2.0", "1.0.0"}
-            or not isinstance(value.get("findings"), list)
-            or any(not isinstance(item, dict) for item in value.get("findings", []))
-            or not isinstance(value.get("readiness"), dict)):
-        raise ScanError(f"invalid AICRE report structure in {path!r}")
-    for item in value["findings"]:
-        if not {"category", "status", "value", "source", "confidence", "unit", "limitations"}.issubset(item):
-            raise ScanError(f"invalid finding structure in {path!r}")
-        if "id" not in item and "check_id" not in item:
-            raise ScanError(f"finding is missing an identifier in {path!r}")
-    if value["schema_version"] == "1.0.0" and not isinstance(value.get("scan_id"), str):
-        raise ScanError(f"canonical report is missing scan_id in {path!r}")
+        text = Path(path).expanduser().read_text(encoding="utf-8")
+        value = json.loads(
+            text,
+            object_pairs_hook=_unique_object,
+            parse_constant=_reject_nonfinite,
+        )
+        if not isinstance(value, dict):
+            raise ReportValidationError("top-level JSON value must be an object")
+        canonical_report(value)  # strict, version-aware validation of all nested fields
+    except (OSError, UnicodeError, json.JSONDecodeError, ReportValidationError, ValueError) as exc:
+        raise ScanError(f"cannot load valid AICRE JSON report {path!r}: {exc}") from exc
     return value
 
 
