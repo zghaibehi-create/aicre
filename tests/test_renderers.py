@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from aicre.renderers import render_html, render_markdown, render_pdf
+from aicre.renderers import render_html, render_markdown, render_pdf, render_text
 
 
 def sample():
