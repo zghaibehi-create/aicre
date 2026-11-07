@@ -108,10 +108,57 @@ def _print_readiness(readiness: dict[str, dict[str, Any]]) -> None:
             print(f"  evidence: {', '.join(result['evidence'])}")
 
 
+def _format_gib(value: Any) -> str:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return "not available"
+    return f"{value / (1024 ** 3):.1f} GiB"
+
+
+def _print_profile_observations(report: dict[str, Any]) -> None:
+    """Display existing host observations without implying resource readiness."""
+    findings = {
+        item["id"]: item
+        for item in report["findings"]
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
+    print("Observed values (host-facing; resource comparisons are not performed):")
+
+    cpu = findings.get("profile.resource.cpu", {}).get("value", {})
+    cpu_actual = cpu.get("actual") if isinstance(cpu, dict) else None
+    cpu_minimum = cpu.get("minimum") if isinstance(cpu, dict) else None
+    cpu_text = str(cpu_actual) if isinstance(cpu_actual, int) else "not available"
+    print(f"  CPU: {cpu_text} (min {cpu_minimum} logical CPUs)")
+
+    memory = findings.get("profile.resource.memory", {}).get("value", {})
+    memory_actual = memory.get("actual") if isinstance(memory, dict) else None
+    memory_minimum = memory.get("minimum") if isinstance(memory, dict) else None
+    print(
+        f"  RAM: {_format_gib(memory_actual)} "
+        f"(min {_format_gib(memory_minimum)})"
+    )
+
+    storage = findings.get("profile.resource.storage", {}).get("value", {})
+    storage_actual = storage.get("actual") if isinstance(storage, dict) else None
+    storage_minimum = storage.get("minimum") if isinstance(storage, dict) else None
+    print(
+        f"  Free disk: {_format_gib(storage_actual)} "
+        f"(min {_format_gib(storage_minimum)})"
+    )
+
+    for tool in ("git", "python3"):
+        item = findings.get(f"profile.software.{tool}")
+        status = item.get("status", "not_checked") if isinstance(item, dict) else "not_checked"
+        label = "detected" if status == "detected" else status.replace("_", " ")
+        print(f"  {tool}: {label}")
+
+
 def _print_human_report(report: dict[str, Any], *, command: str) -> None:
     print(f"AICRE {report['aicre_version']} — profile: {report['profile']}")
     if command == "readiness":
+        if report["profile"] == "agent-development":
+            _print_profile_observations(report)
         _print_readiness(report["readiness"])
+        print("Note: unknown means not assessed, not failed.")
         return
 
     categories = None
