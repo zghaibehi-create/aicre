@@ -99,7 +99,15 @@ def evaluate_readiness(
     by_id = {item.id: item for item in findings if isinstance(item, Finding)}
 
     if profile is None:
-        resource = _dimension(\n            "resource_readiness", "unknown", "No profile specified.", _resource_evidence(findings)\n        )\n        software = _dimension(\n            "software_readiness",\n            "unknown",\n            "No profile specified.",\n            tuple(sorted(key for key in by_id if key.startswith("tool."))),\n        )
+        resource = _dimension(
+            "resource_readiness", "unknown", "No profile specified.", _resource_evidence(findings)
+        )
+        software = _dimension(
+            "software_readiness",
+            "unknown",
+            "No profile specified.",
+            tuple(sorted(key for key in by_id if key.startswith("tool."))),
+        )
     else:
         requirements = resolve_profile(profile)
         if profile == "standard":
