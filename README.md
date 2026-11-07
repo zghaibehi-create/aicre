@@ -136,6 +136,7 @@ See the [AICRE agent skill](skills/aicre/SKILL.md) for instructions an AI agent 
 - [Security model](docs/SECURITY_MODEL.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Security reporting](SECURITY.md)
+- [Legal notices](docs/LEGAL_NOTICES.md)
 - [Contributing](CONTRIBUTING.md)
 - [JSON readiness report schema](schemas/report-v2.schema.json)
 - [JSON directory scan report schema](schemas/directory-scan-report-v2.schema.json)
