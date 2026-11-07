@@ -144,3 +144,68 @@ def test_ignores_non_finding_entries_without_crashing():
     result = evaluate_readiness([None, {"id": "tool.fake"}])
     assert result["software_readiness"].evidence == ()
     assert result["compatibility_readiness"].status == "unknown"
+
+
+
+def profile_findings(*, cpu=4, memory_gib=16, disk_gib=20, tools=None, missing_resource=None):
+    from aicre.workload_profiles import GIB, evaluate_workload_profile
+
+    values = [
+        finding("resource.cpu.logical_count", value=cpu, category="resource"),
+        finding("resource.memory.total_bytes", value=memory_gib * GIB, category="resource"),
+        finding(
+            "resource.storage.root",
+            value={"total_bytes": disk_gib * GIB, "free_bytes": disk_gib * GIB},
+            category="resource",
+        ),
+    ]
+    if missing_resource:
+        values = [item for item in values if item.id != missing_resource]
+    for name, status in (tools or {"git": "detected", "python3": "detected", "node": "detected"}).items():
+        values.append(
+            finding(
+                f"tool.{name}",
+                status=status,
+                value="/usr/bin/" + name if status == "detected" else None,
+                category="software",
+            )
+        )
+    return values + evaluate_workload_profile(values, "laptop-dev")
+
+
+def test_resource_readiness_pass_warning_fail_and_unknown_fixtures():
+    assert evaluate_readiness(profile_findings(), "laptop-dev")["resource_readiness"].status == "pass"
+    assert evaluate_readiness(
+        profile_findings(cpu=2), "laptop-dev"
+    )["resource_readiness"].status == "warning"
+    assert evaluate_readiness(
+        profile_findings(cpu=1), "laptop-dev"
+    )["resource_readiness"].status == "fail"
+    assert evaluate_readiness(
+        profile_findings(missing_resource="resource.memory.total_bytes"), "laptop-dev"
+    )["resource_readiness"].status == "unknown"
+
+
+def test_software_readiness_pass_warning_fail_and_unknown_fixtures():
+    assert evaluate_readiness(
+        profile_findings(), "laptop-dev"
+    )["software_readiness"].status == "pass"
+    assert evaluate_readiness(
+        profile_findings(tools={"git": "not_detected", "python3": "detected", "node": "detected"}),
+        "laptop-dev",
+    )["software_readiness"].status == "warning"
+    assert evaluate_readiness(
+        profile_findings(tools={"git": "not_detected", "python3": "not_detected", "node": "detected"}),
+        "laptop-dev",
+    )["software_readiness"].status == "fail"
+    assert evaluate_readiness(
+        profile_findings(tools={"git": "not_detected", "python3": "permission_denied", "node": "error"}),
+        "laptop-dev",
+    )["software_readiness"].status == "unknown"
+
+
+def test_explicitly_unspecified_profile_returns_unknown_explanation():
+    result = evaluate_readiness([], profile=None)
+    assert result["resource_readiness"].status == "unknown"
+    assert result["software_readiness"].status == "unknown"
+    assert result["resource_readiness"].explanation == "No profile specified."
