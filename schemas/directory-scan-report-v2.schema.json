@@ -116,5 +116,48 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "complete": {
+            "const": true
+          }
+        },
+        "required": [
+          "complete"
+        ]
+      },
+      "then": {
+        "properties": {
+          "termination_reason": {
+            "const": null
+          },
+          "scan_errors": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "complete": {
+            "const": false
+          }
+        },
+        "required": [
+          "complete"
+        ]
+      },
+      "then": {
+        "properties": {
+          "termination_reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
 }
