@@ -125,7 +125,7 @@ def test_inventory_and_readiness_commands(capsys, monkeypatch):
     }
 
     def fake_build_report(*, profile, excludes, timeout, include_tools=True):
-        assert profile == "standard"
+        assert profile is None
         assert include_tools
         return report
 
@@ -382,3 +382,11 @@ def test_composite_score_is_null_when_every_dimension_is_unknown(
     summary = json.loads((tmp_path / "report.summary.json").read_text(encoding="utf-8"))
     assert summary["composite_score"] is None
     assert summary["recommendations"] == []
+
+
+
+def test_cli_without_profile_uses_standard_label_but_explains_unknown_readiness(capsys):
+    assert main(["readiness", "--timeout", "0"]) == 0
+    output = capsys.readouterr().out
+    assert "AICRE 0.2.1 — profile: standard" in output
+    assert output.count("No profile specified.") == 2
