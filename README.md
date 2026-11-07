@@ -100,9 +100,12 @@ MIT. See [LICENSE](LICENSE).
 ## Workload profiles
 
 The default `standard` profile is inventory-only. The `agent-development`
-profile is retained for compatibility. Additional profiles are:
+profile is retained for compatibility. Additional profiles are listed below.
+The CPU, RAM, and storage values are project reference thresholds only; they are
+not compared into Resource readiness because effective process/container limits
+are not established.
 
-| Profile | CPU cores | RAM | Free root storage | Required tools |
+| Profile | Reference CPU | Reference RAM | Reference free storage | Required tools |
 |---|---:|---:|---:|---|
 | `agent-development` | 2 | 8 GiB | 10 GiB | git, python3 |
 | `laptop-dev` | 4 | 16 GiB | 20 GiB | git, python3, node |
