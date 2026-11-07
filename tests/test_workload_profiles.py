@@ -59,9 +59,14 @@ def test_malformed_resource_observations_remain_unknown():
         checks = evaluate_workload_profile(base, "agent-development")
         result = evaluate_readiness(base + checks, "agent-development")
         assert result["resource_readiness"].status == "unknown"
+        resource_name = {
+            "resource.cpu.logical_count": "cpu",
+            "resource.memory.total_bytes": "memory",
+            "resource.storage.root": "storage",
+        }[source_id]
         resource_check = next(
             item for item in checks
-            if item.id == "profile.resource." + source_id.rsplit(".", 1)[-1]
+            if item.id == f"profile.resource.{resource_name}"
         )
         assert resource_check.status == "not_checked"
         assert resource_check.value["actual"] is None
