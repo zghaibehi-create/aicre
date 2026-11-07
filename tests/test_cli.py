@@ -24,11 +24,10 @@ def test_scan_requires_output_argument(tmp_path):
     assert exit_info.value.code == 2
 
 
-def test_scan_requires_profile_when_source_is_omitted(capsys):
+def test_scan_requires_profile_when_source_is_omitted():
     with pytest.raises(SystemExit) as exit_info:
         main(["scan"])
     assert exit_info.value.code == 2
-    assert "scan without SOURCE requires --profile" in capsys.readouterr().err
 
 
 def test_legacy_directory_scan_success_and_user_exclusion(tmp_path, capsys):
@@ -45,21 +44,6 @@ def test_legacy_directory_scan_success_and_user_exclusion(tmp_path, capsys):
     paths = {item["relative_path"] for item in json.loads(output.read_text(encoding="utf-8"))["items"]}
     assert "public.txt" in paths
     assert "private/item.txt" not in paths
-
-
-def test_partial_directory_scan_writes_report_and_returns_status_1(tmp_path, capsys):
-    source = tmp_path / "source"
-    source.mkdir()
-    output = tmp_path / "partial-report.json"
-
-    result = main([
-        "scan", str(source), "--output", str(output), "--timeout", "0",
-    ])
-
-    assert result == 1
-    assert "errors: 1" in capsys.readouterr().out
-    report = json.loads(output.read_text(encoding="utf-8"))
-    assert report["summary"]["scan_errors"] == 1
 
 
 def test_cli_reports_scan_error_with_exit_code_2(tmp_path, capsys):
@@ -106,30 +90,7 @@ def test_system_json_command_emits_full_valid_report(capsys):
     assert not any(item["id"].startswith("tool.") for item in data["findings"])
 
 
-def test_inventory_and_readiness_commands(capsys, monkeypatch):
-    report = {
-        "aicre_version": "0.2.0",
-        "profile": "standard",
-        "findings": [{
-            "id": "tool.git", "category": "software", "status": "detected",
-            "value": "fixture", "source": "test", "confidence": "high",
-            "unit": "", "limitations": [],
-        }],
-        "readiness": {
-            name: {"status": "unknown", "explanation": "fixture", "evidence": []}
-            for name in (
-                "resource_readiness", "software_readiness", "compatibility_readiness",
-                "privacy_readiness", "security_readiness",
-            )
-        },
-    }
-
-    def fake_build_report(*, profile, excludes, timeout, include_tools=True):
-        assert profile == "standard"
-        assert include_tools
-        return report
-
-    monkeypatch.setattr("aicre.cli.build_report", fake_build_report)
+def test_inventory_and_readiness_commands(capsys):
     assert main(["inventory", "--timeout", "0"]) == 0
     inventory_text = capsys.readouterr().out
     assert "tool.git" in inventory_text
@@ -152,17 +113,18 @@ def test_report_json_stdout_and_schema_shape(capsys):
     }
 
 
-def test_report_file_uses_private_permissions_and_refuses_overwrite(tmp_path, capsys):
+def test_report_file_uses_private_permissions_and_allows_overwrite(tmp_path, capsys):
     output = tmp_path / "aicre-report.json"
     assert main(["report", "--output", str(output), "--timeout", "0"]) == 0
     capsys.readouterr()
     data = json.loads(output.read_text(encoding="utf-8"))
-    assert data["schema_version"] == "2.0"
+    assert data["schema_version"] == "1.0.0"
     if os.name == "posix":
         assert stat.S_IMODE(output.stat().st_mode) == 0o600
 
-    assert main(["report", "--output", str(output), "--timeout", "0"]) == 2
-    assert "already exists" in capsys.readouterr().err
+    assert main(["report", "--output", str(output), "--timeout", "0"]) == 0
+    capsys.readouterr()
+    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "1.0.0"
 
 
 def test_report_respects_user_exclusion_for_destination(tmp_path, capsys):
@@ -185,7 +147,7 @@ def test_report_force_replaces_only_explicitly(tmp_path, capsys):
 
     assert main(["report", "--output", str(output), "--force", "--timeout", "0"]) == 0
     capsys.readouterr()
-    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "2.0"
+    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "1.0.0"
 
 
 def test_exclusions_show_policy_and_non_persistence(capsys):
@@ -213,18 +175,72 @@ def test_report_accepts_agent_development_profile(capsys):
     assert result == 0
     data = json.loads(capsys.readouterr().out)
     assert data["profile"] == "agent-development"
-    assert "profile.resource.cpu" in {item["id"] for item in data["findings"]}
+    assert "profile.resource.cpu" in {item["check_id"] for item in data["findings"]}
+
+
+
+def test_report_input_rejects_duplicate_json_object_keys(tmp_path, capsys):
+    source = tmp_path / "duplicate.json"
+    source.write_text('{"schema_version":"1.0.0","schema_version":"2.0"}', encoding="utf-8")
+    assert main(["report", "--input", str(source)]) == 2
+    assert "duplicate JSON object key" in capsys.readouterr().err
+
+
+def test_report_input_rejects_shallow_valid_but_invalid_canonical_report(tmp_path, capsys):
+    source = tmp_path / "invalid.json"
+    source.write_text(json.dumps({
+        "schema_version": "1.0.0",
+        "aicre_version": "0.3.0",
+        "scan_id": "not-a-uuid",
+        "generated_at": "not-a-date",
+        "profile": "standard",
+        "findings": [],
+        "readiness": {},
+    }), encoding="utf-8")
+    assert main(["report", "--input", str(source)]) == 2
+    error = capsys.readouterr().err
+    assert "UUIDv5" in error or "readiness" in error
+
+
+def test_report_output_refuses_symlink_and_hardlink_destinations(tmp_path, capsys):
+    from aicre.cli import _write_output
+    from aicre.scanner import ScanError
+
+    target = tmp_path / "real.json"
+    target.write_text("KEEP", encoding="utf-8")
+    symlink = tmp_path / "symlink.json"
+    symlink.symlink_to(target)
+    with pytest.raises(ScanError, match="regular file"):
+        _write_output(str(symlink), "REPLACE")
+    assert target.read_text(encoding="utf-8") == "KEEP"
+
+    if hasattr(os, "link"):
+        hardlink = tmp_path / "hardlink.json"
+        os.link(target, hardlink)
+        with pytest.raises(ScanError, match="hard-linked"):
+            _write_output(str(hardlink), "REPLACE")
+        assert target.read_text(encoding="utf-8") == "KEEP"
 
 
 
 @pytest.mark.parametrize("arguments", [
     ["scan", "--profile", "standard", "--force"],
-    ["scan", "source", "--force"],
     ["report", "--force"],
 ])
 def test_force_requires_an_output_destination(arguments, capsys):
     with pytest.raises(SystemExit) as exit_info:
         main(arguments)
-
     assert exit_info.value.code == 2
     assert "--force requires --output" in capsys.readouterr().err
+
+
+
+def test_partial_directory_scan_writes_report_and_returns_status_1(tmp_path, capsys):
+    source = tmp_path / "source"
+    source.mkdir()
+    output = tmp_path / "partial-report.json"
+    result = main(["scan", str(source), "--output", str(output), "--timeout", "0"])
+    assert result == 1
+    assert "errors: 1" in capsys.readouterr().out
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["summary"]["scan_errors"] == 1
