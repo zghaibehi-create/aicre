@@ -30,6 +30,7 @@ jobs:
           python -m pip install --no-build-isolation --no-deps -e '.[dev]'
           python -m pip check
 
+      - { name: "Check bidi controls", run: "if git grep -nP '[\\x{202A}-\\x{202E}\\x{2066}-\\x{2069}\\x{200E}\\x{200F}]' -- .; then exit 1; else rc=$?; test $rc -eq 1; fi" }
       - name: Show AICRE version
         run: aicre --version
 
@@ -39,7 +40,7 @@ jobs:
 
       - name: Generate and print JSON report
         run: |
-          aicre report --profile agent-development --format json --output "$RUNNER_TEMP/report.json"
+          aicre report --profile laptop-dev --format json --output "$RUNNER_TEMP/report.json"
           cat "$RUNNER_TEMP/report.json"
           python - <<'PY'
           import json
