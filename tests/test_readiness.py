@@ -36,7 +36,7 @@ def test_resource_unknown_cites_available_resource_findings():
     dimension = evaluate_readiness(findings)["resource_readiness"]
     assert dimension.status == "unknown"
     assert dimension.evidence == ("host.cpu_count", "host.ram_bytes", "host.storage_bytes")
-    assert "no workload resource baseline" in dimension.explanation.lower()
+    assert dimension.explanation == "No profile specified."
 
 
 def test_software_unknown_cites_detected_tool_ids():
@@ -44,7 +44,7 @@ def test_software_unknown_cites_detected_tool_ids():
     dimension = evaluate_readiness(findings)["software_readiness"]
     assert dimension.status == "unknown"
     assert dimension.evidence == ("tool.git", "tool.python")
-    assert "No mandatory software manifest" in dimension.explanation
+    assert dimension.explanation == "No profile specified."
 
 
 def test_compatibility_pass_requires_both_detected_and_satisfied():
