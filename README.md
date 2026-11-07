@@ -1,6 +1,6 @@
 # AICRE 0.2.0 — Linux-first inventory and readiness preview
 
-**Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI that collects a narrow set of environment metadata and reports five separate, evidence-backed readiness dimensions without combining them into a score. It does not run AI agents, install software, change system settings, or send machine information anywhere.
+**Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
 > **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. The 0.2 implementation is not a release approval; independent review remains required.
 
@@ -12,26 +12,6 @@ AICRE runs on Linux with Python 3.11 or newer and is installed from source.
 2. Create and activate a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`.
 3. Install AICRE: `python -m pip install -e '.[dev]'`.
 4. Assess the agent-development profile: `aicre readiness --profile agent-development`.
-
-## Sample output
-
-The following readiness output was collected from a real GitHub Actions virtual runner:
-
-```text
-AICRE 0.2.0 — profile: agent-development
-[pass] resource_readiness: Compared CPU count, total RAM, and free root-filesystem storage with documented agent-development minimums. This is not a performance guarantee.
-  evidence: profile.resource.cpu, profile.resource.memory, profile.resource.storage
-[pass] software_readiness: Compared allowlisted PATH presence for required tools. Presence does not verify versions, configuration, security, or functionality.
-  evidence: profile.software.git, profile.software.python3
-[pass] compatibility_readiness: Linux platform and minimum Python compatibility are assessed from explicit runtime checks only.
-  evidence: compatibility.platform.linux, compatibility.python.minimum
-[pass] privacy_readiness: Describes AICRE's local collection and exclusion behavior only; it is not a host-wide privacy guarantee.
-  evidence: privacy.local_collection, privacy.user_exclusions
-[unknown] security_readiness: The process effective UID is nonzero; other host security controls were not assessed.
-  evidence: security.effective_uid
-```
-
-This sample describes a GitHub Actions virtual runner, not a personal computer. Resource observations are host-facing; container CPU and memory limits are not reflected.
 
 ## Privacy and collection boundaries
 
@@ -45,7 +25,7 @@ Reports can contain hardware details, software availability, and executable path
 
 Each finding has a stable ID, category, collection status, value and optional unit, named source, confidence, UTC collection timestamp, and limitations. Finding statuses are `detected`, `not_detected`, `unsupported`, `permission_denied`, `error`, and `not_checked`.
 
-Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. AICRE does not calculate a composite score. Resource and Software readiness remain `unknown` until workload resource thresholds and a required software manifest are defined. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
+Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. AICRE does not calculate a composite score. In the inventory-only `standard` profile, Resource and Software readiness remain `unknown` because no workload resource baseline or required software manifest is applied. The optional `agent-development` profile checks only PATH presence for its required tools; its Resource readiness remains `unknown` because host-facing measurements do not establish effective process/container limits. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
 
 The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
 
@@ -132,7 +112,7 @@ MIT. See [LICENSE](LICENSE).
 
 ## Workload profiles
 
-The default `standard` profile is inventory-only and deliberately leaves Resource and Software readiness unknown. The optional `agent-development` profile compares CPU count (>=2), total RAM (>=8 GiB), free root-filesystem storage (>=10 GiB), and PATH presence of Git and Python 3.
+The default `standard` profile is inventory-only and deliberately leaves Resource and Software readiness unknown. The optional `agent-development` profile records host-facing CPU count, total RAM, and free root-filesystem storage alongside project-defined reference thresholds (>=2 CPUs, >=8 GiB RAM, >=10 GiB free storage). Because effective process/container, cgroup, CPU-affinity, and filesystem-quota limits are not established, these observations are not used to pass or fail Resource readiness; that dimension remains `unknown`. Software readiness can assess only PATH presence of Git and Python 3, not their versions, configuration, security, or functionality.
 
 ```bash
 aicre readiness --profile agent-development
@@ -141,4 +121,4 @@ aicre report --profile agent-development --format json
 
 This is an advisory project-defined minimum, not a vendor specification or performance/safety guarantee. It does not assess local model inference, GPU drivers, concurrency, agent configuration, MCP permissions, sandboxing, or dependency provenance. Tool presence does not verify version or functionality.
 
-**Container and constrained-environment limitation:** this profile currently uses host-facing observations (`os.cpu_count()` and `/proc/meminfo`) and does not account for cgroup CPU/memory quotas or CPU-affinity restrictions. In containers or restricted execution environments, reported CPU/RAM may exceed what the process can actually use. Treat the resource result as host-observation-only until container-aware limits are implemented and independently tested.
+**Resource limitation:** `os.cpu_count()`, `/proc/meminfo`, and `shutil.disk_usage("/")` provide host-facing observations, not a portable measurement of effective resources available to the process. AICRE does not establish cgroup v1/v2 limits, CPU affinity, orchestrator reservations, or filesystem quotas. Consequently, the `agent-development` profile preserves these observations for context but does not compare them into a Resource `pass` or `fail`; Resource readiness remains `unknown`. Container-aware assessment is deferred until it can be implemented and independently tested without overstating effective capacity.
