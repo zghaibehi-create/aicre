@@ -8,10 +8,8 @@
   covered by tests confirming they always contain findings.
 - Add the `laptop-dev`, `agent-workstation`, and `ci-runner` profiles while
   retaining `standard` and `agent-development`.
-- Evaluate Resource and Software readiness against the selected profile,
-  including fail, warning, pass, and unknown outcomes.
-- Add opt-in `aicre report --composite` output to write a separate
-  `report.summary.json` beside the main report.
+- Evaluate Software readiness against the selected profile; retain host-facing
+  resource observations without using them to pass or fail Resource readiness.
 - Document every emitted finding ID and its value contract in
   `docs/finding-ids.md`.
 - Keep runtime dependencies empty and preserve local-only, read-only,
