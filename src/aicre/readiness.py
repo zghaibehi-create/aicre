@@ -1,7 +1,9 @@
 """Evidence-backed readiness assessments for AICRE."""
 from __future__ import annotations
+
 from collections.abc import Sequence
 from typing import Any
+
 from aicre.models import Finding, ReadinessDimension
 from aicre.workload_profiles import PROFILES
 
