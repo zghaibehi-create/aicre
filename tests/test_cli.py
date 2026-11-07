@@ -13,7 +13,7 @@ def test_version_argument(capsys):
     with pytest.raises(SystemExit) as exit_info:
         main(["--version"])
     assert exit_info.value.code == 0
-    assert capsys.readouterr().out.strip() == "aicre 0.2.0"
+    assert capsys.readouterr().out.strip() == "aicre 0.2.1"
 
 
 def test_scan_requires_output_argument(tmp_path):
@@ -91,7 +91,7 @@ def test_scan_standard_profile_command(capsys):
 
     assert result == 0
     output = capsys.readouterr().out
-    assert "AICRE 0.2.0" in output
+    assert "AICRE 0.2.1" in output
     assert "Readiness (separate dimensions" in output
 
 
@@ -101,14 +101,14 @@ def test_system_json_command_emits_full_valid_report(capsys):
     assert result == 0
     data = json.loads(capsys.readouterr().out)
     assert data["schema_version"] == "2.0"
-    assert data["aicre_version"] == "0.2.0"
+    assert data["aicre_version"] == "0.2.1"
     assert "resource.cpu.logical_count" in {item["id"] for item in data["findings"]}
     assert not any(item["id"].startswith("tool.") for item in data["findings"])
 
 
 def test_inventory_and_readiness_commands(capsys, monkeypatch):
     report = {
-        "aicre_version": "0.2.0",
+        "aicre_version": "0.2.1",
         "profile": "standard",
         "findings": [{
             "id": "tool.git", "category": "software", "status": "detected",
@@ -125,7 +125,7 @@ def test_inventory_and_readiness_commands(capsys, monkeypatch):
     }
 
     def fake_build_report(*, profile, excludes, timeout, include_tools=True):
-        assert profile == "standard"
+        assert profile is None
         assert include_tools
         return report
 
@@ -228,3 +228,19 @@ def test_force_requires_an_output_destination(arguments, capsys):
 
     assert exit_info.value.code == 2
     assert "--force requires --output" in capsys.readouterr().err
+
+
+
+def test_unknown_profile_is_a_usage_error_listing_available_profiles(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(["report", "--profile", "unknown"])
+    assert exit_info.value.code == 2
+    error = capsys.readouterr().err
+    assert "laptop-dev" in error
+    assert "agent-workstation" in error
+
+def test_cli_without_profile_uses_standard_label_but_explains_unknown_readiness(capsys):
+    assert main(["readiness", "--timeout", "0"]) == 0
+    output = capsys.readouterr().out
+    assert "AICRE 0.2.1 — profile: standard" in output
+    assert output.count("No profile specified.") == 2

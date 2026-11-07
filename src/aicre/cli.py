@@ -1,4 +1,4 @@
-"""Command-line interface for AICRE 0.2."""
+"""Command-line interface for AICRE 0.2.1."""
 from __future__ import annotations
 
 import argparse
@@ -32,12 +32,13 @@ def _timeout_value(raw: str) -> float:
 
 
 def _add_inventory_options(parser: argparse.ArgumentParser, *, default_timeout: float) -> None:
-    parser.add_argument("--profile", choices=supported_profiles(), default="standard", help="workload baseline")
+    parser.add_argument("--profile", choices=supported_profiles(), default=None, help="workload baseline (default: standard)")
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument("--exclude", action="append", default=[],
                         help="relative path pattern to omit; repeatable")
     parser.add_argument("--timeout", type=_timeout_value, default=default_timeout,
                         help="cooperative collection time budget in seconds")
+
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -69,7 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_inventory_options(readiness, default_timeout=DEFAULT_TIMEOUT_SECONDS)
 
     report = subparsers.add_parser("report", help="emit the full versioned JSON report")
-    report.add_argument("--profile", choices=supported_profiles(), default="standard", help="workload baseline")
+    report.add_argument("--profile", choices=supported_profiles(), default=None, help="workload baseline (default: standard)")
     report.add_argument("--format", choices=("json",), default="json")
     report.add_argument("--output", help="optional report destination; stdout if omitted")
     report.add_argument("--force", action="store_true", help="explicitly replace an existing report")
@@ -219,8 +220,9 @@ def main(argv: list[str] | None = None) -> int:
                 reason = path_exclusion_reason(args.output, args.exclude)
                 if reason:
                     raise ScanError("Report destination is excluded by the privacy policy; choose another path.")
-                write_json_report(args.output, report, force=args.force)
-                print(f"AICRE report written to {Path(args.output).expanduser().absolute()}")
+                output_path = Path(args.output).expanduser().absolute()
+                write_json_report(output_path, report, force=args.force)
+                print(f"AICRE report written to {output_path}")
             else:
                 print(serialize_report(report), end="")
             return 0

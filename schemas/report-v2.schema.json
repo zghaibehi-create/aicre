@@ -17,13 +17,12 @@
       "const": "2.0"
     },
     "aicre_version": {
-      "const": "0.2.0"
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
     "profile": {
-      "enum": [
-        "standard",
-        "agent-development"
-      ]
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
     },
     "generated_at": {
       "type": "string",
@@ -33,7 +32,8 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/finding"
-      }
+      },
+      "minItems": 1
     },
     "readiness": {
       "type": "object",
@@ -107,7 +107,8 @@
             "integer",
             "boolean",
             "null"
-          ]
+          ],
+          "$comment": "value type is determined by finding.id; see docs/finding-ids.md"
         },
         "unit": {
           "type": [

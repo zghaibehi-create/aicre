@@ -38,3 +38,38 @@ def test_schema_rejects_missing_finding_fields_and_invalid_status():
 def test_agent_development_report_validates_against_schema():
     report = build_report(profile="agent-development", timeout=0)
     assert VALIDATE_REPORT(report) == report
+
+
+
+def test_every_emitted_report_has_findings_for_the_nonempty_schema_contract():
+    for profile in ("standard", "agent-development", "laptop-dev", "agent-workstation", "ci-runner"):
+        report = build_report(profile=profile, timeout=0)
+        assert report["findings"]
+        assert VALIDATE_REPORT(report) == report
+
+
+def test_schema_accepts_patch_versions_and_new_profile_names():
+    report = build_report(profile="laptop-dev", timeout=0)
+    report["aicre_version"] = "0.2.1"
+    report["profile"] = "future-profile-2"
+    assert VALIDATE_REPORT(report) == report
+
+
+def test_schema_rejects_empty_findings_array():
+    report = build_report(timeout=0)
+    report["findings"] = []
+    with pytest.raises(fastjsonschema.JsonSchemaException):
+        VALIDATE_REPORT(report)
+
+
+def test_saved_report_file_validates_and_old_v2_versions_remain_valid(tmp_path):
+    from aicre.scanner import write_json_report
+
+    report = build_report(profile="agent-development", timeout=0)
+    old_v2_document = dict(report, aicre_version="0.2.0")
+    assert VALIDATE_REPORT(old_v2_document) == old_v2_document
+
+    output = tmp_path / "report.json"
+    write_json_report(output, report)
+    saved = json.loads(output.read_text(encoding="utf-8"))
+    assert VALIDATE_REPORT(saved) == saved
