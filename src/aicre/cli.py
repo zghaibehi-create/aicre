@@ -188,15 +188,16 @@ def _diff_as_report(diff: dict[str, Any]) -> dict[str, Any]:
 def _render(report_data: dict[str, Any], fmt: str) -> tuple[str | bytes, str]:
     if fmt == "json":
         return json.dumps(report_data, ensure_ascii=False, indent=2, sort_keys=False) + "\n", ".json"
-    if fmt == "text":
-        return render_markdown(report_data), ".txt"
-    if fmt == "markdown":
-        return render_markdown(report_data), ".md"
+    if fmt in {"text", "markdown"}:
+        return render_markdown(report_data), ".txt" if fmt == "text" else ".md"
     if fmt == "html":
         return render_html(report_data), ".html"
     if fmt == "pdf":
         return render_pdf(report_data), ".pdf"
-    raise ScanError(f"unsupported report formatdef _write_output(path: str, data: str | bytes) -> Path:
+    raise ScanError(f"unsupported report format: {fmt}")
+
+
+def _write_output(path: str, data: str | bytes) -> Path:
     target = Path(path).expanduser()
     if target.name in {"", ".", ".."}:
         raise ScanError("report destination must name a file")
