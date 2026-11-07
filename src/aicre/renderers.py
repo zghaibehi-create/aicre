@@ -3,21 +3,57 @@ from __future__ import annotations
 import hashlib
 import html
 import json
+import re
 from typing import Any
 
 
+def _markdown_inline(value: Any) -> str:
+    """Escape untrusted text so it cannot create Markdown structure."""
+    text = str(value).replace("\\r", " ").replace("\\n", " ")
+    return re.sub(r"([\\\\\\x60*_{}\\[\\]()#+.!|>~-])", r"\\\\\\1", text)
+
+
+def _markdown_cell(value: Any) -> str:
+    return _markdown_inline(value).replace("|", "\\\\|")
+
+
+def _fenced_json(value: Any) -> list[str]:
+    payload = json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False)
+    longest = max((len(match.group(0)) for match in re.finditer(r"\\x60+", payload)), default=0)
+    fence = chr(96) * max(3, longest + 1)
+    return [fence + "json", payload, fence]
+
+
 def render_markdown(report: dict[str, Any]) -> str:
-    lines = ['# AICRE scan report', '', f"- Scan ID: {report.get('scan_id', 'legacy')}", f"- Generated: {report.get('generated_at', 'unknown')}", f"- Profile: {report.get('profile', 'unknown')}", '', '## Readiness', '', '| Dimension | Status | Explanation |', '|---|---|---|']
+    lines = [
+        "# AICRE scan report", "",
+        f"- Scan ID: {_markdown_inline(report.get('scan_id', 'legacy'))}",
+        f"- Generated: {_markdown_inline(report.get('generated_at', 'unknown'))}",
+        f"- Profile: {_markdown_inline(report.get('profile', 'unknown'))}",
+        "", "## Readiness", "", "| Dimension | Status | Explanation |", "|---|---|---|",
+    ]
     for name, item in report.get("readiness", {}).items():
-        explanation = str(item.get("explanation", "")).replace("|", "\\|")
-        lines.append(f"| {name} | {item.get('status', 'unknown')} | {explanation} |")
+        lines.append(
+            f"| {_markdown_cell(name)} | {_markdown_cell(item.get('status', 'unknown'))} "
+            f"| {_markdown_cell(item.get('explanation', ''))} |"
+        )
     if report.get("diff_counts"):
         lines.extend(["", "## Diff summary", "", "| Change | Count |", "|---|---:|"])
-        lines.extend(f"| {name} | {count} |" for name, count in report["diff_counts"].items())
-    lines.extend(['', '## Findings', ''])
-    for item in report.get('findings', []):
-        lines.extend([f"### {item.get('check_id', item.get('id', 'unknown'))} — {item.get('status', 'unknown')}", '', f"Source: {item.get('source', 'unknown')}", '', '```json', json.dumps(item.get('value'), ensure_ascii=False, sort_keys=True, indent=2), '```', ''])
-    return '\n'.join(lines).rstrip() + '\n'
+        lines.extend(
+            f"| {_markdown_cell(name)} | {int(count)} |"
+            for name, count in report["diff_counts"].items()
+        )
+    lines.extend(["", "## Findings", ""])
+    for item in report.get("findings", []):
+        identifier = item.get("check_id", item.get("id", "unknown"))
+        status = item.get("status", "unknown")
+        lines.extend([
+            f"### {_markdown_inline(identifier)} — {_markdown_inline(status)}", "",
+            f"Source: {_markdown_inline(item.get('source', 'unknown'))}", "",
+            *_fenced_json(item.get("value")), "",
+        ])
+    return "\\n".join(lines).rstrip() + "\\n"
+
 
 def render_html(report: dict[str, Any]) -> str:
     payload = json.dumps(report, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
