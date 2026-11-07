@@ -2,6 +2,7 @@ from aicre.models import Finding
 from aicre.readiness import evaluate_readiness
 from aicre.workload_profiles import GIB, evaluate_workload_profile
 
+
 def finding(identifier, value, status="detected", category="resource"):
     return Finding(id=identifier, category=category, status=status, value=value, source="test")
 
