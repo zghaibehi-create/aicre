@@ -51,7 +51,7 @@ def evaluate_readiness(findings: Sequence[Finding], profile: str = "standard") -
         resource = _dimension("resource_readiness", "unknown",
             "No workload resource baseline is defined, so CPU, RAM, and storage capacity cannot be assessed against requirements.", resource_ids)
         software = _dimension("software_readiness", "unknown",
-            "No mandatory software manifest is defined for the inventory-only profile.",
+            "No mandatory software manifest is defined, so detected tools cannot be judged against required software.",
             tuple(sorted(key for key in by_id if key.startswith("tool."))))
     else:
         resource_ids = tuple(key for key in by_id if key.startswith(("resource.", "profile.resource.")))
@@ -75,24 +75,24 @@ def evaluate_readiness(findings: Sequence[Finding], profile: str = "standard") -
         isinstance(item.value, dict) and item.value.get("satisfied") is True for item in compatibility_findings)
     status = "fail" if explicit_failure else "pass" if both_satisfied else "unknown"
     compatibility = _dimension("compatibility_readiness", status,
-        "Linux platform and minimum Python compatibility are assessed from explicit runtime checks only.", compatibility_evidence)
+        "Linux platform and minimum Python compatibility are assessed only from explicit detected requirement results.", compatibility_evidence)
 
     privacy_ids = ("privacy.local_collection", "privacy.user_exclusions")
     privacy_evidence = tuple(key for key in privacy_ids if key in by_id)
     privacy_pass = all(key in by_id and by_id[key].status == "detected" for key in privacy_ids)
     privacy = _dimension("privacy_readiness", "pass" if privacy_pass else "unknown",
-        "Describes AICRE's local collection and exclusion behavior only; it is not a host-wide privacy guarantee."
-        if privacy_pass else "AICRE privacy-policy observations are incomplete; no host-wide privacy guarantee is inferred.", privacy_evidence)
+        "AICRE's local-only collection and path-exclusion policy are AICRE properties, not a host-wide privacy guarantee."
+        if privacy_pass else "Local-only collection and path-exclusion findings are incomplete; these AICRE properties do not establish a host-wide privacy guarantee.", privacy_evidence)
 
     security_finding = by_id.get("security.effective_uid")
     security_evidence = (security_finding.id,) if security_finding else ()
     uid = _uid_value(security_finding.value) if security_finding else None
     if security_finding and security_finding.status == "detected" and uid == 0:
-        security_status, explanation = "warning", "AICRE is running as root (effective UID 0); other host security controls were not assessed."
+        security_status, explanation = "warning", "The process is running as root (effective UID 0); other host security controls were not assessed."
     elif security_finding and security_finding.status == "detected" and uid is not None:
         security_status, explanation = "unknown", "The process effective UID is nonzero; other host security controls were not assessed."
     else:
-        security_status, explanation = "unknown", "Effective UID is unavailable or malformed, and broader host security controls were not assessed."
+        security_status, explanation = "unknown", "Effective UID is unavailable or malformed, and other host security controls were not assessed; no security guarantee is inferred."
     security = _dimension("security_readiness", security_status, explanation, security_evidence)
     return {"resource_readiness": resource, "software_readiness": software,
             "compatibility_readiness": compatibility, "privacy_readiness": privacy,
