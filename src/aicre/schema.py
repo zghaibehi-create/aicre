@@ -38,7 +38,7 @@ def _timestamp(value: Any, field: str) -> None:
     if not isinstance(value, str) or not value:
         raise ReportValidationError(f"{field} must be an ISO-8601 timestamp")
     try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value)
     except ValueError as exc:
         raise ReportValidationError(f"{field} must be an ISO-8601 timestamp") from exc
     if parsed.tzinfo is None or parsed.utcoffset() is None:
