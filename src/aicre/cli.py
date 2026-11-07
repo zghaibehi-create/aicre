@@ -299,6 +299,8 @@ def _handle_report_command(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if getattr(args, "force", False) and not getattr(args, "output", None):
+        parser.error("--force requires --output; it cannot be used with standard output.")
     try:
         if args.command in {"scan", "report"} and args.format is not None and args.format not in FORMATS:
             raise ScanError(f"unsupported report format: {args.format}")
