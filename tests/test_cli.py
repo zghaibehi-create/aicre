@@ -390,3 +390,23 @@ def test_cli_without_profile_uses_standard_label_but_explains_unknown_readiness(
     output = capsys.readouterr().out
     assert "AICRE 0.2.1 — profile: standard" in output
     assert output.count("No profile specified.") == 2
+
+
+
+def test_composite_average_excludes_unknown_dimensions():
+    from aicre.cli import _composite_summary
+
+    report = {
+        "profile": "standard",
+        "findings": [],
+        "readiness": {
+            "resource_readiness": {"status": "pass"},
+            "software_readiness": {"status": "unknown"},
+            "compatibility_readiness": {"status": "unknown"},
+            "privacy_readiness": {"status": "unknown"},
+            "security_readiness": {"status": "unknown"},
+        },
+    }
+    summary = _composite_summary(report, "report.json")
+    assert summary["composite_score"] == 100
+    assert summary["dimensions"]["software"] == "unknown"
