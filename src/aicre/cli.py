@@ -17,7 +17,13 @@ from .policy import (
 )
 from .privacy import path_exclusion_reason
 from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
-from .scanner import ScanError, scan_directory, write_json_report
+from .scanner import (
+    DEFAULT_MAX_DIRECTORY_ENTRIES,
+    DEFAULT_MAX_ITEMS,
+    ScanError,
+    scan_directory,
+    write_json_report,
+)
 from .workload_profiles import supported_profiles
 
 
@@ -28,6 +34,16 @@ def _timeout_value(raw: str) -> float:
         raise argparse.ArgumentTypeError("timeout must be a number of seconds") from exc
     if not math.isfinite(value) or value < 0:
         raise argparse.ArgumentTypeError("timeout must be finite and non-negative")
+    return value
+
+
+def _positive_int(raw: str) -> int:
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("value must be a positive integer") from exc
+    if value < 1:
+        raise argparse.ArgumentTypeError("value must be a positive integer")
     return value
 
 
@@ -59,6 +75,11 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--force", action="store_true", help="explicitly replace an existing report")
     scan.add_argument("--timeout", type=_timeout_value, default=None,
                       help="cooperative time budget; directory scans are unlimited unless set")
+    scan.add_argument("--max-items", type=_positive_int, default=DEFAULT_MAX_ITEMS,
+                      help=f"maximum included directory entries (default: {DEFAULT_MAX_ITEMS})")
+    scan.add_argument("--max-directory-entries", type=_positive_int,
+                      default=DEFAULT_MAX_DIRECTORY_ENTRIES,
+                      help=f"maximum entries buffered per directory (default: {DEFAULT_MAX_DIRECTORY_ENTRIES})")
 
     system = subparsers.add_parser("system", help="show local OS and resource metadata")
     _add_inventory_options(system, default_timeout=DEFAULT_TIMEOUT_SECONDS)
@@ -217,15 +238,19 @@ def main(argv: list[str] | None = None) -> int:
                     excludes=args.exclude,
                     force=args.force,
                     timeout=args.timeout,
+                    max_items=args.max_items,
+                    max_directory_entries=args.max_directory_entries,
                 )
                 summary = report["summary"]
                 print(
                     "Inventory written. "
                     f"Included: {summary['included_items']}; "
                     f"excluded: {summary['excluded_items']}; "
-                    f"errors: {summary['scan_errors']}."
+                    f"errors: {summary['scan_errors']}; "
+                    f"complete: {'yes' if summary['complete'] else 'no'}; "
+                    f"termination: {summary['termination_reason'] or 'none'}."
                 )
-                return 1 if summary["scan_errors"] > 0 else 0
+                return 0 if summary["complete"] else 1
             if args.profile is None:
                 parser.error("scan without SOURCE requires --profile")
             if args.output is not None:
