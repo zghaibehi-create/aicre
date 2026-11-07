@@ -97,7 +97,6 @@ The automated tests cover system source filtering, executable discovery without 
 
 MIT. See [LICENSE](LICENSE).
 
-
 ## Workload profiles
 
 The default `standard` profile is inventory-only and deliberately leaves Resource and Software readiness unknown. The optional `agent-development` profile compares CPU count (>=2), total RAM (>=8 GiB), free root-filesystem storage (>=10 GiB), and PATH presence of Git and Python 3.
@@ -108,3 +107,5 @@ aicre report --profile agent-development --format json
 ```
 
 This is an advisory project-defined minimum, not a vendor specification or performance/safety guarantee. It does not assess local model inference, GPU drivers, concurrency, agent configuration, MCP permissions, sandboxing, or dependency provenance. Tool presence does not verify version or functionality.
+
+**Container and constrained-environment limitation:** this profile currently uses host-facing observations (`os.cpu_count()` and `/proc/meminfo`) and does not account for cgroup CPU/memory quotas or CPU-affinity restrictions. In containers or restricted execution environments, reported CPU/RAM may exceed what the process can actually use. Treat the resource result as host-observation-only until container-aware limits are implemented and independently tested.
