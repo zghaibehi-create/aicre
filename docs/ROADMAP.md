@@ -8,6 +8,7 @@ This roadmap separates implemented behavior from planned work and release approv
 
 ## Current work
 - **0.3 workload-profile foundation (under review):** deterministic resource and required-tool comparisons for the documented `agent-development` baseline. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.
+- **Known limitation:** the initial resource baseline is host-observation-only. It does not yet account for cgroup CPU/memory limits or CPU affinity, so it must not be marketed as container-aware readiness.
 
 ## Next engineering phases
 - **0.3 security intelligence:** threat model and narrowly scoped metadata-only checks for agent/tool configuration, MCP trust and permission exposure, execution boundaries, and dependency provenance. No configuration is executed or changed.
