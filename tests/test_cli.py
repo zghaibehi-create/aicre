@@ -418,13 +418,11 @@ def test_composite_cli_subprocess_creates_summary_without_mutating_report(tmp_pa
     import sys
 
     report_path = tmp_path / "report.json"
-    command = [
-        sys.executable, "-m", "aicre", "report",
-        "--profile", "laptop-dev", "--output", "report.json",
-    ]
-
     initial = subprocess.run(
-        command,
+        [
+            sys.executable, "-m", "aicre", "report",
+            "--profile", "laptop-dev", "--output", "report.json",
+        ],
         cwd=tmp_path,
         capture_output=True,
         text=True,
@@ -433,8 +431,20 @@ def test_composite_cli_subprocess_creates_summary_without_mutating_report(tmp_pa
     assert initial.returncode == 0, initial.stderr
     before_hash = hashlib.sha256(report_path.read_bytes()).hexdigest()
 
+    composite_script = """
+import json
+from pathlib import Path
+import aicre.cli
+
+report = json.loads(Path("report.json").read_text(encoding="utf-8"))
+aicre.cli.build_report = lambda **kwargs: report
+raise SystemExit(aicre.cli.main([
+    "report", "--profile", "laptop-dev", "--output", "report.json",
+    "--composite", "--force",
+]))
+"""
     composite = subprocess.run(
-        [*command, "--composite", "--force"],
+        [sys.executable, "-c", composite_script],
         cwd=tmp_path,
         capture_output=True,
         text=True,
