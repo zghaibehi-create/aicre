@@ -39,30 +39,17 @@ def _uid_value(value: Any) -> int | None:
 
 
 def _resource_status(by_id: dict[str, Finding]) -> tuple[str, tuple[str, ...]]:
-    statuses: list[str] = []
-    evidence: list[str] = []
-    for metric in ("cpu", "memory", "storage"):
-        identifier = f"profile.resource.{metric}"
-        finding = by_id.get(identifier)
-        if finding is None or finding.status != "detected":
-            statuses.append("unknown")
-            continue
-        evidence.append(identifier)
-        value = finding.value
-        ratio = value.get("ratio") if isinstance(value, dict) else None
-        if not isinstance(ratio, (int, float)) or isinstance(ratio, bool):
-            statuses.append("unknown")
-        elif ratio < 0.5:
-            statuses.append("fail")
-        elif ratio < 1:
-            statuses.append("warning")
-        else:
-            statuses.append("pass")
-
-    for status in ("fail", "warning", "unknown"):
-        if status in statuses:
-            return status, tuple(evidence)
-    return "pass", tuple(evidence)
+    """Host-facing observations cannot establish effective resource capacity."""
+    evidence = tuple(
+        identifier
+        for identifier in (
+            "profile.resource.cpu",
+            "profile.resource.memory",
+            "profile.resource.storage",
+        )
+        if identifier in by_id
+    )
+    return "unknown", evidence
 
 
 def _software_status(
@@ -129,9 +116,7 @@ def evaluate_readiness(
                 "resource_readiness",
                 status,
                 (
-                    f"Compared CPU, total RAM, and free root-filesystem storage "
-                    f"with the {profile} profile thresholds. Values below 50% "
-                    "fail; values from 50% to below 100% warn."
+                    "Host-facing CPU, RAM, and root-storage observations are retained for context, but effective process/container limits are not established; resource thresholds are not evaluated and readiness remains unknown."
                 ),
                 evidence or tuple(
                     key for key in by_id if key.startswith("profile.resource.")
