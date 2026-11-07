@@ -173,17 +173,22 @@ def profile_findings(*, cpu=4, memory_gib=16, disk_gib=20, tools=None, missing_r
     return values + evaluate_workload_profile(values, "laptop-dev")
 
 
-def test_resource_readiness_pass_warning_fail_and_unknown_fixtures():
-    assert evaluate_readiness(profile_findings(), "laptop-dev")["resource_readiness"].status == "pass"
-    assert evaluate_readiness(
-        profile_findings(cpu=2), "laptop-dev"
-    )["resource_readiness"].status == "warning"
-    assert evaluate_readiness(
-        profile_findings(cpu=1), "laptop-dev"
-    )["resource_readiness"].status == "fail"
-    assert evaluate_readiness(
-        profile_findings(missing_resource="resource.memory.total_bytes"), "laptop-dev"
-    )["resource_readiness"].status == "unknown"
+def test_resource_readiness_is_unknown_for_all_host_observation_levels():
+    for cpu, memory_gib, disk_gib in ((1, 1, 1), (4, 16, 20), (64, 256, 500)):
+        result = evaluate_readiness(
+            profile_findings(cpu=cpu, memory_gib=memory_gib, disk_gib=disk_gib),
+            "laptop-dev",
+        )
+        assert result["resource_readiness"].status == "unknown"
+        assert "effective process/container limits are not established" in result["resource_readiness"].explanation
+
+
+def test_missing_or_malformed_resource_evidence_remains_unknown():
+    result = evaluate_readiness(
+        profile_findings(missing_resource="resource.memory.total_bytes"),
+        "laptop-dev",
+    )
+    assert result["resource_readiness"].status == "unknown"
 
 
 def test_software_readiness_pass_warning_fail_and_unknown_fixtures():
