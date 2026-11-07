@@ -9,7 +9,7 @@ description = "Local-first Linux metadata inventory and multi-dimensional readin
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{name = "AICRE Project contributors"}]
+authors = [{name = "AICRE Project"}]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Environment :: Console",
