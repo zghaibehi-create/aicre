@@ -686,9 +686,77 @@ def test_directory_scan_report_matches_published_schema(tmp_path):
 
     fastjsonschema.validate(schema, report)
 
+    (source / "second.txt").write_text("fixture", encoding="utf-8")
+    partial_report = scan_directory(
+        source,
+        tmp_path / "partial-report.json",
+        max_items=1,
+    )
+    fastjsonschema.validate(schema, partial_report)
+
     invalid_report = {
         **report,
         "summary": {**report["summary"], "complete": False},
     }
     with pytest.raises(fastjsonschema.JsonSchemaException):
         fastjsonschema.validate(schema, invalid_report)
+
+
+
+def test_nested_wide_directory_limit_preserves_prior_records(tmp_path):
+    source = tmp_path / "source"
+    earlier = source / "a-ok"
+    wide = source / "z-wide"
+    earlier.mkdir(parents=True)
+    wide.mkdir()
+    (earlier / "visible.txt").write_text("fixture", encoding="utf-8")
+    for name in ("one.txt", "two.txt", "three.txt"):
+        (wide / name).write_text("fixture", encoding="utf-8")
+
+    report = scan_directory(
+        source,
+        tmp_path / "report.json",
+        max_directory_entries=2,
+    )
+
+    paths = {item["relative_path"] for item in report["items"]}
+    assert "a-ok" in paths
+    assert "a-ok/visible.txt" in paths
+    assert not any(path.startswith("z-wide/") for path in paths)
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "directory_entry_limit"
+
+
+def test_directory_entry_limit_counts_entries_before_privacy_exclusions(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / ".env").write_text("private fixture", encoding="utf-8")
+    (source / "a.txt").write_text("fixture", encoding="utf-8")
+    (source / "b.txt").write_text("fixture", encoding="utf-8")
+
+    report = scan_directory(
+        source,
+        tmp_path / "report.json",
+        max_directory_entries=2,
+    )
+
+    assert report["items"] == []
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "directory_entry_limit"
+
+
+def test_nested_tree_obeys_global_item_limit(tmp_path):
+    source = tmp_path / "source"
+    deepest = source / "a" / "b"
+    deepest.mkdir(parents=True)
+    (deepest / "leaf.txt").write_text("fixture", encoding="utf-8")
+
+    report = scan_directory(
+        source,
+        tmp_path / "report.json",
+        max_items=2,
+    )
+
+    assert {item["relative_path"] for item in report["items"]} == {"a", "a/b"}
+    assert report["summary"]["complete"] is False
+    assert report["summary"]["termination_reason"] == "item_limit"
