@@ -21,7 +21,7 @@ from .policy import (
     SENSITIVE_SUFFIXES,
 )
 from .privacy import path_exclusion_reason
-from .renderers import render_html, render_markdown, render_pdf
+from .renderers import render_html, render_markdown, render_pdf, render_text
 from .report import DEFAULT_TIMEOUT_SECONDS, build_report, serialize_report
 from .scanner import ScanError, scan_directory, write_json_report
 from .schema import ReportValidationError, canonical_report
@@ -188,8 +188,10 @@ def _diff_as_report(diff: dict[str, Any]) -> dict[str, Any]:
 def _render(report_data: dict[str, Any], fmt: str) -> tuple[str | bytes, str]:
     if fmt == "json":
         return json.dumps(report_data, ensure_ascii=False, indent=2, sort_keys=False) + "\n", ".json"
-    if fmt in {"text", "markdown"}:
-        return render_markdown(report_data), ".txt" if fmt == "text" else ".md"
+    if fmt == "text":
+        return render_text(report_data), ".txt"
+    if fmt == "markdown":
+        return render_markdown(report_data), ".md"
     if fmt == "html":
         return render_html(report_data), ".html"
     if fmt == "pdf":
