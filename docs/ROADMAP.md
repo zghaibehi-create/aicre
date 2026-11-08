@@ -9,7 +9,7 @@ This roadmap separates implemented behavior from planned work and release approv
 
 ## Current work
 - **0.3 workload-profile foundation (implemented on main):** host-facing resource observations and required-tool PATH checks for workload profiles; Resource readiness remains `unknown` until effective limits are established. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.
-- **0.3.0 release preparation:** residual risks and their engineering dispositions are recorded in [the release-readiness register](RELEASE_READINESS.md). Release preparation is not publication approval; external review and target-Linux acceptance remain mandatory.
+- **0.3.0 release preparation:** residual risks and their engineering dispositions are recorded in [the release-readiness register](RELEASE_READINESS.md). Release preparation is not publication approval; publication requires the owner's recorded go/no-go decision. For this release the owner chose an AI-assisted internal security review in place of an external review (not an independent audit or certification) and accepted the Ubuntu 22.04/24.04 CI matrix as Linux acceptance evidence. See [RELEASE_READINESS.md](RELEASE_READINESS.md) and [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md).
 - **Known limitation:** the initial resource baseline is host-observation-only. It does not yet account for cgroup CPU/memory limits or CPU affinity, so it must not be marketed as container-aware readiness.
 
 ## Next engineering phases
@@ -19,7 +19,7 @@ This roadmap separates implemented behavior from planned work and release approv
 - **1.x broader platforms:** Windows/macOS only after separate implementations and target-environment CI; GUI after core contracts stabilize.
 
 ## Release gates
-A green CI run is necessary but insufficient. Each phase requires code review, privacy and threat-model review, regression tests, target-environment integration tests, documented residual risks, and a release decision. Planned features are not implemented merely because they appear here.
+A green CI run is necessary but insufficient. Each phase requires code review, privacy and threat-model review, regression tests, appropriate target-environment integration evidence (or a documented owner-approved scope decision where direct target-machine acceptance is not performed), documented residual risks, and a release decision. Planned features are not implemented merely because they appear here.
 
 ## Permanent non-goals unless explicitly redesigned
 No telemetry, cloud upload of machine inventories, undisclosed network activity, automatic installation/remediation, autonomous agent execution, vendor lock-in, or silent weakening of exclusions.

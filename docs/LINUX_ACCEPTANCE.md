@@ -15,7 +15,8 @@ The following evidence is available from GitHub Actions:
 | **AICRE 0.3.0 candidate Tests run #566 (PR #35 merge ref)** | `bf6b84a68fabf32e0241783f6bd6ae785764dbc0` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Ruff, full pytest suite, CLI entry point |
 | **AICRE 0.3.0 candidate Install smoke run #38 (PR #35 merge ref)** | `bf6b84a68fabf32e0241783f6bd6ae785764dbc0` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Wheel/sdist build and archive inspection, version/metadata/runtime-dependency checks, clean installs, CLI/report smoke checks |
 | **AICRE 0.3.0 candidate Sample report run #19 (PR #35)** | PR #35 merge ref | Ubuntu 24.04 × Python 3.12 | **Passed** | Sample report generation and readiness contract |
-| **Final main Install smoke workflow after PR #33** | `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Wheel/sdist build, archive inventory, version/metadata/runtime-dependency checks, clean installs, CLI/report smoke checks |
+| **Final main Tests workflow after PR #33 ([run 42386187695](https://github.com/zghaibehi-create/aicre/actions/runs/42386187695))** | `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Lint, full test suite, CLI entry point |
+| **Final main Install smoke workflow after PR #33 ([run 42386187780](https://github.com/zghaibehi-create/aicre/actions/runs/42386187780))** | `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Wheel/sdist build, archive inventory, version/metadata/runtime-dependency checks, clean installs, CLI/report smoke checks |
 | Tests run #532 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, full test suite, CLI entry point |
 | Install smoke run #28 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
 | Sample report run #18 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 24.04 × Python 3.12 | Passed | Sample report generation and conservative Resource readiness check |
@@ -91,4 +92,4 @@ Record command exit codes and any environment-specific deviations. Do not run as
 
 ## 5. Release gate
 
-Automated CI acceptance for the declared Ubuntu support matrix is complete for the 0.3.0 candidate. Owner-machine-specific acceptance remains untested and is not implied by the CI results.
+Automated CI acceptance for the declared Ubuntu support matrix is complete for the 0.3.0 candidate. Owner-machine acceptance was not performed. By owner decision (recorded in [RELEASE_READINESS.md](RELEASE_READINESS.md)), the Ubuntu 22.04/24.04 CI matrix is accepted as the Linux support evidence for 0.3.0; Section 2 remains a template for optional future owner-machine acceptance.

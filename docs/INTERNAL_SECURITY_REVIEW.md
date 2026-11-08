@@ -75,4 +75,8 @@ No residual risk above is claimed to be eliminated by this review.
 
 ## Review disposition
 
-**Internal review outcome: no newly identified blocking finding in the scoped review.** Keep RR-01 through RR-08 as documented. The external independent-review gate remains distinct and must not be represented as completed by this report. The project owner must decide whether to accept this internal review as a substitute for an external review for the experimental 0.3.0 publication.
+**Internal review outcome: no newly identified blocking finding in the scoped review.** Keep RR-01 through RR-08 as documented.
+
+**Owner decision and candidate comparison:** The owner accepted this AI-assisted internal review in place of an external review for the experimental 0.3.0 pre-release. This is not an independent audit or certification. A source diff between the reviewed commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` and the merged 0.3.0 candidate `bcdcbebd684c074852bff934d150f68f80058106` found only version-label changes in `src/aicre/__init__.py`, `src/aicre/cli.py`, and `src/aicre/report.py`; no behavioral source-logic changes were present in that comparison. The CLI and report modules were within the review scope; the `__init__.py` change only updates the package version constant. CI results are recorded separately as build/test evidence and are not treated as a substitute for security review.
+
+The external independent-review gate is not represented as completed. No external reviewer was engaged for 0.3.0.

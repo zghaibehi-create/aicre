@@ -1,12 +1,12 @@
-# AICRE 0.3.0 — Independent External Review Brief
+# AICRE — External Review Request Brief
 
-**Review target:** `16b6bee59422d97a8686d2b973c23342010225a8` (current main snapshot at preparation time)  
-**Product:** AICRE — local-first Linux environment inventory and workload-readiness CLI  
-**Release status:** not approved for publication.
+**Document status:** reusable request template. Not a 0.3.0 release gate; see [RELEASE_READINESS.md](RELEASE_READINESS.md).  
+**Review target:** To be set to the commit under review when this brief is sent.  
+**Product:** AICRE — local-first Linux environment inventory and workload-readiness CLI.
 
 ## 1. Purpose
 
-Request an independent reviewer to assess the security and correctness boundaries of AICRE before the 0.3.0 release. This brief is a preparation aid; it is not itself an audit, certification, penetration test, or independent review.
+Request an independent reviewer to assess the security and correctness boundaries of AICRE before a release. This brief is a preparation aid; it is not itself an audit, certification, penetration test, or independent review.
 
 The reviewer should be independent of the implementation and should state their relevant experience, review scope, commit inspected, tools used, limitations, and any conflicts of interest.
 
@@ -53,7 +53,7 @@ Provide a written report containing:
 - Retest evidence for fixes and a final residual-risk statement.
 - Reviewer independence/conflict statement.
 
-## 5. Release acceptance criteria
+## 5. Acceptance criteria if an external review is commissioned
 
 The review gate may be closed only when:
 - The report is received and tied to the exact release-candidate commit or an explicitly compared commit.
@@ -78,4 +78,4 @@ The review gate may be closed only when:
 
 ## 7. Current status
 
-**Not performed.** Internal repository inspection, automated tests, and this brief do not satisfy the independent-review gate. The release remains blocked until an independent reviewer completes and documents the work above.
+No external review has been commissioned or performed. For 0.3.0 the owner chose an AI-assisted internal review ([INTERNAL_SECURITY_REVIEW.md](INTERNAL_SECURITY_REVIEW.md)), which is not independent. This brief remains available for a future external review and does not block 0.3.0.
