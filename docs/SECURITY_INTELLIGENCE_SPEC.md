@@ -29,13 +29,31 @@ The feature is advisory inventory, not a sandbox, access-control enforcement sys
 
 ### 3.1 Two-stage source policy
 
-**Stage A — discovery metadata (default):**
-- Check only documented, fixed candidate paths for supported tools.
-- Collect existence, file type, owner/group IDs where available, permission bits, symlink status, size, and modification time.
-- Do not read file contents.
-- Do not traverse arbitrary directories or follow symlinks.
+**Stage A — fixed-path filesystem metadata only (proposed first implementation):**
+- Inspect only the exact per-user settings paths listed below; do not search for them.
+- Use metadata-only operations. Do not open file contents, parse settings, resolve symlink targets, or inspect sibling files.
+- Record only whether the exact candidate is present, its file type, whether the candidate itself is a symlink, permission bits, and owner/group IDs where supported. Do not report absolute paths, file contents, size, timestamps, or arbitrary filenames.
+- Reject symlinked parent components and symlink candidates; do not follow them.
+- Do not traverse project directories, enumerate home directories, inspect environment variables, or infer active configuration.
+- A missing candidate is only “not present at this exact path”; it is not proof that the tool is absent or that no other configuration source exists.
 
-**Stage B — structured configuration metadata (future opt-in, separately gated):**
+**Initial exact candidate paths (Linux, per-user only):**
+
+| Product | Candidate path relative to the invoking user's home | Metadata-only interpretation |
+|---|---|---|
+| Codex | `.codex/config.toml` | User-level Codex configuration file may be present |
+| Claude Code | `.claude/settings.json` | User-level Claude Code settings file may be present |
+| Gemini CLI | `.gemini/settings.json` | User-level Gemini CLI settings file may be present |
+
+These paths are grounded in the products' current official configuration documentation. They are candidate paths for AICRE's own metadata inventory, not a complete enumeration of each product's configuration precedence or active settings. Project-scoped and system-managed configuration locations are deliberately excluded from the first implementation.
+
+**Explicitly excluded paths and data:**
+- Claude Code `.claude.json`: contains account details, MCP server configuration, and per-project state.
+- Codex `.codex/auth.json`, history, logs, caches, and all files other than the exact `config.toml` candidate.
+- Any `.env*`, credentials, tokens, private keys, shell startup files, prompts, chat/session history, project-local settings, or managed configuration.
+- All other files in the candidate directories.
+
+**Stage B — structured configuration metadata (not approved):**
 - May be considered only for individually named, versioned formats and exact allowlisted paths.
 - Must have a documented field allowlist, strict parser, size/depth/item limits, duplicate-key rejection, and explicit behavior for malformed or unknown versions.
 - Extract only normalized security-relevant fields. Never place raw configuration documents, credentials, tokens, environment values, prompts, or arbitrary argument strings in reports or logs.
@@ -45,16 +63,16 @@ Stage B is not approved by this proposal. It is a design gate, not an implementa
 
 ### 3.2 Initial candidate observations
 
-The initial implementation, if approved, should be limited to Stage A:
+The initial implementation, if approved, should be limited to the three Stage A user-level settings candidates above:
 
 | Area | Candidate observation | What it may establish | What remains unknown |
 |---|---|---|---|
-| Agent/tool configuration | Presence and filesystem metadata of a small, documented set of configuration files | Whether a known configuration location exists and whether its metadata is observable | Active configuration, actual settings, secrets, effective runtime behavior |
-| MCP exposure | Presence/metadata of known MCP configuration locations | That a potential configuration file exists | Server list, transport, authentication, tools, scopes, effective permissions, remote trust |
-| Execution boundaries | Metadata of known wrapper/launcher configuration locations | Whether a known boundary-related file exists | Whether commands are sandboxed, constrained, or safe |
-| Dependency provenance | Presence/metadata of recognized lock/manifest files | Whether a supported manifest is present | Exact dependency graph, integrity, origin, vulnerability status, reproducibility |
+| Agent/tool configuration | Presence, file type, symlink status, mode bits, and owner/group IDs for the three exact candidate files | Whether a documented user-level settings file exists at that exact path and what its basic filesystem metadata indicates | Whether the tool is installed/running, which configuration layer is active, actual settings, secrets, effective runtime behavior |
+| MCP exposure | No MCP server configuration is read or enumerated in Stage A | Nothing about configured MCP servers | Server list, transport, authentication, tools, scopes, effective permissions, remote trust |
+| Execution boundaries | No approval, sandbox, hook, or command setting is read in Stage A | Nothing about effective execution boundaries | Whether commands are sandboxed, constrained, approved, or safe |
+| Dependency provenance | No manifests or lockfiles are inspected in Stage A | Nothing about dependency integrity or origin | Dependency graph, integrity, origin, vulnerability status, reproducibility |
 
-A file's presence is not proof that a tool is installed, active, configured securely, or used by a running process. File permissions alone do not prove effective access controls.
+A file's presence is not proof that a tool is installed, active, configured securely, or used by a running process. File permissions alone do not prove effective access controls. Stage A must not emit “secure”, “insecure”, “safe”, or a security pass/fail from these observations.
 
 ### 3.3 Source allowlist requirements
 
