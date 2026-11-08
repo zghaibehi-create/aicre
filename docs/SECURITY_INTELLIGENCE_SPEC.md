@@ -147,3 +147,14 @@ PR #4 is not a safe implementation base for this phase as-is. It is substantiall
 ## 10. Decision requested
 
 Review this proposal's product boundary and Stage A/Stage B separation. No implementation should begin until the source allowlist and privacy boundary are approved.
+
+
+## 11. Source references
+
+The exact candidate locations above are based on the following official documentation, consulted on 2026-11-09:
+
+- OpenAI Codex configuration basics: https://learn.chatgpt.com/docs/config-file/config-basic
+- Claude Code settings files and precedence: https://code.claude.com/docs/en/settings
+- Gemini CLI configuration: https://github.com/google-gemini/gemini-cli/blob/main/docs/reference/configuration.md
+
+These references establish documented configuration locations only. They do not establish that a candidate file is active, secure, or authoritative on a particular machine.
