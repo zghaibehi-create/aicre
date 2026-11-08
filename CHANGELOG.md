@@ -1,10 +1,13 @@
 # Changelog
 
-## 0.3.0 (candidate validated; pending GitHub pre-release publication)
+## 0.3.0 (experimental GitHub pre-release published 2026-11-07)
 
 The 0.3.0 candidate passed the documented Linux test, package-inspection, and install
-matrix. Publication as a GitHub pre-release is the remaining release operation; see
-[RELEASE_READINESS.md](docs/RELEASE_READINESS.md) for the owner-directed scope decisions.
+matrix and was published as a GitHub pre-release on 2026-11-07. The immutable `v0.3.0`
+tag identifies validated commit `530920cfa4a5fb7a3619f4e624157772230b157d`. Later
+documentation-only clarifications were merged to `main` in PR #37; they do not change
+the published tag or release contents. See [RELEASE_READINESS.md](docs/RELEASE_READINESS.md)
+for the release record and owner-directed scope decisions.
 
 - Add workload-profile foundations for `standard`, `agent-development`,
   `laptop-dev`, `agent-workstation`, and `ci-runner`, with five independent

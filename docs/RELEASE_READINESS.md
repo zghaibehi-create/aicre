@@ -1,9 +1,10 @@
 # AICRE 0.3.0 — Release Readiness and Residual-Risk Decision
 
-**Status:** 0.3.0 candidate validation passed; awaiting publication decision.  
+**Status:** Published as an experimental GitHub pre-release on 2026-11-07.  
 **Current package version:** 0.3.0.  
-**Target:** 0.3.0.  
-**Release rule:** do not tag, publish, or announce 0.3.0 until the final candidate has been validated and the project owner records a go decision.
+**Release tag:** [`v0.3.0`](https://github.com/zghaibehi-create/aicre/releases/tag/v0.3.0).  
+**Tagged commit:** `530920cfa4a5fb7a3619f4e624157772230b157d`.  
+**Post-release documentation:** PR #37 merged documentation-only clarifications to `main` on 2026-11-08; the published tag remains an immutable snapshot of the validated release commit.
 
 ## 1. Scope of the 0.3.0 candidate
 
@@ -59,9 +60,11 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only withi
 - [x] **Final main install/artifact inspection workflow after PR #33:** run [42386187780](https://github.com/zghaibehi-create/aicre/actions/runs/42386187780), all six matrix jobs passed on the same commit. It built wheel and sdist, inspected archive contents and metadata, checked version consistency and absence of runtime dependencies, installed both artifacts into clean virtual environments, and exercised CLI/report commands.
 - [x] **0.3.0 release-candidate validation:** PR #35 merge validation passed on the exact integrated candidate tree: Tests run #566 (6/6), Install smoke run #38 (6/6), and Sample report run #19 (passed). The install-smoke run built and inspected wheel/sdist, checked metadata and zero runtime dependencies, installed both artifacts in clean virtual environments, and exercised CLI/report behavior. Evidence is recorded in `LINUX_ACCEPTANCE.md`.
 - [x] **Final consistency:** package metadata, `aicre.__version__`, CLI/report tests, README, changelog, security model, schemas, finding-ID reference, and issue template are aligned at 0.3.0; the CI artifact-inspection workflow confirmed version metadata consistency.
-- [ ] **Publication authorization and execution:** record the owner's final go/no-go decision, create the `v0.3.0` tag, and publish the GitHub pre-release with the validated source and release notes.
+- [x] **Publication and tag:** GitHub pre-release [`v0.3.0`](https://github.com/zghaibehi-create/aicre/releases/tag/v0.3.0) published on 2026-11-07; tag resolves to validated commit `530920cfa4a5fb7a3619f4e624157772230b157d`. The release is marked as a pre-release. No wheel or source-distribution assets are attached; GitHub provides the source archives for the tag.
 
-## 4. Release execution checklist
+## 4. Release execution record
+
+The following checklist describes the procedure used for 0.3.0. Publication is complete; it is retained as an auditable record rather than a list of pending actions.
 
 1. Resolve the open gate decisions above without misrepresenting deferred work as completed.
 2. Freeze the release-candidate commit; do not add unrelated features.
@@ -73,6 +76,6 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only withi
 8. Create a GitHub Release only after explicit go/no-go approval. Mark it as a pre-release if the project remains experimental.
 9. Preserve the exact tag, commit SHA, artifact filenames, hashes, and CI run links in the release record.
 
-## 5. Current engineering recommendation
+## 5. Post-publication status
 
-**GO for 0.3.0 pre-release publication.** The candidate passed the full test, install/artifact-inspection, and sample-report workflows. The owner deferred the third-party provenance audit and accepted the AI-assisted internal review in place of an external review for this experimental release. The Ubuntu CI matrix is accepted as Linux support evidence; the owner's personal machine was not tested. No external audit or host-security certification is claimed.
+**0.3.0 experimental pre-release publication is complete.** The candidate passed the documented test, install/artifact-inspection, and sample-report workflows before publication. The owner deferred the third-party provenance audit and accepted the AI-assisted internal review in place of an external review for this experimental release. The Ubuntu CI matrix is accepted as Linux support evidence; the owner's personal machine was not tested. No external audit or host-security certification is claimed. No binary distribution assets were attached to the GitHub Release; the published tag and GitHub-generated source archives remain the release source of record.
