@@ -92,6 +92,4 @@ Record command exit codes and any environment-specific deviations. Do not run as
 
 ## 5. Release gate
 
-Automated CI acceptance for the declared Ubuntu support matrix is complete for the 0.3.0 candidate. Owner-machine-specific acceptance remains untested and is not implied by the CI results.
-
-Owner-machine acceptance was not performed. By owner decision (recorded in [RELEASE_READINESS.md](RELEASE_READINESS.md)), the Ubuntu 22.04/24.04 CI matrix is accepted as the Linux support evidence for 0.3.0. Section 2 remains a template for optional future owner-machine acceptance.
+Automated CI acceptance for the declared Ubuntu support matrix is complete for the 0.3.0 candidate. Owner-machine acceptance was not performed. By owner decision (recorded in [RELEASE_READINESS.md](RELEASE_READINESS.md)), the Ubuntu 22.04/24.04 CI matrix is accepted as the Linux support evidence for 0.3.0; Section 2 remains a template for optional future owner-machine acceptance.
