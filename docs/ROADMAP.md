@@ -19,7 +19,7 @@ This roadmap separates implemented behavior from planned work and release approv
 - **1.x broader platforms:** Windows/macOS only after separate implementations and target-environment CI; GUI after core contracts stabilize.
 
 ## Release gates
-A green CI run is necessary but insufficient. Each phase requires code review, privacy and threat-model review, regression tests, target-environment integration tests, documented residual risks, and a release decision. Planned features are not implemented merely because they appear here.
+A green CI run is necessary but insufficient. Each phase requires code review, privacy and threat-model review, regression tests, appropriate target-environment integration evidence (or a documented owner-approved scope decision where direct target-machine acceptance is not performed), documented residual risks, and a release decision. Planned features are not implemented merely because they appear here.
 
 ## Permanent non-goals unless explicitly redesigned
 No telemetry, cloud upload of machine inventories, undisclosed network activity, automatic installation/remediation, autonomous agent execution, vendor lock-in, or silent weakening of exclusions.
