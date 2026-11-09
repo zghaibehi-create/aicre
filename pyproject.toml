@@ -25,6 +25,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest==9.2.0", "ruff==0.17.4", "fastjsonschema==2.21.2"]
+pdf = ["reportlab>=4.2,<5"]
 
 [project.scripts]
 aicre = "aicre.cli:main"

@@ -2,7 +2,7 @@
 
 **Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
-> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. The 0.3.0 candidate remains experimental; see the release-readiness record for accepted limitations and validation status.
+> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. Version 0.3.0 is published on GitHub as a pre-release from `main`. Multi-format report and snapshot-diff features described below are proposed in open PR #4 and are not in that release unless merged and released separately.
 
 ## Quick start
 
@@ -144,6 +144,31 @@ See the [AICRE agent skill](skills/aicre/SKILL.md) for instructions an AI agent 
 - [Contributing](CONTRIBUTING.md)
 - [JSON readiness report schema](schemas/report-v2.schema.json)
 - [JSON directory scan report schema](schemas/directory-scan-report-v2.schema.json)
+- [Canonical report schema](schemas/report-v1.schema.json)
+- [Report schema and identity design](docs/schema.md)
+
+## Report formats and comparisons
+
+Render a canonical report as JSON, Markdown, HTML, or PDF:
+
+```bash
+aicre report --format json
+aicre report --format markdown --output "$HOME/reports/aicre.md"
+aicre report --format html --output "$HOME/reports/aicre.html"
+aicre scan --profile standard --format html --output "$HOME/reports/system.html"
+```
+
+PDF is optional: install it with `python -m pip install -e '.[pdf]'`, then use `--format pdf`. HTML has no scripts, remote assets, CDN dependencies, or external fonts. POSIX output files are created with mode `0600`; missing parent directories are created without following symlinks. Existing regular files require `--force` to be atomically replaced.
+
+Render a previously saved JSON report, or compare two snapshots:
+
+```bash
+aicre report --input "$HOME/aicre-report.json" --format html --output "$HOME/aicre.html"
+aicre report --diff before.json after.json --format json
+aicre report --diff before.json after.json --format markdown --output changes.md
+```
+
+The diff classifies checks as `new`, `resolved`, `unchanged`, or `changed`. `--open` opens a completed output with `xdg-open` on Linux only. Exit code `3` indicates an unsupported output format or missing optional PDF support; `6` indicates that opening is unsupported on the current platform; `7` indicates that `xdg-open` could not be launched.
 
 ## License
 
