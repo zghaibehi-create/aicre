@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.4.0 (final scoped release candidate; not yet published)
+## 0.4.0 — 2026-11-09
+
+Published as the final scoped GitHub release: [v0.4.0](https://github.com/zghaibehi-create/aicre/releases/tag/v0.4.0), targeting merge commit `9a2300e3bddd7badc9dd25b3d493bc5481e79027`.
 
 - Include canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons that were merged after the immutable `v0.3.0` tag.
 - Preserve schema 2.0 for legacy report defaults and require explicit `--force` for replacement; reject unsafe report output destinations and symlinked parent components.
