@@ -5,7 +5,7 @@
 **Release tag:** [`v0.3.0`](https://github.com/zghaibehi-create/aicre/releases/tag/v0.3.0).  
 **Tagged commit:** `530920cfa4a5fb7a3619f4e624157772230b157d`.  
 **Post-release documentation:** PR #37 merged documentation-only clarifications to `main` on 2026-11-08; the published tag remains an immutable snapshot of the validated release commit.
-**Follow-on work:** open PR #4 is not included in the tagged source or GitHub release; its canonical reporting and snapshot-diff changes require separate review, merge, validation, and a later release.
+**Follow-on work:** PR #4 was merged into `main` on 2026-11-09 as merge commit `f27fa03b2a517602768f5ef577067e8c6f26efba`. Its canonical reporting and snapshot-diff changes postdate the immutable `v0.3.0` tag and require a later release before package users receive them.
 
 ## 1. Scope of the 0.3.0 candidate
 

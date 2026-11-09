@@ -2,7 +2,7 @@
 
 **Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
-> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. Version 0.3.0 is published on GitHub as a pre-release from `main`. Multi-format report and snapshot-diff features described below are proposed in open PR #4 and are not in that release unless merged and released separately.
+> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. Version 0.3.0 is published on GitHub as a pre-release from `main`. Multi-format report and snapshot-diff features described below were merged into `main` on 2026-11-09 after the `v0.3.0` tag. They are not part of that published pre-release; a later release is required before package users receive them.
 
 ## Quick start
 

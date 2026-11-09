@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Fix canonical readiness evidence remapping after deterministic canonical finding sorting; add a regression test with findings from different dimensions.
-- Add canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons (open PR #4; not in the published package).
+- Add canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons (merged into `main` after the `v0.3.0` tag; not in the published package).
 - Preserve schema 2.0 for legacy report defaults, require explicit `--force` for replacement, and reject symlinked output parent components and unsafe destinations.
 
 
