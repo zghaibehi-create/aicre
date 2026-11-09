@@ -33,7 +33,7 @@ After the scoped release, accept only necessary, evidence-backed fixes for confi
 
 ## Release state
 
-- `v0.3.0` remains the historical experimental GitHub pre-release published on 2026-11-07. Its tag is immutable and does not contain the later reporting/diff implementation.
+- `v0.3.0` remains the historical experimental GitHub pre-release published on 2026-11-07. It predates the later reporting/diff implementation.
 - `v0.4.0` is the final scoped release, published at [GitHub Release v0.4.0](https://github.com/zghaibehi-create/aicre/releases/tag/v0.4.0) from merge commit `9a2300e3bddd7badc9dd25b3d493bc5481e79027`. PR #40 is merged; the release includes the reporting/diff implementation, import-safety fix, and verified wheel/sdist/checksum assets.
 - The project has no future feature phases. The roadmap is maintenance-only: accept only necessary, evidence-backed fixes for confirmed security, privacy, correctness, compatibility, reliability, or packaging defects.
 

@@ -2,9 +2,9 @@
 
 ## Current release: 0.4.0
 
-**Status:** published as the final scoped GitHub Release on 2026-11-09; it is neither a draft nor a prerelease. [Release page](https://github.com/zghaibehi-create/aicre/releases/tag/v0.4.0). PR [#40](https://github.com/zghaibehi-create/aicre/pull/40) was merged to `main` as `9a2300e3bddd7badc9dd25b3d493bc5481e79027`, which is the immutable `v0.4.0` tag target.
+**Status:** published as the final scoped GitHub Release on 2026-11-09; it is neither a draft nor a prerelease. [Release page](https://github.com/zghaibehi-create/aicre/releases/tag/v0.4.0). PR [#40](https://github.com/zghaibehi-create/aicre/pull/40) was merged to `main` as `9a2300e3bddd7badc9dd25b3d493bc5481e79027`, and the `v0.4.0` tag currently points to that commit.
 
-**Scope:** 0.4.0 is the first package release containing multi-format reporting and snapshot comparison merged after the immutable v0.3.0 tag. Feature scope is frozen: no Security Intelligence, Compatibility Catalog, Guided Remediation, Windows/macOS, GUI, new MCP/agent integrations, or architecture redesign is planned. Only confirmed security, privacy, correctness, compatibility, reliability, and packaging fixes remain in scope.
+**Scope:** 0.4.0 is the first package release containing multi-format reporting and snapshot comparison merged after the v0.3.0 release. Feature scope is frozen: no Security Intelligence, Compatibility Catalog, Guided Remediation, Windows/macOS, GUI, new MCP/agent integrations, or architecture redesign is planned. Only confirmed security, privacy, correctness, compatibility, reliability, and packaging fixes remain in scope.
 
 **Final security review:** confirmed report-import path/privacy and unbounded-input issues were fixed. The importer checks sensitive and user-excluded paths before opening; refuses symlink, hard-link, special-file, and virtual-filesystem sources; limits each input to 16 MiB; and converts deeply nested JSON failures into controlled CLI errors. Regression tests cover these cases. This AI-assisted internal review is scoped and is not an independent audit or certification.
 
@@ -20,8 +20,8 @@
 **Package version at the time:** 0.3.0.
 **Release tag:** [`v0.3.0`](https://github.com/zghaibehi-create/aicre/releases/tag/v0.3.0).  
 **Tagged commit:** `530920cfa4a5fb7a3619f4e624157772230b157d`.  
-**Post-release documentation:** PR #37 merged documentation-only clarifications to `main` on 2026-11-08; the published tag remains an immutable snapshot of the validated release commit.
-**Follow-on work:** PR #4 was merged into `main` on 2026-11-09 as merge commit `f27fa03b2a517602768f5ef577067e8c6f26efba`. Its canonical reporting and snapshot-diff changes postdate the immutable `v0.3.0` tag and are included in the later `v0.4.0` release.
+**Post-release documentation:** PR #37 merged documentation-only clarifications to `main` on 2026-11-08; those changes were not part of the published v0.3.0 release.
+**Follow-on work:** PR #4 was merged into `main` on 2026-11-09 as merge commit `f27fa03b2a517602768f5ef577067e8c6f26efba`. Its canonical reporting and snapshot-diff changes postdate the v0.3.0 release and are included in the later `v0.4.0` release.
 
 ### 1. Scope of the 0.3.0 candidate
 
