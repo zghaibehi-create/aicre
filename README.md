@@ -2,7 +2,7 @@
 
 **Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
-> **Release status:** AICRE is a local inventory and readiness tool, not a security product, agent sandbox, malware scanner, complete secret scanner, or guarantee that a computer is safe for autonomous agents. Version 0.4.0 is the final scoped release candidate; it is not published until the final matrix/package checks and release approval are complete. The older `v0.3.0` GitHub pre-release does not contain the later multi-format reporting and snapshot-diff implementation.
+> **Release status:** AICRE is a local inventory and readiness tool, not a security product, agent sandbox, malware scanner, complete secret scanner, or guarantee that a computer is safe for autonomous agents. The package version is 0.4.0; check [GitHub Releases](https://github.com/zghaibehi-create/aicre/releases) for its current publication status. The older `v0.3.0` pre-release does not contain the later multi-format reporting and snapshot-diff implementation.
 
 ## Quick start
 
@@ -15,10 +15,10 @@ AICRE runs on Linux with Python 3.11 or newer and is installed from source.
 
 ## Sample output
 
-The following output was captured by the [GitHub Actions sample-report workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42371048090) on a GitHub-hosted Ubuntu 24.04 runner, using AICRE 0.2.1 from the merge commit for PR #16:
+The following output was captured by the [GitHub Actions sample-report workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42587078776) on a GitHub-hosted Ubuntu 24.04 runner with Python 3.12, from the 0.4.0 release-candidate branch:
 
 ```text
-AICRE 0.2.1 — profile: agent-development
+AICRE 0.4.0 — profile: agent-development
 Observed values (host-facing; resource comparisons are not performed):
   CPU: 4 (min 2 logical CPUs)
   RAM: 15.6 GiB (min 8.0 GiB)
