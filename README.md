@@ -15,7 +15,7 @@ AICRE runs on Linux with Python 3.11 or newer and is installed from source.
 
 ## Sample output
 
-The following output was captured by the [GitHub Actions sample-report workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42587078776) on a GitHub-hosted Ubuntu 24.04 runner with Python 3.12, from the 0.4.0 release-candidate branch:
+The following output was captured by the [GitHub Actions sample-report workflow](https://github.com/zghaibehi-create/aicre/actions/runs/42587555625) on a GitHub-hosted Ubuntu 24.04 runner with Python 3.12, from the 0.4.0 release-candidate branch:
 
 ```text
 AICRE 0.4.0 — profile: agent-development

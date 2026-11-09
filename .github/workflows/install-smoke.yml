@@ -6,11 +6,15 @@ on:
     paths:
       - '.github/workflows/install-smoke.yml'
       - 'src/aicre/**'
+      - 'README.md'
+      - 'LICENSE'
       - 'pyproject.toml'
   pull_request:
     paths:
       - '.github/workflows/install-smoke.yml'
       - 'src/aicre/**'
+      - 'README.md'
+      - 'LICENSE'
       - 'pyproject.toml'
 
 permissions:

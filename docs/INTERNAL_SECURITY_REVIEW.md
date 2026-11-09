@@ -83,7 +83,7 @@ The external independent-review gate is not represented as completed. No externa
 
 ## Final scope-frozen candidate review — 2026-11-09
 
-**Target:** the 0.4.0 final scoped release candidate on `fix/final-report-import-safety`; the exact validated commit is recorded in `RELEASE_READINESS.md` after the candidate commit is finalized. This is a separate review from the historical 0.3.0 review above.
+**Target:** PR #40's final scoped 0.4.0 implementation commit `f28c837e1dab81f556fcd8bfcc3a62d1ee5eb35d`, based on `main` commit `3e1538bd622e4a0a110b4bdbc27c737df16300e6`. This review is separate from the historical 0.3.0 review above; later release-evidence-only documentation does not change the reviewed implementation.
 
 **Scope inspected:** imported JSON loading and schema validation, import path boundaries and resource limits, diff identity, Markdown/HTML/PDF rendering, directory traversal and output publication, CLI input validation, and the corresponding regression tests. The review also checked that tool discovery remains PATH-only and does not execute discovered programs.
 
@@ -95,4 +95,4 @@ The external independent-review gate is not represented as completed. No externa
 
 No additional confirmed actionable defect was found in the scoped review of import validation, comparison identity, Markdown/HTML/PDF renderers, scanner traversal, or atomic output publication. A hostile-content PDF smoke test with the optional ReportLab dependency produced a valid PDF. This is not proof of security: the exclusions are not a complete secret detector; the file cap bounds bytes, not peak parsed memory; directory scans are not atomic snapshots and do not enforce a hard byte-level memory ceiling; deadlines are cooperative; same-device bind mounts remain a documented risk; and host security posture is not assessed.
 
-**Verification status:** the candidate's local Ruff and full test results, including the optional PDF test, are recorded in the current release-readiness section. The six-job Ubuntu/Python CI matrix and clean wheel/sdist installation checks remain release gates until they pass on the exact published candidate. This AI-assisted internal review is not an independent third-party audit, penetration test, formal verification, or security certification.
+**Verification status:** local Ruff, all 218 tests with optional PDF coverage, and hostile-markup PDF smoke passed. On implementation commit `f28c837`, GitHub Tests and Install smoke each passed 6/6 across Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13; a sample-report run passed. Locally built wheel and sdist were inspected, installed in clean environments, and exercised through report/import/render/diff. This AI-assisted internal review is not an independent third-party audit, penetration test, formal verification, or security certification.

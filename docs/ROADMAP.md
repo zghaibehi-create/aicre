@@ -34,7 +34,7 @@ After the scoped release, accept only necessary, evidence-backed fixes for confi
 ## Release state
 
 - `v0.3.0` remains the historical experimental GitHub pre-release published on 2026-11-07. Its tag is immutable and does not contain the later reporting/diff implementation.
-- `0.4.0` is the final scoped release candidate for those already-implemented reporting/diff features and the final import-safety review. It is not considered published until the exact candidate passes the Ubuntu/Python matrix, wheel/sdist inspection and clean-install checks, SHA-256 recording, and explicit release approval.
+- `0.4.0` is the final scoped release candidate for the already-implemented reporting/diff features and final import-safety review. The candidate's Ubuntu/Python matrix, wheel/sdist inspection and clean-install checks, SHA-256 verification, and report import/render/diff smoke tests have passed; PR #40 remains open for final review. The release is not published until the PR is merged and the owner approves the final release operation.
 - The project has no future feature phases. After publication, the roadmap is maintenance-only.
 
 See [RELEASE_READINESS.md](RELEASE_READINESS.md), [SECURITY_MODEL.md](SECURITY_MODEL.md), and [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md) for the release gates, privacy boundaries, residual risks, and test evidence.

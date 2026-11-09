@@ -1,0 +1,2 @@
+5b6e5461d66d1a62424fc57a258c54b7de5bc4442c37c79cb803ffebdd969182  aicre-0.4.0-py3-none-any.whl
+f9a9afc3103d90f6c467c4ddc5abfba8942bfacbfcd77d0b2d578a09aba23c6c  aicre-0.4.0.tar.gz

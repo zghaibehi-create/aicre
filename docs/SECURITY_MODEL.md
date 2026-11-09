@@ -72,7 +72,7 @@ Directory scans default to at most 25,000 included items and 5,000 entries buffe
 
 ## Verification and release status
 
-CI targets Ubuntu 22.04 and 24.04 with Python 3.11, 3.12, and 3.13. A successful run verifies only those checks. The 0.4.0 candidate requires the final matrix and package-build/install workflows to pass before publication. The scoped internal review is AI-assisted and is not an independent third-party audit, penetration test, formal verification, or security certification.
+CI targets Ubuntu 22.04 and 24.04 with Python 3.11, 3.12, and 3.13. The current 0.4.0 candidate passed the test and package-build/install matrices on PR #40; those results verify only the checks listed in the workflows. The scoped internal review is AI-assisted and is not an independent third-party audit, penetration test, formal verification, or security certification.
 
 ## Workload profile limitation
 

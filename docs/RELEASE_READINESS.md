@@ -2,15 +2,19 @@
 
 ## Current candidate: 0.4.0 final scoped release
 
-**Status:** release candidate under final validation; not yet published. The version is 0.4.0 because it is the first package release containing the reporting and snapshot-diff features merged after the immutable v0.3.0 tag. It remains a 0.x release and makes no security-product or host-safety claim.
+**Status:** final scoped candidate validated, PR #40 open for review, and not yet published. Version 0.4.0 is the first package release containing the reporting and snapshot-diff features merged after the immutable v0.3.0 tag. It remains a 0.x release and makes no security-product or host-safety claim.
 
 **Scope:** feature scope is frozen. No Security Intelligence, Compatibility Catalog, Guided Remediation, Windows/macOS, GUI, new MCP/agent integrations, or architecture redesign is planned. PR [#39](https://github.com/zghaibehi-create/aicre/pull/39) was closed unmerged. After publication, only confirmed security, privacy, correctness, compatibility, reliability, and packaging fixes are in scope.
 
 **Final security review:** confirmed report-import path/privacy and unbounded-input issues were fixed in the 0.4.0 candidate. The importer now checks sensitive and user-excluded paths before opening; refuses symlink, hard-link, special-file, and virtual-filesystem sources; limits each input to 16 MiB; and converts deeply nested JSON failures into controlled CLI errors. Regression tests cover these cases. This AI-assisted internal review is scoped and is not an independent audit or certification.
 
-**Local verification on the candidate tree:** `ruff check src tests` passed; `pytest -v` passed all 218 tests with optional ReportLab installed, including the PDF renderer test; and `python -m aicre --version` reported `aicre 0.4.0`. A hostile-markup PDF smoke check produced a valid PDF. These local checks do not replace the pending six-job GitHub matrix.
+**Local verification:** `ruff check src tests` passed; `pytest -v` passed all 218 tests with optional ReportLab installed, including the PDF renderer test; and `python -m aicre --version` reported `aicre 0.4.0`. A hostile-markup PDF smoke check produced a valid PDF.
 
-**Release gates:** complete Ruff/tests and all six Ubuntu/Python CI matrix jobs on the exact candidate; build and inspect wheel/sdist; install both artifacts into clean environments; exercise report import/render/diff from the installed artifacts; calculate SHA-256; then obtain explicit owner approval before creating the final GitHub Release. Until those steps are complete, v0.4.0 is not published.
+**GitHub verification on PR #40 head `f28c837e1dab81f556fcd8bfcc3a62d1ee5eb35d`:** Tests workflow passed 6/6 on Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 ([run 42587555664](https://github.com/zghaibehi-create/aicre/actions/runs/42587555664)); install-smoke passed 6/6 with wheel/sdist builds, archive checks, clean installs and report/import/render/diff commands ([run 42587555636](https://github.com/zghaibehi-create/aicre/actions/runs/42587555636)); sample report passed ([run 42587555625](https://github.com/zghaibehi-create/aicre/actions/runs/42587555625)).
+
+**Local package acceptance on the final package inputs:** wheel and sdist metadata/archive contents were inspected; both installed in fresh virtual environments with `pip check`; both exercised legacy JSON schema 2.0, canonical JSON 1.0.0, import-to-Markdown, and self-diff. No runtime dependencies were present. Verified hashes are recorded in the repository's [0.4.0 SHA-256 manifest](release-assets/SHA256SUMS-v0.4.0.txt), also prepared as the release asset `SHA256SUMS.txt`: wheel `5b6e5461d66d1a62424fc57a258c54b7de5bc4442c37c79cb803ffebdd969182`, sdist `f9a9afc3103d90f6c467c4ddc5abfba8942bfacbfcd77d0b2d578a09aba23c6c`.
+
+**Remaining release gates:** complete PR review and merge to `main`, then obtain explicit owner approval before creating the final `v0.4.0` GitHub Release and attaching the verified wheel, sdist, and `SHA256SUMS.txt`. No release has been created and `main` has not been changed by this candidate. The AI-assisted internal review is not an independent third-party audit or security certification.
 
 ## Historical release record: 0.3.0
 

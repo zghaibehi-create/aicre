@@ -1,47 +1,39 @@
 # AICRE Linux Acceptance Evidence
 
-**Purpose:** distinguish automated Linux CI evidence from acceptance on the project owner's intended Linux environment.  
-**Current package version:** 0.3.0 (release candidate).  
-**Release target:** 0.3.0.
+**Purpose:** distinguish automated Linux CI and package-artifact evidence from acceptance on the project owner's own Linux machine. No owner-machine acceptance is claimed.
 
-## 1. Automated Linux CI evidence
+## Current candidate: 0.4.0 (not yet published)
 
-The following evidence is available from GitHub Actions:
+PR [#40](https://github.com/zghaibehi-create/aicre/pull/40) is open against `main`; implementation commit `f28c837e1dab81f556fcd8bfcc3a62d1ee5eb35d` passed the listed checks. The candidate branch now also records final release evidence and broadens install-smoke triggers to package inputs; those follow-up changes are being revalidated. No 0.4.0 commit has been merged, tagged, or published. The currently published version remains the historical experimental pre-release `v0.3.0`.
 
-| Evidence | Commit | Environment | Result | Scope |
-|---|---|---|---|---|
-| Tests run #533 (post-merge on main) | `1d0145752952a0a39e6ffa65510690e57cca1452` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, full test suite, CLI entry point |
-| Install smoke run #29 (post-merge on main) | `1d0145752952a0a39e6ffa65510690e57cca1452` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
-| **AICRE 0.3.0 candidate Tests run #566 (PR #35 merge ref)** | `bf6b84a68fabf32e0241783f6bd6ae785764dbc0` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Ruff, full pytest suite, CLI entry point |
-| **AICRE 0.3.0 candidate Install smoke run #38 (PR #35 merge ref)** | `bf6b84a68fabf32e0241783f6bd6ae785764dbc0` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Wheel/sdist build and archive inspection, version/metadata/runtime-dependency checks, clean installs, CLI/report smoke checks |
-| **AICRE 0.3.0 candidate Sample report run #19 (PR #35)** | PR #35 merge ref | Ubuntu 24.04 × Python 3.12 | **Passed** | Sample report generation and readiness contract |
-| **Final main Tests workflow after PR #33 ([run 42386187695](https://github.com/zghaibehi-create/aicre/actions/runs/42386187695))** | `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Lint, full test suite, CLI entry point |
-| **Final main Install smoke workflow after PR #33 ([run 42386187780](https://github.com/zghaibehi-create/aicre/actions/runs/42386187780))** | `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | **6/6 jobs passed** | Wheel/sdist build, archive inventory, version/metadata/runtime-dependency checks, clean installs, CLI/report smoke checks |
-| Tests run #532 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Lint, full test suite, CLI entry point |
-| Install smoke run #28 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13 | 6/6 jobs passed | Wheel and sdist build, clean-venv installs, pip check, CLI/report smoke checks |
-| Sample report run #18 (PR #31) | `5ae2128a85de2ece87fb1373ad9c180c00cc6c58` | Ubuntu 24.04 × Python 3.12 | Passed | Sample report generation and conservative Resource readiness check |
+| Evidence | Result | Scope |
+|---|---:|---|
+| [Tests workflow run 42587555664](https://github.com/zghaibehi-create/aicre/actions/runs/42587555664) | 6/6 passed | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13; Ruff, full test suite, CLI entry point |
+| [Install smoke run 42587555636](https://github.com/zghaibehi-create/aicre/actions/runs/42587555636) | 6/6 passed | Wheel/sdist build and archive inspection, clean installs, `pip check`, legacy/canonical report, import, Markdown render, and diff commands |
+| [Sample report run 42587555625](https://github.com/zghaibehi-create/aicre/actions/runs/42587555625) | Passed | GitHub-hosted Ubuntu 24.04 × Python 3.12; readiness sample |
+| Local candidate validation | Passed | `ruff check src tests`; `pytest -v` (218 passed with optional ReportLab); hostile-markup PDF smoke |
+| Local wheel/sdist acceptance | Passed | Both artifacts inspected and installed in clean virtual environments; `pip check` and installed report/import/render/diff checks passed |
 
-AICRE 0.3.0 candidate run links:
-- [Tests run #566 — 6/6](https://github.com/zghaibehi-create/aicre/actions/runs/42386970651)
-- [Install smoke run #38 — 6/6](https://github.com/zghaibehi-create/aicre/actions/runs/42386970639)
-- [Sample report run #19 — passed](https://github.com/zghaibehi-create/aicre/actions/runs/42386970661)
-- [PR #35 — 0.3.0 candidate](https://github.com/zghaibehi-create/aicre/pull/35)
-- [Merged main candidate commit](https://github.com/zghaibehi-create/aicre/commit/bcdcbebd684c074852bff934d150f68f80058106)
+Local candidate artifact hashes (the artifacts are not yet attached to a GitHub release):
 
-Earlier evidence:
-- [Tests run #533](https://github.com/zghaibehi-create/aicre/actions/runs/42385655762)
-- [Install smoke run #29](https://github.com/zghaibehi-create/aicre/actions/runs/42385655772)
-- [Tests run #532](https://github.com/zghaibehi-create/aicre/actions/runs/42385579698)
-- [Install smoke run #28](https://github.com/zghaibehi-create/aicre/actions/runs/42385579695)
-- [Sample report run #18](https://github.com/zghaibehi-create/aicre/actions/runs/42385579678)
+- `aicre-0.4.0-py3-none-any.whl` — SHA-256 `5b6e5461d66d1a62424fc57a258c54b7de5bc4442c37c79cb803ffebdd969182`
+- `aicre-0.4.0.tar.gz` — SHA-256 `f9a9afc3103d90f6c467c4ddc5abfba8942bfacbfcd77d0b2d578a09aba23c6c`
 
-The candidate workflow logs show successful wheel and source-distribution builds, archive inspection, clean virtual-environment installs, `pip check`, CLI execution, and JSON report contract checks. In the Ubuntu 24.04 / Python 3.12 job, the built artifacts were `aicre-0.3.0-py3-none-any.whl` (SHA-256 `133c0ed5cbc56b040e53766c1aeb16b47ee18640f86ad805907eb187387d0c9c`) and `aicre-0.3.0.tar.gz` (SHA-256 `47de24dce9d59927d86c0c441ca8eda22a92d73b606c627599c32037396f0a71`). These hashes identify the outputs of that CI job; other matrix jobs may produce different wheel hashes. The workflow does not retain these files as downloadable artifacts.
+These values are verified by the repository's [0.4.0 checksum manifest](release-assets/SHA256SUMS-v0.4.0.txt), prepared for attachment as `SHA256SUMS.txt`. The package contains no runtime dependencies. Final publication remains gated on PR review/merge and explicit owner approval.
 
-These are GitHub-hosted Ubuntu runner results. They do not identify or prove acceptance on the project owner's own target machine, filesystem, distribution configuration, or deployment environment. The install-smoke workflow validates CI-built artifacts, not an artifact uploaded to a public release.
+## Historical release: 0.3.0
 
-## 2. Project-owner target Linux acceptance record
+`v0.3.0` is an experimental GitHub pre-release published on 2026-11-07 from tagged commit `530920cfa4a5fb7a3619f4e624157772230b157d`. It predates the canonical multi-format reporting and snapshot-diff changes in PR #4 and the current 0.4.0 candidate. Historical candidate CI evidence:
 
-**Status: not supplied.** No claim is made that the owner's own Linux machine was tested.
+- [Tests run #566 — 6/6](https://github.com/zghaibehi-create/aicre/actions/runs/42386970651) and [install smoke run #38 — 6/6](https://github.com/zghaibehi-create/aicre/actions/runs/42386970639), on the Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 matrix.
+- [Sample report run #19](https://github.com/zghaibehi-create/aicre/actions/runs/42386970661) passed on Ubuntu 24.04 × Python 3.12.
+- 0.3.0 artifacts from the Ubuntu 24.04/Python 3.12 job were `aicre-0.3.0-py3-none-any.whl` (SHA-256 `133c0ed5cbc56b040e53766c1aeb16b47ee18640f86ad805907eb187387d0c9c`) and `aicre-0.3.0.tar.gz` (SHA-256 `47de24dce9d59927d86c0c441ca8eda22a92d73b606c627599c32037396f0a71`). Those hashes identify that historical CI job only.
+
+Earlier main/PR matrix evidence remains available in the [GitHub Actions history](https://github.com/zghaibehi-create/aicre/actions). It must not be presented as evidence for the 0.4.0 candidate.
+
+## Project-owner target Linux acceptance
+
+**Status: not supplied.** These are GitHub-hosted runner results, not proof of acceptance on the owner's machine, filesystem, distribution configuration, or deployment environment. Do not publish private hostnames, usernames, private directory paths, serial numbers, or full inventory reports; AICRE reports may disclose machine and path metadata.
 
 | Field | Recorded value |
 |---|---|
@@ -54,11 +46,9 @@ These are GitHub-hosted Ubuntu runner results. They do not identify or prove acc
 | Test date (UTC) | Not supplied |
 | Deviations or failures | Not supplied |
 
-Do not publish private hostnames, usernames, private directory paths, serial numbers, or full inventory reports. AICRE reports may disclose machine and path metadata.
+## Reproducible acceptance commands
 
-## 3. Reproducible acceptance commands
-
-Run from a clean checkout of the intended release candidate on Linux with Python 3.11 or newer:
+Run from a clean checkout of the intended release candidate on Linux with Python 3.11 or newer. Do not run as root or scan a sensitive directory; use disposable synthetic fixtures for directory-scan checks.
 
 ```bash
 cat /etc/os-release
@@ -76,20 +66,12 @@ python -m ruff check src tests
 python -m pytest -v
 aicre --version
 aicre readiness --profile agent-development
-aicre report --format json | python -c 'import json,sys; r=json.load(sys.stdin); assert r["schema_version"] == "2.0"; assert len(r["readiness"]) == 5; print("JSON report contract: OK")'
+aicre report | python -c 'import json,sys; r=json.load(sys.stdin); assert r["schema_version"] == "2.0"; assert len(r["readiness"]) == 5'
+aicre report --format json | python -c 'import json,sys; r=json.load(sys.stdin); assert r["schema_version"] == "1.0.0"; assert len(r["readiness"]) == 5'
 ```
 
-Record command exit codes and any environment-specific deviations. Do not run as root. Do not use a sensitive directory as a scan fixture. If validating the directory scanner, create a disposable temporary directory with synthetic files and remove it afterward.
+Record command exit codes and environment-specific deviations. Confirm that unknown Resource readiness remains unknown where effective process/container limits are not established, and that no unexpected network, telemetry, source-content reads, program execution, privilege elevation, or system modifications occur.
 
-## 4. Acceptance criteria
+## Release gate
 
-- All commands above complete successfully, except any explicitly documented environment-specific limitation.
-- The CLI version matches the candidate under test.
-- The JSON report parses and has schema version `2.0` with five independent readiness dimensions.
-- Resource readiness remains `unknown` where effective process/container limits are not established.
-- No unexpected network, telemetry, source-content reads, program execution, privilege elevation, or system modifications are observed.
-- Any failure is triaged, fixed if blocking, and retested on the candidate commit.
-
-## 5. Release gate
-
-Automated CI acceptance for the declared Ubuntu support matrix is complete for the 0.3.0 candidate. Owner-machine acceptance was not performed. By owner decision (recorded in [RELEASE_READINESS.md](RELEASE_READINESS.md)), the Ubuntu 22.04/24.04 CI matrix is accepted as the Linux support evidence for 0.3.0; Section 2 remains a template for optional future owner-machine acceptance.
+Automated Linux acceptance for the 0.4.0 candidate is complete only after the final matrix for the current PR head passes; the implementation commit listed above already passed its matrix. The outstanding steps are current-head revalidation, final PR review/merge, and owner authorization to publish the final release and attach the verified artifacts plus `SHA256SUMS.txt`. The 0.3.0 owner decision accepting CI evidence is historical and does not constitute publication approval for 0.4.0.
