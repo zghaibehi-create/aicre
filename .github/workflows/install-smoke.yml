@@ -141,5 +141,6 @@ jobs:
             AICRE="$ENV/bin/aicre"
             "$AICRE" --version
             "$AICRE" readiness --profile agent-development
-            "$AICRE" report --format json | "$ENV/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "2.0"; assert len(report["readiness"]) == 5'
+            "$AICRE" report | "$ENV/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "2.0"; assert len(report["readiness"]) == 5'
+            "$AICRE" report --format json | "$ENV/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "1.0.0"; assert len(report["readiness"]) == 5'
           done

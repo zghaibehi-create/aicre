@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Fix canonical readiness evidence remapping after deterministic canonical finding sorting; add a regression test with findings from different dimensions.
+- Add canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons (open PR #4; not in the published package).
+- Preserve schema 2.0 for legacy report defaults, require explicit `--force` for replacement, and reject symlinked output parent components and unsafe destinations.
+
+
 ## 0.3.0 (experimental GitHub pre-release published 2026-11-07)
 
 The 0.3.0 candidate passed the documented Linux test, package-inspection, and install
