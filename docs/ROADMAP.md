@@ -1,6 +1,6 @@
 # AICRE Roadmap and Scope
 
-AICRE's feature scope is frozen. The project is being completed as a Linux-first, local environment inventory and readiness CLI; no additional feature roadmap is planned. The 0.4.0 candidate consolidates the implemented reporting work and the final confirmed import-safety fix. Publication remains gated on the final CI/package checks and owner approval.
+AICRE's feature scope is frozen and complete as a Linux-first, local environment inventory and readiness CLI. Version 0.4.0 was published as the final scoped release on 2026-11-09; no additional feature roadmap is planned.
 
 ## Completed product scope
 
@@ -33,8 +33,8 @@ After the scoped release, accept only necessary, evidence-backed fixes for confi
 
 ## Release state
 
-- `v0.3.0` remains the historical experimental GitHub pre-release published on 2026-11-07. Its tag is immutable and does not contain the later reporting/diff implementation.
-- `0.4.0` is the final scoped release candidate for the already-implemented reporting/diff features and final import-safety review. The candidate's Ubuntu/Python matrix, wheel/sdist inspection and clean-install checks, SHA-256 verification, and report import/render/diff smoke tests have passed; PR #40 remains open for final review. The release is not published until the PR is merged and the owner approves the final release operation.
-- The project has no future feature phases. After publication, the roadmap is maintenance-only.
+- `v0.3.0` remains the historical experimental GitHub pre-release published on 2026-11-07. It predates the later reporting/diff implementation.
+- `v0.4.0` is the final scoped release, published at [GitHub Release v0.4.0](https://github.com/zghaibehi-create/aicre/releases/tag/v0.4.0) from merge commit `9a2300e3bddd7badc9dd25b3d493bc5481e79027`. PR #40 is merged; the release includes the reporting/diff implementation, import-safety fix, and verified wheel/sdist/checksum assets.
+- The project has no future feature phases. The roadmap is maintenance-only: accept only necessary, evidence-backed fixes for confirmed security, privacy, correctness, compatibility, reliability, or packaging defects.
 
 See [RELEASE_READINESS.md](RELEASE_READINESS.md), [SECURITY_MODEL.md](SECURITY_MODEL.md), and [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md) for the release gates, privacy boundaries, residual risks, and test evidence.

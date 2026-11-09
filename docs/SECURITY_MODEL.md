@@ -1,8 +1,8 @@
-# AICRE 0.4.0 candidate — Security and Privacy Model
+# AICRE 0.4.0 — Security and Privacy Model
 
 ## Purpose and non-goals
 
-AICRE 0.4.0 candidate collects a bounded set of Linux environment and directory metadata and reports five independent readiness dimensions. It is not an agent sandbox, access-control manager, malware scanner, complete secret detector, backup tool, security certification, or authorization to run an autonomous agent. It does not install software, modify machine settings, or remediate findings. Windows and macOS support are not claimed. Feature scope is frozen; Security Intelligence, compatibility catalogs, guided remediation, new MCP/agent integrations, GUI, and architecture redesign are not planned.
+AICRE 0.4.0 collects a bounded set of Linux environment and directory metadata and reports five independent readiness dimensions. It is not an agent sandbox, access-control manager, malware scanner, complete secret detector, backup tool, security certification, or authorization to run an autonomous agent. It does not install software, modify machine settings, or remediate findings. Windows and macOS support are not claimed. Feature scope is frozen; Security Intelligence, compatibility catalogs, guided remediation, new MCP/agent integrations, GUI, and architecture redesign are not planned.
 
 ## Trust boundary
 
@@ -72,7 +72,7 @@ Directory scans default to at most 25,000 included items and 5,000 entries buffe
 
 ## Verification and release status
 
-CI targets Ubuntu 22.04 and 24.04 with Python 3.11, 3.12, and 3.13. The current 0.4.0 candidate passed the test and package-build/install matrices on PR #40; those results verify only the checks listed in the workflows. The scoped internal review is AI-assisted and is not an independent third-party audit, penetration test, formal verification, or security certification.
+CI targets Ubuntu 22.04 and 24.04 with Python 3.11, 3.12, and 3.13. Release commit `9a2300e3bddd7badc9dd25b3d493bc5481e79027` passed the post-merge test matrix ([run 42589858188](https://github.com/zghaibehi-create/aicre/actions/runs/42589858188)) and package-build/install matrix ([run 42589858166](https://github.com/zghaibehi-create/aicre/actions/runs/42589858166)); those results verify only the checks listed in the workflows. The scoped internal review is AI-assisted and is not an independent third-party audit, penetration test, formal verification, or security certification.
 
 ## Workload profile limitation
 

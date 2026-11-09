@@ -1,29 +1,27 @@
 # AICRE — Release Readiness and Residual-Risk Decision
 
-## Current candidate: 0.4.0 final scoped release
+## Current release: 0.4.0
 
-**Status:** final scoped candidate validated, PR #40 open for review, and not yet published. Version 0.4.0 is the first package release containing the reporting and snapshot-diff features merged after the immutable v0.3.0 tag. It remains a 0.x release and makes no security-product or host-safety claim.
+**Status:** published as the final scoped GitHub Release on 2026-11-09; it is neither a draft nor a prerelease. [Release page](https://github.com/zghaibehi-create/aicre/releases/tag/v0.4.0). PR [#40](https://github.com/zghaibehi-create/aicre/pull/40) was merged to `main` as `9a2300e3bddd7badc9dd25b3d493bc5481e79027`, and the `v0.4.0` tag currently points to that commit.
 
-**Scope:** feature scope is frozen. No Security Intelligence, Compatibility Catalog, Guided Remediation, Windows/macOS, GUI, new MCP/agent integrations, or architecture redesign is planned. PR [#39](https://github.com/zghaibehi-create/aicre/pull/39) was closed unmerged. After publication, only confirmed security, privacy, correctness, compatibility, reliability, and packaging fixes are in scope.
+**Scope:** 0.4.0 is the first package release containing multi-format reporting and snapshot comparison merged after the v0.3.0 release. Feature scope is frozen: no Security Intelligence, Compatibility Catalog, Guided Remediation, Windows/macOS, GUI, new MCP/agent integrations, or architecture redesign is planned. Only confirmed security, privacy, correctness, compatibility, reliability, and packaging fixes remain in scope.
 
-**Final security review:** confirmed report-import path/privacy and unbounded-input issues were fixed in the 0.4.0 candidate. The importer now checks sensitive and user-excluded paths before opening; refuses symlink, hard-link, special-file, and virtual-filesystem sources; limits each input to 16 MiB; and converts deeply nested JSON failures into controlled CLI errors. Regression tests cover these cases. This AI-assisted internal review is scoped and is not an independent audit or certification.
+**Final security review:** confirmed report-import path/privacy and unbounded-input issues were fixed. The importer checks sensitive and user-excluded paths before opening; refuses symlink, hard-link, special-file, and virtual-filesystem sources; limits each input to 16 MiB; and converts deeply nested JSON failures into controlled CLI errors. Regression tests cover these cases. This AI-assisted internal review is scoped and is not an independent audit or certification.
 
-**Local verification:** `ruff check src tests` passed; `pytest -v` passed all 218 tests with optional ReportLab installed, including the PDF renderer test; and `python -m aicre --version` reported `aicre 0.4.0`. A hostile-markup PDF smoke check produced a valid PDF.
+**Validation:** `ruff check src tests` passed; `pytest -v` passed all 218 tests with optional ReportLab installed; and a hostile-markup PDF smoke check produced a valid PDF. After merge, the Tests matrix passed 6/6 on Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 ([run 42589858188](https://github.com/zghaibehi-create/aicre/actions/runs/42589858188)); the wheel/sdist build and clean-install matrix also passed 6/6 ([run 42589858166](https://github.com/zghaibehi-create/aicre/actions/runs/42589858166)). The sample report passed on the final PR candidate ([run 42588959452](https://github.com/zghaibehi-create/aicre/actions/runs/42588959452)).
 
-**GitHub verification on final package-input commit `fb4786375dd943326011eef258b60b09641db9e3` in PR #40:** Tests workflow passed 6/6 on Ubuntu 22.04/24.04 × Python 3.11/3.12/3.13 ([run 42588710927](https://github.com/zghaibehi-create/aicre/actions/runs/42588710927)); install-smoke passed 6/6 with wheel/sdist builds, archive checks, clean installs and report/import/render/diff commands ([run 42588711058](https://github.com/zghaibehi-create/aicre/actions/runs/42588711058)); sample report passed ([run 42588711032](https://github.com/zghaibehi-create/aicre/actions/runs/42588711032)). All 25 PR checks are successful.
+**Published assets:** the wheel ([download](https://github.com/zghaibehi-create/aicre/releases/download/v0.4.0/aicre-0.4.0-py3-none-any.whl)) has SHA-256 `5b6e5461d66d1a62424fc57a258c54b7de5bc4442c37c79cb803ffebdd969182`; the sdist ([download](https://github.com/zghaibehi-create/aicre/releases/download/v0.4.0/aicre-0.4.0.tar.gz)) has SHA-256 `f9a9afc3103d90f6c467c4ddc5abfba8942bfacbfcd77d0b2d578a09aba23c6c`. The [SHA256SUMS.txt release asset](https://github.com/zghaibehi-create/aicre/releases/download/v0.4.0/SHA256SUMS.txt) and [repository manifest](release-assets/SHA256SUMS-v0.4.0.txt) match; downloaded GitHub assets were checked with `sha256sum -c`. Both packages installed in clean virtual environments, passed `pip check`, and exercised legacy JSON schema 2.0, canonical JSON 1.0.0, import, render, and diff. There are no runtime dependencies.
 
-**Local package acceptance on the final package inputs:** wheel and sdist metadata/archive contents were inspected; both installed in fresh virtual environments with `pip check`; both exercised legacy JSON schema 2.0, canonical JSON 1.0.0, import-to-Markdown, and self-diff. No runtime dependencies were present. Verified hashes are recorded in the repository's [0.4.0 SHA-256 manifest](release-assets/SHA256SUMS-v0.4.0.txt), also prepared as the release asset `SHA256SUMS.txt`: wheel `5b6e5461d66d1a62424fc57a258c54b7de5bc4442c37c79cb803ffebdd969182`, sdist `f9a9afc3103d90f6c467c4ddc5abfba8942bfacbfcd77d0b2d578a09aba23c6c`.
-
-**Remaining release gates:** complete PR review and merge to `main`, then obtain explicit owner approval before creating the final `v0.4.0` GitHub Release and attaching the verified wheel, sdist, and `SHA256SUMS.txt`. No release has been created and `main` has not been changed by this candidate. The AI-assisted internal review is not an independent third-party audit or security certification.
+**Boundaries:** no acceptance test on the project owner's own machine is claimed. The internal review is AI-assisted, not an independent third-party audit, penetration test, formal verification, or security certification. AICRE is not a security product or sandbox and does not guarantee host safety. Release gates are complete; future work is maintenance-only.
 
 ## Historical release record: 0.3.0
 
 **Status:** Published as an experimental GitHub pre-release on 2026-11-07.  
-**Current package version:** 0.3.0.  
+**Package version at the time:** 0.3.0.
 **Release tag:** [`v0.3.0`](https://github.com/zghaibehi-create/aicre/releases/tag/v0.3.0).  
 **Tagged commit:** `530920cfa4a5fb7a3619f4e624157772230b157d`.  
-**Post-release documentation:** PR #37 merged documentation-only clarifications to `main` on 2026-11-08; the published tag remains an immutable snapshot of the validated release commit.
-**Follow-on work:** PR #4 was merged into `main` on 2026-11-09 as merge commit `f27fa03b2a517602768f5ef577067e8c6f26efba`. Its canonical reporting and snapshot-diff changes postdate the immutable `v0.3.0` tag and require a later release before package users receive them.
+**Post-release documentation:** PR #37 merged documentation-only clarifications to `main` on 2026-11-08; those changes were not part of the published v0.3.0 release.
+**Follow-on work:** PR #4 was merged into `main` on 2026-11-09 as merge commit `f27fa03b2a517602768f5ef577067e8c6f26efba`. Its canonical reporting and snapshot-diff changes postdate the v0.3.0 release and are included in the later `v0.4.0` release.
 
 ### 1. Scope of the 0.3.0 candidate
 

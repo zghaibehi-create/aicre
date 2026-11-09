@@ -1,8 +1,10 @@
 # Changelog
 
-## 0.4.0 (final scoped release candidate; not yet published)
+## 0.4.0 — 2026-11-09
 
-- Include canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons that were merged after the immutable `v0.3.0` tag.
+Published as the final scoped GitHub release: [v0.4.0](https://github.com/zghaibehi-create/aicre/releases/tag/v0.4.0), targeting merge commit `9a2300e3bddd7badc9dd25b3d493bc5481e79027`.
+
+- Include canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons that were merged after the `v0.3.0` tag.
 - Preserve schema 2.0 for legacy report defaults and require explicit `--force` for replacement; reject unsafe report output destinations and symlinked parent components.
 - Fix readiness evidence remapping after deterministic finding sorting and add a regression test for cross-dimension evidence.
 - Harden report imports: apply built-in and user path exclusions before opening, reject symlinked/hard-linked/special/virtual-filesystem inputs, cap files at 16 MiB, and return a controlled CLI error for deeply nested JSON.
@@ -14,8 +16,8 @@
 ## 0.3.0 (experimental GitHub pre-release published 2026-11-07)
 
 The 0.3.0 candidate passed the documented Linux test, package-inspection, and install
-matrix and was published as a GitHub pre-release on 2026-11-07. The immutable `v0.3.0`
-tag identifies validated commit `530920cfa4a5fb7a3619f4e624157772230b157d`. Later
+matrix and was published as a GitHub pre-release on 2026-11-07. The `v0.3.0` tag
+identifies validated commit `530920cfa4a5fb7a3619f4e624157772230b157d`. Later
 documentation-only clarifications were merged to `main` in PR #37; they do not change
 the published tag or release contents. See [RELEASE_READINESS.md](docs/RELEASE_READINESS.md)
 for the release record and owner-directed scope decisions.
