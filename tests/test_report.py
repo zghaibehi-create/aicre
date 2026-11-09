@@ -42,7 +42,7 @@ def test_build_report_has_stable_top_level_shape_and_separate_dimensions(monkeyp
         "schema_version", "aicre_version", "profile", "generated_at", "findings", "readiness"
     }
     assert result["schema_version"] == "2.0"
-    assert result["aicre_version"] == "0.3.0"
+    assert result["aicre_version"] == "0.4.0"
     assert result["profile"] == "standard"
     assert result["generated_at"].endswith("Z")
     assert set(result["readiness"]) == {

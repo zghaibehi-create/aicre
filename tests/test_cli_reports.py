@@ -29,6 +29,65 @@ def test_report_input_renders_without_running_scanner(tmp_path, monkeypatch):
     assert main(['report','--input',str(source),'--format','markdown','--output',str(output)]) == 0
     assert r'cpu\.logical' in output.read_text(encoding='utf-8')
 
+
+def test_report_input_rejects_sensitive_dotenv_path(tmp_path, capsys):
+    source = tmp_path / '.env'
+    source.write_text(json.dumps(FIXTURE), encoding='utf-8')
+    assert main(['report', '--input', str(source), '--format', 'json']) == 2
+    assert 'privacy policy' in capsys.readouterr().err
+
+
+def test_report_input_rejects_symlinked_file_and_parent(tmp_path):
+    target = tmp_path / 'target.json'
+    target.write_text(json.dumps(FIXTURE), encoding='utf-8')
+    file_link = tmp_path / 'link.json'
+    file_link.symlink_to(target)
+    assert main(['report', '--input', str(file_link), '--format', 'json']) == 2
+
+    real_dir = tmp_path / 'real'
+    real_dir.mkdir()
+    nested = real_dir / 'report.json'
+    nested.write_text(json.dumps(FIXTURE), encoding='utf-8')
+    dir_link = tmp_path / 'alias'
+    dir_link.symlink_to(real_dir, target_is_directory=True)
+    assert main(['report', '--input', str(dir_link / nested.name), '--format', 'json']) == 2
+
+
+def test_report_input_rejects_hardlinked_sensitive_file(tmp_path):
+    secret = tmp_path / '.env'
+    secret.write_text(json.dumps(FIXTURE), encoding='utf-8')
+    alias = tmp_path / 'report.json'
+    os.link(secret, alias)
+    assert main(['report', '--input', str(alias), '--format', 'json']) == 2
+
+
+def test_report_input_does_not_open_proc_environment():
+    assert main(['report', '--input', '/proc/self/environ', '--format', 'json']) == 2
+
+
+def test_report_input_honors_user_exclusion_before_read(tmp_path, capsys):
+    source = tmp_path / 'input.json'
+    source.write_text(json.dumps(FIXTURE), encoding='utf-8')
+    excluded = source.as_posix().lstrip('/')
+    assert main(['report', '--input', str(source), '--exclude', excluded, '--format', 'json']) == 2
+    assert 'privacy policy' in capsys.readouterr().err
+
+
+def test_report_input_enforces_byte_limit(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(cli, 'MAX_REPORT_INPUT_BYTES', 64)
+    source = tmp_path / 'oversize.json'
+    source.write_bytes(b' ' * 65)
+    assert main(['report', '--input', str(source), '--format', 'json']) == 2
+    assert '64-byte limit' in capsys.readouterr().err
+
+
+def test_deep_report_input_fails_as_cli_error_not_traceback(tmp_path, capsys):
+    source = tmp_path / 'deep.json'
+    source.write_text('[' * 2_000 + '0' + ']' * 2_000, encoding='utf-8')
+    assert main(['report', '--input', str(source), '--format', 'json']) == 2
+    assert 'cannot load valid AICRE JSON report' in capsys.readouterr().err
+
+
 def test_report_diff_json_exposes_all_classifications(tmp_path, capsys):
     before = dict(FIXTURE)
     before['findings'] = [dict(FIXTURE['findings'][0])]

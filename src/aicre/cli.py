@@ -37,6 +37,7 @@ EXIT_UNSUPPORTED_FORMAT = 3
 EXIT_OPEN_UNSUPPORTED = 6
 EXIT_OPEN_FAILED = 7
 FORMATS = ("text", "json", "markdown", "html", "pdf")
+MAX_REPORT_INPUT_BYTES = 16 * 1024 * 1024
 
 
 def _timeout_value(raw: str) -> float:
@@ -224,9 +225,60 @@ def _reject_nonfinite(value: str) -> None:
     raise ValueError(f"non-finite JSON number is not permitted: {value}")
 
 
-def _load_json(path: str) -> dict[str, Any]:
+def _read_report_input(path: str, excludes: tuple[str, ...] | list[str]) -> str:
+    requested = Path(path).expanduser()
+    absolute = Path(os.path.abspath(requested))
+    if path_exclusion_reason(absolute, excludes):
+        raise ScanError("refusing to read a report input blocked by the privacy policy")
+    if any(absolute == root or root in absolute.parents for root in map(Path, ("/proc", "/sys", "/dev"))):
+        raise ScanError("report input must not be read from a virtual filesystem")
+
+    directory_flags = (
+        os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    )
+    if (
+        os.open not in os.supports_dir_fd
+        or not hasattr(os, "O_DIRECTORY")
+        or not hasattr(os, "O_NOFOLLOW")
+    ):
+        raise ScanError("safe report input is unavailable on this platform")
+
+    directory_fd = os.open(os.path.sep, directory_flags)
+    file_fd: int | None = None
     try:
-        text = Path(path).expanduser().read_text(encoding="utf-8")
+        for component in absolute.parent.parts[1:]:
+            child_fd = os.open(component, directory_flags, dir_fd=directory_fd)
+            os.close(directory_fd)
+            directory_fd = child_fd
+        file_flags = os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+        file_flags |= getattr(os, "O_NONBLOCK", 0)
+        file_fd = os.open(absolute.name, file_flags, dir_fd=directory_fd)
+        metadata = os.fstat(file_fd)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ScanError("report input must be a regular file")
+        if metadata.st_nlink > 1:
+            raise ScanError("report input with multiple hard links is not accepted")
+        if metadata.st_size > MAX_REPORT_INPUT_BYTES:
+            raise ScanError(f"report input exceeds the {MAX_REPORT_INPUT_BYTES}-byte limit")
+
+        content = bytearray()
+        while len(content) <= MAX_REPORT_INPUT_BYTES:
+            chunk = os.read(file_fd, min(65_536, MAX_REPORT_INPUT_BYTES + 1 - len(content)))
+            if not chunk:
+                break
+            content.extend(chunk)
+        if len(content) > MAX_REPORT_INPUT_BYTES:
+            raise ScanError(f"report input exceeds the {MAX_REPORT_INPUT_BYTES}-byte limit")
+        return content.decode("utf-8")
+    finally:
+        if file_fd is not None:
+            os.close(file_fd)
+        os.close(directory_fd)
+
+
+def _load_json(path: str, *, excludes: tuple[str, ...] | list[str] = ()) -> dict[str, Any]:
+    try:
+        text = _read_report_input(path, excludes)
         value = json.loads(
             text,
             object_pairs_hook=_unique_object,
@@ -235,7 +287,7 @@ def _load_json(path: str) -> dict[str, Any]:
         if not isinstance(value, dict):
             raise ReportValidationError("top-level JSON value must be an object")
         canonical_report(value)  # strict, version-aware validation of all nested fields
-    except (OSError, UnicodeError, json.JSONDecodeError, ReportValidationError, ValueError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ReportValidationError, ValueError, RecursionError) as exc:
         raise ScanError(f"cannot load valid AICRE JSON report {path!r}: {exc}") from exc
     return value
 
@@ -350,11 +402,11 @@ def _handle_report_command(args: argparse.Namespace) -> int:
     diff_result = None
     legacy_default = args.format is None and not args.input and not args.diff
     if args.diff:
-        before, after = (_load_json(path) for path in args.diff)
+        before, after = (_load_json(path, excludes=args.exclude) for path in args.diff)
         diff_result = compare_reports(before, after)
         data = _diff_as_report(diff_result)
     elif args.input:
-        data = canonical_report(_load_json(args.input))
+        data = canonical_report(_load_json(args.input, excludes=args.exclude))
     else:
         raw_report = build_report(profile=args.profile, excludes=args.exclude, timeout=args.timeout)
         data = raw_report if legacy_default else canonical_report(raw_report)

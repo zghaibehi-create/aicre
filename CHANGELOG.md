@@ -1,10 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 (final scoped release candidate; not yet published)
 
-- Fix canonical readiness evidence remapping after deterministic canonical finding sorting; add a regression test with findings from different dimensions.
-- Add canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons (merged into `main` after the `v0.3.0` tag; not in the published package).
-- Preserve schema 2.0 for legacy report defaults, require explicit `--force` for replacement, and reject symlinked output parent components and unsafe destinations.
+- Include canonical report identities, strict imported-report validation, JSON/Markdown/offline HTML and optional PDF rendering, and snapshot comparisons that were merged after the immutable `v0.3.0` tag.
+- Preserve schema 2.0 for legacy report defaults and require explicit `--force` for replacement; reject unsafe report output destinations and symlinked parent components.
+- Fix readiness evidence remapping after deterministic finding sorting and add a regression test for cross-dimension evidence.
+- Harden report imports: apply built-in and user path exclusions before opening, reject symlinked/hard-linked/special/virtual-filesystem inputs, cap files at 16 MiB, and return a controlled CLI error for deeply nested JSON.
+- Add regression coverage for sensitive and excluded input paths, symlink/hard-link aliases, oversize/deep JSON, and extend installed wheel/sdist smoke tests to cover import, render, and diff operations.
+- Freeze feature scope. No future feature roadmap is planned; maintenance is limited to confirmed security, privacy, correctness, compatibility, reliability, and packaging fixes.
+- Keep runtime dependencies empty; PDF remains an optional extra.
 
 
 ## 0.3.0 (experimental GitHub pre-release published 2026-11-07)
