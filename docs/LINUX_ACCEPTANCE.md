@@ -4,13 +4,13 @@
 
 ## Current candidate: 0.4.0 (not yet published)
 
-PR [#40](https://github.com/zghaibehi-create/aicre/pull/40) is open against `main`; implementation commit `f28c837e1dab81f556fcd8bfcc3a62d1ee5eb35d` passed the listed checks. The candidate branch now also records final release evidence and broadens install-smoke triggers to package inputs; those follow-up changes are being revalidated. No 0.4.0 commit has been merged, tagged, or published. The currently published version remains the historical experimental pre-release `v0.3.0`.
+PR [#40](https://github.com/zghaibehi-create/aicre/pull/40) is open against `main`; final package-input commit `fb4786375dd943326011eef258b60b09641db9e3` passed the listed checks. No 0.4.0 commit has been merged, tagged, or published. The currently published version remains the historical experimental pre-release `v0.3.0`.
 
 | Evidence | Result | Scope |
 |---|---:|---|
-| [Tests workflow run 42587555664](https://github.com/zghaibehi-create/aicre/actions/runs/42587555664) | 6/6 passed | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13; Ruff, full test suite, CLI entry point |
-| [Install smoke run 42587555636](https://github.com/zghaibehi-create/aicre/actions/runs/42587555636) | 6/6 passed | Wheel/sdist build and archive inspection, clean installs, `pip check`, legacy/canonical report, import, Markdown render, and diff commands |
-| [Sample report run 42587555625](https://github.com/zghaibehi-create/aicre/actions/runs/42587555625) | Passed | GitHub-hosted Ubuntu 24.04 × Python 3.12; readiness sample |
+| [Tests workflow run 42588710927](https://github.com/zghaibehi-create/aicre/actions/runs/42588710927) | 6/6 passed | Ubuntu 22.04 and 24.04 × Python 3.11, 3.12, 3.13; Ruff, full test suite, CLI entry point |
+| [Install smoke run 42588711058](https://github.com/zghaibehi-create/aicre/actions/runs/42588711058) | 6/6 passed | Wheel/sdist build and archive inspection, clean installs, `pip check`, legacy/canonical report, import, Markdown render, and diff commands |
+| [Sample report run 42588711032](https://github.com/zghaibehi-create/aicre/actions/runs/42588711032) | Passed | GitHub-hosted Ubuntu 24.04 × Python 3.12; readiness sample |
 | Local candidate validation | Passed | `ruff check src tests`; `pytest -v` (218 passed with optional ReportLab); hostile-markup PDF smoke |
 | Local wheel/sdist acceptance | Passed | Both artifacts inspected and installed in clean virtual environments; `pip check` and installed report/import/render/diff checks passed |
 
@@ -74,4 +74,4 @@ Record command exit codes and environment-specific deviations. Confirm that unkn
 
 ## Release gate
 
-Automated Linux acceptance for the 0.4.0 candidate is complete only after the final matrix for the current PR head passes; the implementation commit listed above already passed its matrix. The outstanding steps are current-head revalidation, final PR review/merge, and owner authorization to publish the final release and attach the verified artifacts plus `SHA256SUMS.txt`. The 0.3.0 owner decision accepting CI evidence is historical and does not constitute publication approval for 0.4.0.
+Automated Linux and artifact acceptance is complete for package-input commit `fb4786375dd943326011eef258b60b09641db9e3`. The outstanding steps are final PR review/merge and owner authorization to publish the final release and attach the verified artifacts plus `SHA256SUMS.txt`. The 0.3.0 owner decision accepting CI evidence is historical and does not constitute publication approval for 0.4.0.
