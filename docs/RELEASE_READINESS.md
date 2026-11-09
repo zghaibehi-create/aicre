@@ -1,4 +1,18 @@
-# AICRE 0.3.0 — Release Readiness and Residual-Risk Decision
+# AICRE — Release Readiness and Residual-Risk Decision
+
+## Current candidate: 0.4.0 final scoped release
+
+**Status:** release candidate under final validation; not yet published. The version is 0.4.0 because it is the first package release containing the reporting and snapshot-diff features merged after the immutable v0.3.0 tag. It remains a 0.x release and makes no security-product or host-safety claim.
+
+**Scope:** feature scope is frozen. No Security Intelligence, Compatibility Catalog, Guided Remediation, Windows/macOS, GUI, new MCP/agent integrations, or architecture redesign is planned. PR [#39](https://github.com/zghaibehi-create/aicre/pull/39) was closed unmerged. After publication, only confirmed security, privacy, correctness, compatibility, reliability, and packaging fixes are in scope.
+
+**Final security review:** confirmed report-import path/privacy and unbounded-input issues were fixed in the 0.4.0 candidate. The importer now checks sensitive and user-excluded paths before opening; refuses symlink, hard-link, special-file, and virtual-filesystem sources; limits each input to 16 MiB; and converts deeply nested JSON failures into controlled CLI errors. Regression tests cover these cases. This AI-assisted internal review is scoped and is not an independent audit or certification.
+
+**Local verification on the candidate tree:** `ruff check src tests` passed; `pytest -v` passed all 218 tests with optional ReportLab installed, including the PDF renderer test; and `python -m aicre --version` reported `aicre 0.4.0`. A hostile-markup PDF smoke check produced a valid PDF. These local checks do not replace the pending six-job GitHub matrix.
+
+**Release gates:** complete Ruff/tests and all six Ubuntu/Python CI matrix jobs on the exact candidate; build and inspect wheel/sdist; install both artifacts into clean environments; exercise report import/render/diff from the installed artifacts; calculate SHA-256; then obtain explicit owner approval before creating the final GitHub Release. Until those steps are complete, v0.4.0 is not published.
+
+## Historical release record: 0.3.0
 
 **Status:** Published as an experimental GitHub pre-release on 2026-11-07.  
 **Current package version:** 0.3.0.  
@@ -7,7 +21,7 @@
 **Post-release documentation:** PR #37 merged documentation-only clarifications to `main` on 2026-11-08; the published tag remains an immutable snapshot of the validated release commit.
 **Follow-on work:** PR #4 was merged into `main` on 2026-11-09 as merge commit `f27fa03b2a517602768f5ef577067e8c6f26efba`. Its canonical reporting and snapshot-diff changes postdate the immutable `v0.3.0` tag and require a later release before package users receive them.
 
-## 1. Scope of the 0.3.0 candidate
+### 1. Scope of the 0.3.0 candidate
 
 The 0.3.0 candidate is a consolidation release of behavior already implemented on `main`, not a promise that planned security-intelligence features exist.
 
@@ -27,7 +41,7 @@ Not included and must not be implied:
 - Agent configuration, MCP permission, or dependency-provenance assessment.
 - Windows or macOS support.
 
-## 2. Residual-risk register and engineering disposition
+### 2. Residual-risk register and engineering disposition
 
 The following dispositions are scoped to an experimental, local-first metadata tool. They are not claims that the risks are eliminated. Any future reviewer finding that contradicts these dispositions reopens the relevant item.
 
@@ -42,11 +56,11 @@ The following dispositions are scoped to an experimental, local-first metadata t
 | RR-07 | Tool discovery checks PATH presence only | A discovered executable is not launched; its version, configuration, safety, or functionality is not verified. | **Accept with narrow semantics.** Preserve PATH-only wording and do not infer a tool is safe or ready merely because it is detected. |
 | RR-08 | AICRE does not establish host security posture | Non-root execution and the limited checks do not establish host-wide controls or safe agent execution. | **Accept only as a non-security-product boundary.** Keep security readiness unknown unless a specific supported observation justifies a narrower result. Never call AICRE a security audit or agent sandbox. |
 
-### Risk decision
+#### Risk decision
 
 For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only within the product scope and constraints above. No item is represented as mitigated or eliminated where it is not.
 
-## 3. Release gates and evidence
+### 3. Release gates and evidence
 
 - [x] **Owner ownership attestation and public notice:** owner confirmed rights necessary to distribute current AICRE content under MIT and selected **AICRE Project** as the public-facing copyright designation. Recorded in PR #30. This is an owner representation, not an independent legal audit.
 - [x] **Third-party source/license provenance audit deferral:** explicitly deferred by the project owner for this release. This is a scope decision, not a completed audit. Runtime dependencies remain empty; see `THIRD_PARTY_NOTICES.md` for the bounded prior inventory.
@@ -63,7 +77,7 @@ For 0.3.0, RR-01 through RR-08 are accepted as documented limitations only withi
 - [x] **Final consistency:** package metadata, `aicre.__version__`, CLI/report tests, README, changelog, security model, schemas, finding-ID reference, and issue template are aligned at 0.3.0; the CI artifact-inspection workflow confirmed version metadata consistency.
 - [x] **Publication and tag:** GitHub pre-release [`v0.3.0`](https://github.com/zghaibehi-create/aicre/releases/tag/v0.3.0) published on 2026-11-07; tag resolves to validated commit `530920cfa4a5fb7a3619f4e624157772230b157d`. The release is marked as a pre-release. No wheel or source-distribution assets are attached; GitHub provides the source archives for the tag.
 
-## 4. Release execution record
+### 4. Release execution record
 
 The following checklist describes the procedure used for 0.3.0. Publication is complete; it is retained as an auditable record rather than a list of pending actions.
 
@@ -77,6 +91,6 @@ The following checklist describes the procedure used for 0.3.0. Publication is c
 8. Create a GitHub Release only after explicit go/no-go approval. Mark it as a pre-release if the project remains experimental.
 9. Preserve the exact tag, commit SHA, artifact filenames, hashes, and CI run links in the release record.
 
-## 5. Post-publication status
+### 5. Post-publication status
 
 **0.3.0 experimental pre-release publication is complete.** The candidate passed the documented test, install/artifact-inspection, and sample-report workflows before publication. The owner deferred the third-party provenance audit and accepted the AI-assisted internal review in place of an external review for this experimental release. The Ubuntu CI matrix is accepted as Linux support evidence; the owner's personal machine was not tested. No external audit or host-security certification is claimed. No binary distribution assets were attached to the GitHub Release; the published tag and GitHub-generated source archives remain the release source of record.

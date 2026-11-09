@@ -1,8 +1,8 @@
-# AICRE 0.3.0 — Linux-first inventory and readiness preview
+# AICRE 0.4.0 — Linux-first inventory and readiness
 
 **Independent AI Computer Readiness Engine (AICRE)** is a local-first Linux CLI for collecting a narrow set of environment metadata and presenting separate, evidence-backed readiness dimensions. It does not run AI agents, install software, change system settings, or send machine information anywhere.
 
-> **Preview status:** AICRE is an experimental inventory tool, not a security product, agent sandbox, malware scanner, secret scanner, or guarantee that a computer is safe for autonomous agents. Version 0.3.0 is published on GitHub as a pre-release from `main`. Multi-format report and snapshot-diff features described below were merged into `main` on 2026-11-09 after the `v0.3.0` tag. They are not part of that published pre-release; a later release is required before package users receive them.
+> **Release status:** AICRE is a local inventory and readiness tool, not a security product, agent sandbox, malware scanner, complete secret scanner, or guarantee that a computer is safe for autonomous agents. Version 0.4.0 is the final scoped release candidate; it is not published until the final matrix/package checks and release approval are complete. The older `v0.3.0` GitHub pre-release does not contain the later multi-format reporting and snapshot-diff implementation.
 
 ## Quick start
 
@@ -40,11 +40,15 @@ Note: unknown means not assessed, not failed.
 
 This sample describes a GitHub-hosted virtual runner, not a personal computer. Resource readiness remains `unknown` because the report does not establish effective process/container limits.
 
+## Frozen project scope
+
+AICRE is complete within its defined Linux-first, local metadata inventory, readiness, directory-reporting, multi-format rendering, and snapshot-comparison scope. No future feature work is planned. The project will not add Security Intelligence, a Compatibility Catalog, Guided Remediation, Windows/macOS support, a GUI, new MCP/agent integrations, or an architecture redesign for its own sake. After the scoped release, only necessary confirmed security, privacy, correctness, compatibility, reliability, or packaging fixes are in scope. The AICRE #39 specification PR for Security Intelligence was closed without merge.
+
 ## Privacy and collection boundaries
 
 AICRE uses only narrowly scoped local sources: Python's `platform`, `os`, `sys`, and `sysconfig` interfaces; Linux `/etc/os-release`/`/usr/lib/os-release`, `/proc/meminfo`, `/sys/class/drm` vendor/device identifiers; `shutil.disk_usage("/")`; and `shutil.which` for a fixed allowlist of executable names. The allowlist is `git`, `python3`, `pip`, `uv`, `pipx`, `node`, `npm`, `docker`, `podman`, `codex`, `claude`, `aider`, and `ollama`. Tool detection searches permitted `PATH` entries only: `detected` does not verify version or functionality, and `not_detected` does not prove the tool is absent elsewhere.
 
-AICRE does not execute discovered programs, read credentials, API keys, `.env` contents, private keys, chat histories, or user documents. It makes no network requests or telemetry calls and does not perform remediation. Filesystem sources and executable paths are filtered through built-in sensitive-path policy and any `--exclude` patterns before reading or disclosing them. An excluded result is reported as `not_checked`, not as absent. Exclusion patterns are not persisted.
+AICRE does not execute discovered programs, read credentials, API keys, `.env` contents, private keys, chat histories, or user documents. It makes no network requests or telemetry calls and does not perform remediation. Filesystem sources and executable paths are filtered through built-in sensitive-path policy and any `--exclude` patterns before reading or disclosing them. User-selected report imports are limited to 16 MiB, schema-validated, and subject to the same sensitive-path and user-exclusion checks; symlinks, hard links, special files, and virtual-filesystem inputs are rejected. An excluded result is reported as `not_checked`, not as absent. Exclusion patterns are not persisted.
 
 Reports can contain hardware details, software availability, and executable paths. Review a report before sharing it. Built-in path rules are conservative and cannot discover every secret.
 
@@ -54,7 +58,7 @@ Each finding has a stable ID, category, collection status, value and optional un
 
 Each report contains five separate readiness dimensions: Resource, Software, Compatibility, Privacy, and Security. Each dimension returns `pass`, `warning`, `fail`, or `unknown`, an explanation, and finding IDs used as evidence. Resource and Software readiness are evaluated independently. The default `standard` profile remains inventory-only and leaves both dimensions `unknown`. Workload profiles may assess PATH presence for required tools, but host-facing CPU, RAM, and storage observations are never used to pass or fail Resource readiness; it remains `unknown` until effective process/container limits can be established. The standard Compatibility profile explicitly checks Linux and Python `>=3.11`; it has no GPU requirement. Security readiness is deliberately limited: root execution produces a warning, while non-root execution does not imply that other host security controls passed. Privacy findings describe AICRE behavior, not host-wide privacy.
 
-The full JSON report conforms to [`schemas/report-v2.schema.json`](schemas/report-v2.schema.json). Reports are written locally; when saved to a file, the existing atomic publication rules apply, with owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
+Legacy `report` defaults and profile scans without an explicit format preserve JSON schema `2.0`; explicit canonical report formats use [`schemas/report-v1.schema.json`](schemas/report-v1.schema.json), schema `1.0.0`. Directory metadata scans use [`schemas/directory-scan-report-v2.schema.json`](schemas/directory-scan-report-v2.schema.json). Reports are written locally; when saved to a file, atomic publication uses owner-only `0600` mode on POSIX. Existing reports are not replaced without explicit `--force`.
 
 ## Requirements and installation
 
@@ -129,7 +133,7 @@ The automated tests cover system source filtering, executable discovery without 
 
 ## Use with AI agents
 
-See the [AICRE agent skill](skills/aicre/SKILL.md) for instructions an AI agent can follow when running AICRE and interpreting its output. AICRE is Linux-only for now.
+See the [AICRE agent skill](skills/aicre/SKILL.md) for usage instructions an AI agent can follow when running AICRE and interpreting its output; it is documentation, not an agent or MCP integration. AICRE targets Linux only. Windows and macOS support are out of scope and are not planned.
 
 ## Project documents
 
@@ -170,6 +174,8 @@ aicre report --diff before.json after.json --format markdown --output changes.md
 
 The diff classifies checks as `new`, `resolved`, `unchanged`, or `changed`. `--open` opens a completed output with `xdg-open` on Linux only. Exit code `3` indicates an unsupported output format or missing optional PDF support; `6` indicates that opening is unsupported on the current platform; `7` indicates that `xdg-open` could not be launched.
 
+Imported reports are capped at 16 MiB and validated before rendering or comparison. Import paths matching built-in sensitive-path rules or `--exclude` are refused; parent/file symlinks, hard-linked files, special files, and `/proc`, `/sys`, or `/dev` sources are also refused.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
@@ -205,4 +211,3 @@ configuration, MCP permissions, sandboxing, or dependency provenance.
 remain host-facing and do not account for cgroup CPU/memory quotas or
 CPU-affinity restrictions. Treat the result as a host-observation-only
 assessment.
-

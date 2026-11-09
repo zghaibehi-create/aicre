@@ -143,4 +143,21 @@ jobs:
             "$AICRE" readiness --profile agent-development
             "$AICRE" report | "$ENV/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "2.0"; assert len(report["readiness"]) == 5'
             "$AICRE" report --format json | "$ENV/bin/python" -c 'import json, sys; report = json.load(sys.stdin); assert report["schema_version"] == "1.0.0"; assert len(report["readiness"]) == 5'
+            WORKDIR="$(mktemp -d)"
+            "$AICRE" report --format json --output "$WORKDIR/before.json"
+            "$AICRE" report --input "$WORKDIR/before.json" --format markdown --output "$WORKDIR/rendered.md"
+            "$AICRE" report --diff "$WORKDIR/before.json" "$WORKDIR/before.json" --format json > "$WORKDIR/diff.json"
+            "$ENV/bin/python" - "$WORKDIR" <<'PY'
+            import json
+            import pathlib
+            import sys
+
+            root = pathlib.Path(sys.argv[1])
+            report = json.loads((root / "before.json").read_text(encoding="utf-8"))
+            diff = json.loads((root / "diff.json").read_text(encoding="utf-8"))
+            assert report["schema_version"] == "1.0.0"
+            assert diff["schema_version"] == "1.0.0"
+            assert diff["counts"]["unchanged"] > 0
+            assert "AICRE scan report" in (root / "rendered.md").read_text(encoding="utf-8")
+            PY
           done

@@ -80,3 +80,19 @@ No residual risk above is claimed to be eliminated by this review.
 **Owner decision and candidate comparison:** The owner accepted this AI-assisted internal review in place of an external review for the experimental 0.3.0 pre-release. This is not an independent audit or certification. A source diff between the reviewed commit `d9ee4977f6057a79c9f1fec2289f2de05ec33c12` and the merged 0.3.0 candidate `bcdcbebd684c074852bff934d150f68f80058106` found only version-label changes in `src/aicre/__init__.py`, `src/aicre/cli.py`, and `src/aicre/report.py`; no behavioral source-logic changes were present in that comparison. The CLI and report modules were within the review scope; the `__init__.py` change only updates the package version constant. CI results are recorded separately as build/test evidence and are not treated as a substitute for security review.
 
 The external independent-review gate is not represented as completed. No external reviewer was engaged for 0.3.0.
+
+## Final scope-frozen candidate review — 2026-11-09
+
+**Target:** the 0.4.0 final scoped release candidate on `fix/final-report-import-safety`; the exact validated commit is recorded in `RELEASE_READINESS.md` after the candidate commit is finalized. This is a separate review from the historical 0.3.0 review above.
+
+**Scope inspected:** imported JSON loading and schema validation, import path boundaries and resource limits, diff identity, Markdown/HTML/PDF rendering, directory traversal and output publication, CLI input validation, and the corresponding regression tests. The review also checked that tool discovery remains PATH-only and does not execute discovered programs.
+
+### Confirmed finding and disposition
+
+- **Imported-report path/privacy and resource exhaustion:** the earlier loader read any user-supplied path with `Path.read_text()` before applying the sensitive-path and `--exclude` policy, followed symlinks, and had no byte limit. Deeply nested JSON could also escape the normal CLI error path. This meant a named sensitive path such as `.env` could be read when passed as `--input`, and a large/deep document could consume excessive resources. The 0.4.0 candidate checks path exclusions before opening, traverses parents descriptor-relatively without following symlinks, rejects hard-linked, special, and virtual-filesystem inputs, caps each file at 16 MiB, and converts parse recursion failures into controlled CLI errors. Regression tests cover each behavior.
+
+### Review result and bounded residual risks
+
+No additional confirmed actionable defect was found in the scoped review of import validation, comparison identity, Markdown/HTML/PDF renderers, scanner traversal, or atomic output publication. A hostile-content PDF smoke test with the optional ReportLab dependency produced a valid PDF. This is not proof of security: the exclusions are not a complete secret detector; the file cap bounds bytes, not peak parsed memory; directory scans are not atomic snapshots and do not enforce a hard byte-level memory ceiling; deadlines are cooperative; same-device bind mounts remain a documented risk; and host security posture is not assessed.
+
+**Verification status:** the candidate's local Ruff and full test results, including the optional PDF test, are recorded in the current release-readiness section. The six-job Ubuntu/Python CI matrix and clean wheel/sdist installation checks remain release gates until they pass on the exact published candidate. This AI-assisted internal review is not an independent third-party audit, penetration test, formal verification, or security certification.

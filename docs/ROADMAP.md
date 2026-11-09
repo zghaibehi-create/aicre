@@ -1,26 +1,40 @@
-# AICRE Roadmap
+# AICRE Roadmap and Scope
 
-This roadmap separates implemented behavior from planned work and release approval.
+AICRE's feature scope is frozen. The project is being completed as a Linux-first, local environment inventory and readiness CLI; no additional feature roadmap is planned. The 0.4.0 candidate consolidates the implemented reporting work and the final confirmed import-safety fix. Publication remains gated on the final CI/package checks and owner approval.
 
-## Implemented on main
-- **0.1 security hardening:** descriptor-relative directory scanning, conservative sensitive-path policy, private atomic reports, locked CI, and regression coverage.
-- **0.2 Linux inventory preview:** local system metadata, allowlisted PATH-only tool discovery without execution, explicit Linux/Python compatibility checks, five separate readiness dimensions, versioned JSON Schema, cooperative timeouts, and CLI reporting.
-- **0.3 bounded directory scanning (implemented on main):** per-directory and total-item limits, deterministic completed output, explicit partial-report semantics, and a versioned directory-scan JSON Schema. These cardinality bounds do not constitute a hard byte-level memory ceiling.
+## Completed product scope
 
-## Current work
-- **0.3 reporting and snapshot comparison (PR #4 merged into main on 2026-11-09):** canonical identities, JSON/Markdown/offline HTML and optional PDF, strict imports, and snapshot diffs are implemented on `main`. They are not part of the immutable published v0.3.0 tag; a later release is required.
-- **0.3 workload-profile foundation (implemented on main):** host-facing resource observations and required-tool PATH checks for workload profiles; Resource readiness remains `unknown` until effective limits are established. The `standard` profile remains inventory-only. This does not audit agent configuration, MCP permissions, sandboxing, or host security posture.
-- **0.3.0 experimental pre-release (published 2026-11-07):** residual risks and their engineering dispositions are recorded in [the release-readiness register](RELEASE_READINESS.md). The immutable `v0.3.0` tag identifies the validated release commit; documentation-only clarifications were merged afterward in PR #37, and PR #4 reporting features were merged to `main` after that tag. Neither changes the contents of the published release. For this release the owner chose an AI-assisted internal security review in place of an external review (not an independent audit or certification) and accepted the Ubuntu 22.04/24.04 CI matrix as Linux acceptance evidence. See [RELEASE_READINESS.md](RELEASE_READINESS.md) and [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md).
-- **Known limitation:** the initial resource baseline is host-observation-only. It does not yet account for cgroup CPU/memory limits or CPU affinity, so it must not be marketed as container-aware readiness.
+- Local Linux system metadata inventory and fixed allowlist PATH discovery; discovered programs are identified, never executed.
+- Five separate readiness dimensions and named workload profiles. No composite score is produced, and unknown remains distinct from fail.
+- Metadata-only directory inventory with bounded cardinality, explicit incomplete-scan reporting, and schema-versioned JSON.
+- Versioned readiness reports, canonical report identities, strict JSON import validation, JSON/Markdown/offline HTML and optional PDF output, and snapshot comparison.
+- Local report publication with private POSIX permissions, atomic writes, overwrite consent, and symlink/special-file protections.
+- Linux/Python compatibility evidence for Ubuntu 22.04 and 24.04 with Python 3.11, 3.12, and 3.13 in CI.
 
-## Next engineering phases
-- **0.3 security intelligence:** threat model and narrowly scoped metadata-only checks for agent/tool configuration, MCP trust and permission exposure, execution boundaries, and dependency provenance. No configuration is executed or changed.
-- **0.4 compatibility catalog:** evidence-backed, version-aware requirements for selected agent runtimes; unknown states are explicit.
-- **0.5 guided remediation plans:** recommendations and preview-only diffs; any system-changing action requires explicit per-action approval and rollback design.
-- **1.x broader platforms:** Windows/macOS only after separate implementations and target-environment CI; GUI after core contracts stabilize.
+The scope is intentionally narrow. AICRE does not establish effective container/cgroup resource limits, host security posture, safe agent execution, or complete secret detection. These limitations remain documented rather than being treated as unfinished feature requirements.
 
-## Release gates
-A green CI run is necessary but insufficient. Each phase requires code review, privacy and threat-model review, regression tests, appropriate target-environment integration evidence (or a documented owner-approved scope decision where direct target-machine acceptance is not performed), documented residual risks, and a release decision. Planned features are not implemented merely because they appear here.
+## Explicitly out of scope; no features planned
 
-## Permanent non-goals unless explicitly redesigned
-No telemetry, cloud upload of machine inventories, undisclosed network activity, automatic installation/remediation, autonomous agent execution, vendor lock-in, or silent weakening of exclusions.
+The following are not release gates, planned phases, or work items for AICRE:
+
+- Security Intelligence or broader agent/tool configuration, MCP trust/permission, or dependency-provenance assessment.
+- Compatibility Catalogs or version-aware vendor/runtime support matrices.
+- Guided Remediation, automatic changes, or remediation previews.
+- Windows or macOS support.
+- A graphical interface.
+- New MCP or agent integrations. The existing agent skill is usage documentation, not an integration.
+- Architectural redesign for its own sake.
+
+PR [#39](https://github.com/zghaibehi-create/aicre/pull/39), which proposed a future Security Intelligence specification, was closed unmerged on 2026-11-09 under this scope decision. Its history remains available for reference; it is not a requirement for project completion.
+
+## Maintenance policy
+
+After the scoped release, accept only necessary, evidence-backed fixes for confirmed security, privacy, correctness, backward-compatibility, reliability, or packaging defects. Every behavior change must have a regression test and preserve the documented privacy boundaries. Do not use maintenance work to introduce the out-of-scope capabilities above.
+
+## Release state
+
+- `v0.3.0` remains the historical experimental GitHub pre-release published on 2026-11-07. Its tag is immutable and does not contain the later reporting/diff implementation.
+- `0.4.0` is the final scoped release candidate for those already-implemented reporting/diff features and the final import-safety review. It is not considered published until the exact candidate passes the Ubuntu/Python matrix, wheel/sdist inspection and clean-install checks, SHA-256 recording, and explicit release approval.
+- The project has no future feature phases. After publication, the roadmap is maintenance-only.
+
+See [RELEASE_READINESS.md](RELEASE_READINESS.md), [SECURITY_MODEL.md](SECURITY_MODEL.md), and [LINUX_ACCEPTANCE.md](LINUX_ACCEPTANCE.md) for the release gates, privacy boundaries, residual risks, and test evidence.

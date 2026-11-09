@@ -1,4 +1,4 @@
-"""AICRE 0.3.0 local inventory and evidence-backed readiness report."""
+"""AICRE local inventory and evidence-backed readiness report."""
 from __future__ import annotations
 
 import json
@@ -59,7 +59,7 @@ def build_report(
                 "approved_metadata_sources_only": True,
                 "discovered_programs_executed": False,
             },
-            source="AICRE 0.3.0 collection policy",
+            source=f"AICRE {__version__} collection policy",
             limitations=(
                 "Describes AICRE inventory behavior only; it does not monitor other host processes or traffic.",
             ),
